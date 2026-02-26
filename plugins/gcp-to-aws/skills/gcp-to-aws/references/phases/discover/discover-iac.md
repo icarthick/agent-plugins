@@ -171,3 +171,18 @@ Based on: `steering/discover-full.md` Steps 1-6
 3. Verify all resource addresses in inventory appear in exactly one cluster
 4. Verify all cluster IDs match resource cluster_id assignments
 5. Report to user: "✅ Wrote gcp-resource-inventory.json (X resources) and gcp-resource-clusters.json (Y clusters)"
+
+## CRITICAL: Output Files ONLY
+
+**Do NOT create any additional files.** Forbidden:
+- ❌ README.md
+- ❌ discovery-summary.md
+- ❌ EXECUTION_REPORT.txt
+- ❌ discovery-log.md
+- ❌ Any other documentation or report files
+
+**ONLY these two files should exist:**
+1. `.migration/[MMDD-HHMM]/gcp-resource-inventory.json`
+2. `.migration/[MMDD-HHMM]/gcp-resource-clusters.json`
+
+All information must be conveyed via user output messages, NOT written files.

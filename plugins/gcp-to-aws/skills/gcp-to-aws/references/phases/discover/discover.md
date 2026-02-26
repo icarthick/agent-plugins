@@ -54,6 +54,21 @@ Lightweight orchestrator that detects available source types and delegates to do
    ```
 2. Output to user: "✅ Discover phase complete. Discovered X total resources across Y clusters. Proceeding to Phase 2: Clarify."
 
+## Output Files ONLY
+
+**Discover phase produces EXACTLY 2 files in `.migration/[MMDD-HHMM]/`:**
+1. `gcp-resource-inventory.json` (REQUIRED)
+2. `gcp-resource-clusters.json` (REQUIRED)
+
+**No other files should be created:**
+- ❌ README.md
+- ❌ discovery-summary.md
+- ❌ EXECUTION_REPORT.txt
+- ❌ discovery-log.md
+- ❌ Any documentation or report files
+
+All user communication via output messages only.
+
 ## Error Handling
 
 - **Missing `.migration` directory**: Create it (Step 0)
@@ -61,6 +76,7 @@ Lightweight orchestrator that detects available source types and delegates to do
 - **discover-iac.md fails**: STOP and report exact failure point
 - **discover-iac.md completes but output files missing**: STOP with error listing missing files
 - **Output file validation fails**: STOP and report schema errors
+- **Extra files created (README, reports, etc.)**: Failure. Discover must produce ONLY the two JSON files.
 
 ## Future Versions (v1.1+, v1.2+)
 
