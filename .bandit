@@ -1,0 +1,4 @@
+exclude_dirs:
+  - node_modules
+  - .tmp
+  - .git
