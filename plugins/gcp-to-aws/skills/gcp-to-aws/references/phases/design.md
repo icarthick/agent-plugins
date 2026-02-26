@@ -1,0 +1,124 @@
+# Phase 3: Design AWS Architecture
+
+## Step 0: Validate Inputs
+
+Read `clarified.json`. If missing: **STOP**. Output: "Phase 2 (Clarify) not completed. Run Phase 2 first."
+
+Read `gcp-resource-clusters.json`.
+
+## Step 1: Order Clusters
+
+Sort clusters by `creation_order_depth` (lowest first, representing foundational infrastructure).
+
+## Step 2: Two-Pass Mapping per Cluster
+
+For each cluster:
+
+### Pass 1: Fast-Path Lookup
+
+For each PRIMARY resource in the cluster:
+
+1. Extract GCP type (e.g., `google_sql_database_instance`)
+2. Look up in `design-refs/fast-path.md` → Direct Mappings table
+3. If found (deterministic 1:1 match): assign AWS service with confidence = `deterministic`
+4. If not found: proceed to Pass 2
+
+### Pass 2: Rubric-Based Selection
+
+For resources not covered by fast-path:
+
+1. Determine service category (via `design-refs/index.md`):
+   - `google_compute_instance` → compute
+   - `google_cloudfunctions_function` → compute
+   - `google_sql_database_instance` → database
+   - `google_storage_bucket` → storage
+   - `google_compute_network` → networking
+   - etc.
+
+2. Load rubric from corresponding `design-refs/*.md` file (e.g., `compute.md`, `database.md`)
+
+3. Evaluate 6 criteria (1-sentence each):
+   - **Eliminators**: Feature incompatibility (hard blocker)
+   - **Operational Model**: Managed vs self-hosted fit
+   - **User Preference**: From `clarified.json` answers
+   - **Feature Parity**: GCP feature → AWS feature availability
+   - **Cluster Context**: Affinity with other resources in this cluster
+   - **Simplicity**: Prefer fewer resources / less config
+
+4. Select best-fit AWS service. Confidence = `inferred`
+
+## Step 3: Handle Secondary Resources
+
+For each SECONDARY resource:
+
+1. Use `design-refs/index.md` for category
+2. Apply fast-path (most secondaries have deterministic mappings)
+3. If rubric needed: apply same 6-criteria approach
+
+## Step 4: Write Design Output
+
+**File 1: `aws-design.json`**
+
+```json
+{
+  "clusters": [
+    {
+      "cluster_id": "web-app-us-central1",
+      "gcp_region": "us-central1",
+      "aws_region": "us-east-1",
+      "resources": [
+        {
+          "gcp_address": "google_compute_instance.web",
+          "gcp_type": "google_compute_instance",
+          "aws_service": "Fargate",
+          "aws_config": {
+            "cpu": "0.5",
+            "memory": "1024",
+            "region": "us-east-1"
+          },
+          "confidence": "deterministic",
+          "rationale": "1:1 compute mapping with Cold Start considerations"
+        }
+      ]
+    }
+  ],
+  "warnings": [
+    "service X not fully supported in us-east-1; fallback to us-west-2"
+  ]
+}
+```
+
+**File 2: `aws-design-report.md`**
+
+```
+# AWS Architecture Design Report
+
+## Overview
+Mapped X GCP resources to Y AWS services across Z clusters.
+
+## Cluster: web-app-us-central1
+### Compute
+- google_compute_instance.web → Fargate (0.5 CPU, 1 GB memory)
+  Confidence: deterministic
+  Rationale: Direct compute mapping, Cold Start not applicable (always-on)
+
+[repeat per resource]
+
+## Warnings
+- Service X: falling back to region Y due to regional unavailability
+```
+
+## Step 5: Update Phase Status
+
+Update `.phase-status.json`:
+
+```json
+{
+  "phase": "estimate",
+  "status": "completed",
+  "timestamp": "2026-02-26T14:30:00Z",
+  "version": "1.0.0"
+}
+```
+
+Output to user: "AWS Architecture designed. Proceeding to Phase 4: Estimate Costs."

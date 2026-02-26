@@ -47,6 +47,26 @@
       "source": "./plugins/amazon-location-service",
       "tags": ["aws", "location", "maps", "geospatial"],
       "version": "1.0.0"
+    },
+    {
+      "category": "migration",
+      "description": "Migrate workloads from Google Cloud Platform to AWS with a 5-phase guided process: Terraform infrastructure discovery, requirements clarification, AWS architecture design, cost estimation, and execution planning.",
+      "keywords": [
+        "aws",
+        "gcp",
+        "google-cloud",
+        "migration",
+        "cloud-migration",
+        "terraform",
+        "fargate",
+        "cdk",
+        "rds",
+        "eks"
+      ],
+      "name": "gcp-to-aws",
+      "source": "./plugins/gcp-to-aws",
+      "tags": ["aws", "gcp", "migration", "infrastructure"],
+      "version": "1.0.0"
     }
   ]
 }

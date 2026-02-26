@@ -1,0 +1,286 @@
+# Output Schema Reference
+
+Complete JSON schemas for all phase outputs and state files.
+
+## .phase-status.json
+
+Current phase tracking and status.
+
+```json
+{
+  "phase": "discover|clarify|design|estimate|execute",
+  "status": "in-progress|completed",
+  "timestamp": "2026-02-26T14:30:00Z",
+  "version": "1.0.0"
+}
+```
+
+---
+
+## gcp-resource-inventory.json (Phase 1 output)
+
+All discovered GCP resources with full configuration and dependencies.
+
+```json
+{
+  "timestamp": "2026-02-26T14:30:00Z",
+  "total_resources": 24,
+  "resources": [
+    {
+      "address": "google_sql_database_instance.prod_postgres",
+      "type": "google_sql_database_instance",
+      "classification": "PRIMARY",
+      "cluster_id": "database-us-central1",
+      "config": {
+        "database_version": "POSTGRES_13",
+        "region": "us-central1",
+        "tier": "db-custom-2-7680"
+      },
+      "dependencies": []
+    },
+    {
+      "address": "google_compute_instance.web",
+      "type": "google_compute_instance",
+      "classification": "PRIMARY",
+      "cluster_id": "web-us-central1",
+      "config": {
+        "machine_type": "e2-medium",
+        "zone": "us-central1-a",
+        "image": "debian-11"
+      },
+      "dependencies": ["google_compute_network.vpc"]
+    }
+  ]
+}
+```
+
+---
+
+## gcp-resource-clusters.json (Phase 1 output)
+
+Clustered resources by affinity and deployment order.
+
+```json
+{
+  "clusters": [
+    {
+      "cluster_id": "web-us-central1",
+      "gcp_region": "us-central1",
+      "creation_order_depth": 1,
+      "primary_resources": [
+        "google_compute_instance.web"
+      ],
+      "secondary_resources": [
+        "google_compute_network.vpc",
+        "google_compute_firewall.web-allow-http"
+      ]
+    },
+    {
+      "cluster_id": "database-us-central1",
+      "gcp_region": "us-central1",
+      "creation_order_depth": 0,
+      "primary_resources": [
+        "google_sql_database_instance.prod_postgres"
+      ],
+      "secondary_resources": []
+    }
+  ]
+}
+```
+
+---
+
+## clarified.json (Phase 2 output)
+
+User answers to clarification questions.
+
+```json
+{
+  "mode": "A",
+  "answers": {
+    "q1_timeline": "6-12 months",
+    "q2_primary_concern": "cost",
+    "q3_team_experience": "novice",
+    "q4_traffic_profile": "predictable",
+    "q5_database_requirements": "structured",
+    "q6_cost_sensitivity": "moderate",
+    "q7_multi_cloud": "no",
+    "q8_compliance": "none"
+  },
+  "timestamp": "2026-02-26T14:30:00Z"
+}
+```
+
+---
+
+## aws-design.json (Phase 3 output)
+
+AWS services mapped from GCP resources, clustered by affinity.
+
+```json
+{
+  "clusters": [
+    {
+      "cluster_id": "web-us-central1",
+      "gcp_region": "us-central1",
+      "aws_region": "us-east-1",
+      "resources": [
+        {
+          "gcp_address": "google_compute_instance.web",
+          "gcp_type": "google_compute_instance",
+          "aws_service": "Fargate",
+          "aws_config": {
+            "cpu": "0.5",
+            "memory": "1024",
+            "region": "us-east-1"
+          },
+          "confidence": "inferred",
+          "rationale": "Compute mapping; always-on; Fargate for simplicity"
+        }
+      ]
+    }
+  ],
+  "warnings": [],
+  "timestamp": "2026-02-26T14:30:00Z"
+}
+```
+
+---
+
+## estimation.json (Phase 4 output)
+
+Monthly operating costs, one-time migration costs, and ROI analysis.
+
+```json
+{
+  "monthly_costs": {
+    "premium": {
+      "total": 5000,
+      "breakdown": {
+        "Fargate": 1200,
+        "RDS Aurora": 2500,
+        "S3": 500,
+        "ALB": 200,
+        "NAT Gateway": 300,
+        "Data Transfer": 300
+      }
+    },
+    "balanced": {
+      "total": 3500,
+      "breakdown": {
+        "Fargate": 800,
+        "RDS Aurora Serverless": 1800,
+        "S3": 500,
+        "ALB": 200,
+        "NAT Gateway": 200
+      }
+    },
+    "optimized": {
+      "total": 2200,
+      "breakdown": {
+        "Fargate Spot": 300,
+        "RDS Aurora Serverless": 1200,
+        "S3": 500,
+        "NAT Gateway": 200
+      }
+    }
+  },
+  "one_time_costs": {
+    "dev_hours": "150 hours @ $150/hr = $22,500",
+    "data_transfer": "500 GB @ $0.02/GB = $10,000",
+    "training": "Team AWS training = $5,000",
+    "total": 37500
+  },
+  "roi": {
+    "assumed_gcp_monthly": 4500,
+    "aws_monthly_balanced": 3500,
+    "monthly_savings": 1000,
+    "payback_months": 37.5,
+    "five_year_savings": 22500
+  },
+  "assumptions": [
+    "24/7 workload operation",
+    "us-east-1 region selection",
+    "No Reserved Instances purchased",
+    "No Spot instances in Balanced tier",
+    "GCP monthly cost: user estimate"
+  ],
+  "timestamp": "2026-02-26T14:30:00Z"
+}
+```
+
+---
+
+## execution.json (Phase 5 output)
+
+Timeline, risk assessment, and rollback procedures.
+
+```json
+{
+  "timeline_weeks": 12,
+  "critical_path": [
+    "VPC setup (Week 1)",
+    "PoC deployment (Week 3-5)",
+    "Data migration (Week 9-10)",
+    "DNS cutover (Week 11)"
+  ],
+  "risks": [
+    {
+      "category": "data_loss",
+      "probability": "low",
+      "impact": "critical",
+      "mitigation": "Dual-write replication for 2 weeks; full backup before cutover"
+    },
+    {
+      "category": "performance_regression",
+      "probability": "medium",
+      "impact": "high",
+      "mitigation": "PoC testing (Week 3-5); load testing (Week 6)"
+    },
+    {
+      "category": "team_capacity",
+      "probability": "medium",
+      "impact": "medium",
+      "mitigation": "Allocate 2 FTE engineers; external support if needed"
+    }
+  ],
+  "rollback_window": "Reversible until DNS cutover (Week 11); manual after",
+  "gcp_teardown_week": 14,
+  "timestamp": "2026-02-26T14:30:00Z"
+}
+```
+
+---
+
+## Design Resource Schema (aws-design.json resource object)
+
+Template for individual resource mappings in aws-design.json.
+
+```json
+{
+  "gcp_address": "google_sql_database_instance.prod_postgres",
+  "gcp_type": "google_sql_database_instance",
+  "gcp_config": {
+    "database_version": "POSTGRES_13",
+    "region": "us-central1",
+    "tier": "db-custom-2-7680"
+  },
+  "aws_service": "RDS Aurora PostgreSQL",
+  "aws_config": {
+    "engine_version": "14.7",
+    "instance_class": "db.r6g.xlarge",
+    "multi_az": true,
+    "region": "us-east-1"
+  },
+  "confidence": "deterministic|inferred",
+  "rationale": "1:1 Cloud SQL → RDS Aurora; Multi-AZ for production HA",
+  "rubric_applied": [
+    "Eliminators: PASS",
+    "Operational Model: Managed RDS Aurora",
+    "User Preference: Structured (q5)",
+    "Feature Parity: Full (binary logs, replication)",
+    "Cluster Context: Consistent with app tier",
+    "Simplicity: RDS Aurora (managed)"
+  ]
+}
+```
