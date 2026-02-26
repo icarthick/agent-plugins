@@ -24,19 +24,53 @@ All resources with fields:
 
 **Mark these resources as clustered; remove from unassigned pool.**
 
-### Rule 2: Same-Type Grouping
+### Rule 2: Same-Type Grouping (GROUP ALL INTO ONE CLUSTER PER TYPE)
 
-**FOR EACH** resource type with 2+ PRIMARY resources:
+**CRITICAL: Create ONE cluster per resource type, NOT one cluster per resource.**
 
-- Group: All PRIMARY resources of identical type
-- Cluster ID: `{service_shortname}_{sequence}` (e.g., `cloudrun_001`, `cloudrun_002`)
-- **Reasoning**: Identical workloads often migrate together
+**Process:**
 
-**Example**: 3× `google_container_cluster` → `k8s_001`, `k8s_002`, `k8s_003`
+1. **Identify all resource types with 2+ PRIMARY resources**
+   - Example: 4× `google_pubsub_topic`, 3× `google_storage_bucket`, 2× `google_sql_database_instance`
 
-**Output**: M clusters (one per multi-resource type)
+2. **For EACH resource type with 2+ primaries: Create ONE cluster containing ALL of them**
+   - Do NOT create separate clusters for each resource
+   - Create ONE cluster with ALL matching resources
 
-**Mark these resources as clustered; remove from unassigned pool.**
+3. **Cluster ID format**: `{service_category}_{service_type}_{gcp_region}_{sequence:001}`
+   - `messaging_pubsubtopic_us-central1_001` (contains ALL 4 pubsub topics)
+   - `storage_bucket_us-central1_001` (contains ALL 3 storage buckets)
+   - `database_sql_us-central1_001` (contains ALL 2 SQL instances)
+
+4. **Primary resources in cluster**: List ALL matching resources
+   - Example cluster `messaging_pubsubtopic_us-central1_001`:
+     - primary_resources:
+       - `google_pubsub_topic.order_events`
+       - `google_pubsub_topic.inventory_events`
+       - `google_pubsub_topic.user_events`
+       - `google_pubsub_topic.dead_letter`
+
+5. **Secondary resources**: Collect ALL secondaries that `serve` ANY of the grouped primaries
+   - All subscriptions for all grouped topics
+   - All IAM bindings for all grouped resources
+   - All supporting resources
+
+**Correct Examples (ONE cluster per type):**
+- 4× `google_pubsub_topic` → 1 cluster: `messaging_pubsubtopic_us-central1_001`
+- 3× `google_storage_bucket` → 1 cluster: `storage_bucket_us-central1_001`
+- 2× `google_sql_database_instance` → 1 cluster: `database_sql_us-central1_001`
+- 3× `google_container_cluster` → 1 cluster: `compute_gke_us-central1_001` (NOT `k8s_001`, `k8s_002`, `k8s_003`)
+
+**INCORRECT Examples (DO NOT DO THIS):**
+- ❌ 4× `google_pubsub_topic` → 4 clusters (`compute_pubsubtopic_001`, `compute_pubsubtopic_002`, etc.)
+- ❌ 3× `google_storage_bucket` → 3 clusters (`compute_storagebucket_001`, `compute_storagebucket_002`, etc.)
+- ❌ 3× `google_container_cluster` → 3 clusters (`k8s_001`, `k8s_002`, `k8s_003`)
+
+**Output**: ONE cluster per resource type (not per resource)
+
+**Reasoning**: Identical workloads of the same GCP service type migrate together, share operational characteristics, and should be managed as a unit.
+
+**Mark all resources of this type as clustered; remove from unassigned pool.**
 
 ### Rule 3: Seed Clusters
 
