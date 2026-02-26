@@ -26,46 +26,22 @@ Lightweight orchestrator that detects available source types and delegates to do
 2. **IF zero sources found**: STOP and output: "No GCP sources detected (no `.tf` files, billing exports, or app code). Provide at least one source type and try again."
 3. Report detected sources to user (e.g., "Found Terraform files in: [list]")
 
-## Step 2: Invoke Terraform Discoverer
+## Step 2: Invoke Terraform Discoverer (v1.0 — REQUIRED)
 
-**This step is MANDATORY for v1.0. Execute exactly as written.**
+**This step is MANDATORY for v1.0. Produces final outputs directly.**
 
 1. **IF Terraform files found** (from Step 1):
    - Read `references/phases/discover/discover-iac.md` completely
    - Follow ALL steps in discover-iac.md exactly as written
-   - **WAIT for completion**: Confirm `iac_resources.json` exists in `.migration/[MMDD-HHMM]/` before proceeding
-   - **Validate schema**: Confirm file contains all required resource fields (see discover-iac.md output schema)
+   - **WAIT for completion**: Confirm BOTH output files exist in `.migration/[MMDD-HHMM]/`:
+     - `gcp-resource-inventory.json` (REQUIRED)
+     - `gcp-resource-clusters.json` (REQUIRED)
+   - **Validate schemas**: Confirm files contain all required fields
    - Proceed to Step 3
 2. **IF Terraform files NOT found**:
-   - Skip this step, proceed to Step 3
+   - Skip this step. Terraform is required for v1.0. If other sources available, defer to v1.1/v1.2 handling.
 
-## Step 3: Invoke Other Discoverers (v1.1+, v1.2+)
-
-**Note**: Currently stubs. Skip these in v1.0.
-
-1. **IF Billing files found** (v1.2+):
-   - Read `references/phases/discover/discover-billing.md`
-   - Follow all steps
-   - **WAIT for completion**: Confirm `billing_resources.json` exists
-   - (Currently stub; skip in v1.0)
-2. **IF App code found** (v1.1+):
-   - Read `references/phases/discover/discover-app-code.md`
-   - Follow all steps
-   - **WAIT for completion**: Confirm `app_code_resources.json` exists
-   - (Currently stub; skip in v1.0)
-
-## Step 4: Unify Resources from All Sources
-
-**Execute exactly as written.**
-
-1. Read `references/phases/discover/unify-resources.md` completely
-2. Follow ALL steps in unify-resources.md exactly as written
-3. **WAIT for completion**: Confirm both output files exist:
-   - `gcp-resource-inventory.json` (REQUIRED)
-   - `gcp-resource-clusters.json` (REQUIRED if IaC discoverer ran)
-4. **Validate schemas**: Confirm files match exact schemas defined in unify-resources.md
-
-## Step 5: Update Phase Status
+## Step 3: Update Phase Status
 
 1. Update `.phase-status.json` with exact schema:
    ```json
@@ -81,8 +57,17 @@ Lightweight orchestrator that detects available source types and delegates to do
 ## Error Handling
 
 - **Missing `.migration` directory**: Create it (Step 0)
-- **No sources found**: STOP with error message (Step 1)
+- **No Terraform files found**: STOP with error message (Step 1). Terraform is required for v1.0.
 - **discover-iac.md fails**: STOP and report exact failure point
-- **discover-iac.md completes but `iac_resources.json` missing**: STOP with error: "discover-iac.md did not produce `iac_resources.json`. Verify discover-iac.md execution."
-- **unify-resources.md fails**: STOP and report exact failure point
-- **Output files missing after unify-resources.md**: STOP with error listing missing files
+- **discover-iac.md completes but output files missing**: STOP with error listing missing files
+- **Output file validation fails**: STOP and report schema errors
+
+## Future Versions (v1.1+, v1.2+)
+
+**v1.1 (App Code Discovery):**
+- Implement `discover-app-code.md` to scan Python/Node/Go imports
+- Merge strategy with Terraform results: TBD
+
+**v1.2 (Billing Discovery):**
+- Implement `discover-billing.md` to parse GCP billing exports
+- Merge strategy with other sources: TBD

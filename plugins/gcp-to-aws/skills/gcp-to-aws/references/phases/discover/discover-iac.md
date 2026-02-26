@@ -1,6 +1,9 @@
 # Discover Phase: IaC (Terraform) Discovery
 
-Extracts and clusters GCP resources from Terraform files. **Execute ALL steps in order. Do not skip or optimize.**
+Extracts and clusters GCP resources from Terraform files. Produces final inventory and clusters JSON files.
+**Execute ALL steps in order. Do not skip or optimize.**
+
+Based on: `steering/discover-full.md` Steps 1-6
 
 ## Step 1: Parse Terraform Files
 
@@ -12,104 +15,159 @@ Extracts and clusters GCP resources from Terraform files. **Execute ALL steps in
    - `config` (object with key attributes: `machine_type`, `name`, `region`, etc.)
    - `raw_hcl` (raw HCL text for this resource, needed for Step 3)
    - `depends_on` (array of addresses this resource depends on)
-4. Report total resources found to user
+4. Report total resources found to user (e.g., "Parsed 50 GCP resources from Terraform")
 
-## Step 2: Apply Classification Rules
+## Step 2: Classify Resources (PRIMARY vs SECONDARY)
 
 1. Read `references/clustering/terraform/classification-rules.md` completely
 2. For EACH resource from Step 1, apply classification rules in priority order:
-   - **Priority 1**: Check if in PRIMARY list → mark `classification: "PRIMARY"`, skip to Step 3
-   - **Priority 2**: Check if type matches SECONDARY patterns → mark `classification: "SECONDARY"` with `secondary_role` field (one of: `identity`, `access_control`, `network_path`, `configuration`, `encryption`, `orchestration`)
+   - **Priority 1**: Check if in PRIMARY list → mark `classification: "PRIMARY"`, continue
+   - **Priority 2**: Check if type matches SECONDARY patterns → mark `classification: "SECONDARY"` with `secondary_role` (one of: `identity`, `access_control`, `network_path`, `configuration`, `encryption`, `orchestration`)
    - **Priority 3**: Apply LLM inference heuristics → mark as SECONDARY with `secondary_role` and confidence field
    - **Default**: Mark as `SECONDARY` with `secondary_role: "configuration"` and `confidence: 0.5`
-3. Confirm ALL resources have `classification` and `secondary_role` (if SECONDARY) fields
+3. Confirm ALL resources have `classification` and (if SECONDARY) `secondary_role` fields
+4. Report counts (e.g., "Classified: 12 PRIMARY, 38 SECONDARY")
 
-## Step 3: Build Typed Dependency Edges
+## Step 3: Build Dependency Edges and Populate Serves
 
 1. Read `references/clustering/terraform/typed-edges-strategy.md` completely
 2. For EACH resource from Step 1, extract references from `raw_hcl`:
    - Extract all `google_*\.[\w\.]+` patterns
-   - Classify edge type by field name context (see typed-edges-strategy.md rules):
-     - Field name contains `DATABASE*`, `DB_*`, `SQL_*` → `data_dependency`
-     - Field name contains `REDIS*`, `CACHE*` → `cache_dependency`
-     - Field name contains `PUBSUB*`, `TOPIC*` → `publishes_to`
-     - Field name contains `BUCKET*`, `STORAGE*` → `writes_to` or `reads_from`
-     - Field name is `vpc_connector` → `network_path`
-     - Field name is `kms_key_name` → `encryption`
-     - In `depends_on` array → `orchestration`
-   - Store edge with evidence (field_path, env_var_name, reference)
-3. For SECONDARY resources, populate `serves[]` array (list of PRIMARY resources this secondary supports)
-4. Add `typed_edges[]` array to each resource
+   - Classify edge type by field name/value context (see typed-edges-strategy.md)
+   - Store as `{from, to, edge_type, evidence}` in `typed_edges[]` array
+3. For SECONDARY resources, populate `serves[]` array:
+   - Trace outgoing references to PRIMARY resources
+   - Trace incoming `depends_on` references from PRIMARY resources
+   - Include transitive chains (e.g., IAM → SA → Cloud Run)
+4. Report dependency summary (e.g., "Found 45 typed edges, 38 secondaries populated serves arrays")
 
 ## Step 4: Calculate Topological Depth
 
 1. Read `references/clustering/terraform/depth-calculation.md` completely
-2. Use Kahn's algorithm to assign `depth` field to EVERY resource:
+2. Use Kahn's algorithm (or equivalent topological sort) to assign `depth` field:
    - Depth 0: resources with no incoming dependencies
    - Depth N: resources where at least one dependency is depth N-1
 3. **Detect cycles**: If any resource cannot be assigned depth, flag error: "Circular dependency detected between: [resources]. Breaking lowest-confidence edge."
 4. Confirm ALL resources have `depth` field (integer ≥ 0)
+5. Report depth summary (e.g., "Depth 0: 8 resources, Depth 1: 15 resources, ..., Max depth: 3")
 
 ## Step 5: Apply Clustering Algorithm
 
 1. Read `references/clustering/terraform/clustering-algorithm.md` completely
-2. Apply Rules 1-6 in exact order:
-   - **Rule 1**: Group `google_compute_network` + all `network_path` secondaries → cluster
-   - **Rule 2**: Group each resource type with 2+ PRIMARY resources → clusters
-   - **Rule 3**: Seed cluster from each remaining PRIMARY + its `serves[]` secondaries
-   - **Rule 4**: Merge clusters only if single deployment unit
-   - **Rule 5**: Skip `google_project_service`, attach to service it enables
-   - **Rule 6**: Name deterministically: `{category}_{service_type}_{region}_{sequence}`
+2. Apply Rules 1-6 in exact priority order:
+   - **Rule 1: Networking Cluster** — `google_compute_network` + all `network_path` secondaries → 1 cluster
+   - **Rule 2: Same-Type Grouping** — ALL primaries of identical type → 1 cluster (not one per resource)
+   - **Rule 3: Seed Clusters** — Each remaining PRIMARY gets cluster + its `serves[]` secondaries
+   - **Rule 4: Merge on Dependencies** — Merge only if single deployment unit (rare)
+   - **Rule 5: Skip API Services** — `google_project_service` never gets own cluster; attach to service it enables
+   - **Rule 6: Deterministic Naming** — `{type}_{subtype}_{sequence}` (e.g., `compute_cloudrun_001`, `database_sql_001`)
 3. Assign `cluster_id` to EVERY resource (must match one of generated clusters)
 4. Confirm ALL resources have `cluster_id` field
+5. Report clustering results (e.g., "Generated 6 clusters from 50 resources")
 
-## Step 6: Write Intermediate Output File
+## Step 6: Write Final Output Files
 
-**This step is MANDATORY. Write the file exactly as specified.**
+**This step is MANDATORY. Write both files with exact schemas.**
 
-1. Create file: `.migration/[MMDD-HHMM]/iac_resources.json`
+### 6a: Write gcp-resource-inventory.json
+
+1. Create file: `.migration/[MMDD-HHMM]/gcp-resource-inventory.json`
+2. Write with exact schema (see below):
+   ```json
+   {
+     "timestamp": "2026-02-26T14:30:00Z",
+     "metadata": {
+       "total_resources": 50,
+       "primary_resources": 12,
+       "secondary_resources": 38,
+       "total_clusters": 6,
+       "terraform_available": true
+     },
+     "resources": [
+       {
+         "address": "google_cloud_run_service.api",
+         "type": "google_cloud_run_service",
+         "classification": "PRIMARY",
+         "secondary_role": null,
+         "cluster_id": "compute_cloudrun_001",
+         "config": {
+           "region": "us-central1",
+           "name": "api"
+         },
+         "dependencies": ["google_sql_database_instance.main"],
+         "depth": 2,
+         "serves": []
+       },
+       {
+         "address": "google_service_account.app",
+         "type": "google_service_account",
+         "classification": "SECONDARY",
+         "secondary_role": "identity",
+         "cluster_id": "compute_cloudrun_001",
+         "config": {},
+         "dependencies": [],
+         "depth": 1,
+         "serves": ["google_cloud_run_service.api"]
+       }
+     ]
+   }
+   ```
+
+**CRITICAL field names (use EXACTLY these):**
+- `address` (resource Terraform address)
+- `type` (resource Terraform type)
+- `classification` (PRIMARY or SECONDARY)
+- `secondary_role` (for secondaries only)
+- `cluster_id` (assigned cluster)
+- `depth` (topological depth)
+- `serves` (for secondaries only)
+
+### 6b: Write gcp-resource-clusters.json
+
+1. Create file: `.migration/[MMDD-HHMM]/gcp-resource-clusters.json`
 2. Write with exact schema:
    ```json
    {
      "timestamp": "2026-02-26T14:30:00Z",
-     "total_resources": 24,
-     "resources": [
+     "metadata": {
+       "total_clusters": 6
+     },
+     "clusters": [
        {
-         "address": "google_compute_instance.web",
-         "type": "google_compute_instance",
-         "classification": "PRIMARY",
-         "secondary_role": null,
-         "cluster_id": "compute_cloudrun_us-central1_001",
-         "config": {
-           "machine_type": "e2-medium",
-           "zone": "us-central1-a",
-           "region": "us-central1"
-         },
-         "dependencies": ["google_compute_network.vpc"],
-         "typed_edges": [
+         "cluster_id": "compute_cloudrun_001",
+         "name": "Cloud Run Services",
+         "type": "compute",
+         "description": "Primary: cloud_run_service, Secondary: service_account, iam_member",
+         "gcp_region": "us-central1",
+         "primary_resources": ["google_cloud_run_service.api", "google_cloud_run_service.worker"],
+         "secondary_resources": ["google_service_account.app", "google_cloud_run_service_iam_member.*"],
+         "network": "network_vpc_001",
+         "creation_order_depth": 2,
+         "must_migrate_together": true,
+         "dependencies": ["database_sql_001"],
+         "edges": [
            {
-             "target": "google_sql_database_instance.prod",
-             "edge_type": "data_dependency",
-             "evidence": {
-               "field_path": "env.DATABASE_URL",
-               "reference": "google_sql_database_instance.prod.connection_name"
-             }
+             "from": "google_cloud_run_service.api",
+             "to": "google_sql_database_instance.main",
+             "relationship_type": "data_dependency"
            }
-         ],
-         "depth": 2,
-         "serves": []
+         ]
        }
-     ],
-     "clusters": {
-       "compute_cloudrun_us-central1_001": {
-         "name": "Cloud Run Application",
-         "primary_resources": ["google_cloud_run_service.app"],
-         "secondary_resources": ["google_service_account.app_runner"],
-         "network": "network_vpc_us-central1_000",
-         "creation_order_depth": 2
-       }
-     }
+     ]
    }
    ```
-3. **Validate file exists**: Confirm `.migration/[MMDD-HHMM]/iac_resources.json` is written before Step 6 completes
-4. Report to user: "✅ Parsed X resources. Applied clustering rules. Wrote iac_resources.json."
+
+**CRITICAL field names (use EXACTLY these):**
+- `cluster_id` (matches resources' cluster_id)
+- `primary_resources` (array of addresses)
+- `secondary_resources` (array of addresses)
+- `creation_order_depth` (matches resource depths)
+- `edges` (array of {from, to, relationship_type})
+
+### 6c: Validate Both Files Exist
+
+1. Confirm `.migration/[MMDD-HHMM]/gcp-resource-inventory.json` exists and is valid JSON
+2. Confirm `.migration/[MMDD-HHMM]/gcp-resource-clusters.json` exists and is valid JSON
+3. Verify all resource addresses in inventory appear in exactly one cluster
+4. Verify all cluster IDs match resource cluster_id assignments
+5. Report to user: "✅ Wrote gcp-resource-inventory.json (X resources) and gcp-resource-clusters.json (Y clusters)"
