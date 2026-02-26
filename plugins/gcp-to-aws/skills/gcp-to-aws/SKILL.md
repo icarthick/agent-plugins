@@ -66,9 +66,9 @@ If `.phase-status.json` exists and phase is `completed`, advance to next phase. 
 
 ## Phase Summary Table
 
-| Phase        | Inputs                                          | Outputs                                                                                   | Reference                       |
-| ------------ | ----------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------- |
-| **Discover** | `.tf` files                                     | `gcp-resource-inventory.json`, `gcp-resource-clusters.json`, `.phase-status.json` updated | `references/phases/discover.md` |
+| Phase        | Inputs                                          | Outputs                                                                                   | Reference                                |
+| ------------ | ----------------------------------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------- |
+| **Discover** | `.tf` files                                     | `gcp-resource-inventory.json`, `gcp-resource-clusters.json`, `.phase-status.json` updated | `references/phases/discover/discover.md` |
 | **Clarify**  | `gcp-resource-inventory.json`, user answers     | `clarified.json`, `.phase-status.json` updated                                            | `references/phases/clarify.md`  |
 | **Design**   | `gcp-resource-inventory.json`, `clarified.json` | `aws-design.json`, `aws-design-report.md`, `.phase-status.json` updated                   | `references/phases/design.md`   |
 | **Estimate** | `aws-design.json`, `clarified.json`             | `estimation.json` (cost tables), `.phase-status.json` updated                             | `references/phases/estimate.md` |
