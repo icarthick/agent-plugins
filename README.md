@@ -28,8 +28,9 @@ To maximize the benefits of plugin-assisted development while maintaining securi
 
 | Plugin                      | Description                                                                                                       | Status    |
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------- | --------- |
-| **deploy-on-aws**           | Deploy applications to AWS with architecture recommendations, cost estimates, and IaC deployment                  | Available |
 | **amazon-location-service** | Add maps, geocoding, routing, places search, and geospatial features to applications with Amazon Location Service | Available |
+| **deploy-on-aws**           | Deploy applications to AWS with architecture recommendations, cost estimates, and IaC deployment                  | Available |
+| **gcp-to-aws**              | Migrate GCP infrastructure to AWS with resource discovery, architecture mapping, cost analysis, and IaC generation | Available |
 
 ## Installation
 
@@ -44,13 +45,19 @@ To maximize the benefits of plugin-assisted development while maintaining securi
 #### Install a plugin
 
 ```bash
+/plugin install amazon-location-service@agent-plugins-for-aws
+```
+
+or
+
+```bash
 /plugin install deploy-on-aws@agent-plugins-for-aws
 ```
 
 or
 
 ```bash
-/plugin install amazon-location-service@agent-plugins-for-aws
+/plugin install gcp-to-aws@agent-plugins-for-aws
 ```
 
 ### Cursor
@@ -105,6 +112,31 @@ Guides developers through adding maps, places search, geocoding, routing, and ot
 | Server      | Purpose                                |
 | ----------- | -------------------------------------- |
 | **aws-mcp** | AWS documentation and service guidance |
+
+## gcp-to-aws
+
+Helps you systematically migrate GCP infrastructure to AWS through resource discovery, architecture mapping, cost analysis, and infrastructure-as-code generation. Analyzes Terraform configurations, billing data, and application code to recommend AWS equivalents and generate deployable IaC.
+
+### Workflow
+
+1. **Discover** - Scan GCP infrastructure (Terraform, billing, app code) and extract resources
+2. **Clarify** - Understand compute workloads and architecture patterns
+3. **Design** - Map GCP services to AWS equivalents with rationale
+4. **Estimate** - Calculate monthly AWS costs and compare to GCP
+5. **Execute** - Generate working Infrastructure-as-Code (CDK/CloudFormation)
+
+### Agent Skill Triggers
+
+| Agent Skill    | Triggers                                                                                                            |
+| -------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **gcp-to-aws** | "migrate GCP to AWS", "move from GCP", "GCP migration plan", "estimate AWS costs", "GCP infrastructure assessment" |
+
+### MCP Servers
+
+| Server           | Purpose                                            |
+| ---------------- | -------------------------------------------------- |
+| **awsknowledge** | AWS documentation, architecture guidance          |
+| **awspricing**   | Real-time AWS service pricing for cost estimates  |
 
 ## Requirements
 
