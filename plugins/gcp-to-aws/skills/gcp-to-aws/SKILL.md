@@ -66,9 +66,9 @@ If `.phase-status.json` exists and phase is `completed`, advance to next phase. 
 
 ## Phase Summary Table
 
-| Phase        | Inputs                                          | Outputs                                                                                   | Reference                       |
-| ------------ | ----------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------- |
-| **Discover** | `.tf` files                                     | `gcp-resource-inventory.json`, `gcp-resource-clusters.json`, `.phase-status.json` updated | `references/phases/discover.md` |
+| Phase        | Inputs                                          | Outputs                                                                                   | Reference                                |
+| ------------ | ----------------------------------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------- |
+| **Discover** | `.tf` files                                     | `gcp-resource-inventory.json`, `gcp-resource-clusters.json`, `.phase-status.json` updated | `references/phases/discover/discover.md` |
 | **Clarify**  | `gcp-resource-inventory.json`, user answers     | `clarified.json`, `.phase-status.json` updated                                            | `references/phases/clarify.md`  |
 | **Design**   | `gcp-resource-inventory.json`, `clarified.json` | `aws-design.json`, `aws-design-report.md`, `.phase-status.json` updated                   | `references/phases/design.md`   |
 | **Estimate** | `aws-design.json`, `clarified.json`             | `estimation.json` (cost tables), `.phase-status.json` updated                             | `references/phases/estimate.md` |
@@ -108,15 +108,23 @@ If `.phase-status.json` exists and phase is `completed`, advance to next phase. 
 
 ## Workflow Execution
 
-When invoked, the agent:
+When invoked, the agent **MUST follow this exact sequence**:
 
-1. Calls the phase reference file matching current `.phase-status.json` phase
-2. Passes all discovered state (JSON files) as context to that reference
-3. Reference file executes its steps, writes outputs to `.migration/*/`
-4. Agent updates `.phase-status.json` to mark phase complete
-5. Agent displays summary and offers to proceed to next phase (or exit)
+1. **Load phase status**: Read `.phase-status.json`. If missing, initialize for discover phase.
+2. **Route to phase reference**: Based on `.phase-status.json` phase field:
+   - `discover` → Read `references/phases/discover/discover.md` completely
+   - `clarify` → Read `references/phases/clarify.md` completely
+   - `design` → Read `references/phases/design.md` completely
+   - `estimate` → Read `references/phases/estimate.md` completely
+   - `execute` → Read `references/phases/execute.md` completely
+3. **Execute ALL steps in order**: Follow every numbered step in the reference file. **Do not skip, optimize, or deviate.**
+4. **Validate outputs**: Confirm all required output files exist with correct schema before proceeding.
+5. **Update phase status**: Mark phase as `completed` and advance to next phase.
+6. **Display summary**: Show user what was accomplished and offer next phase or exit.
 
-User can invoke the skill again at any time to resume or switch phases (read `.phase-status.json` for context).
+**Critical constraint**: Agent must strictly adhere to the reference file's workflow. If unable to complete a step, stop and report the exact step that failed.
+
+User can invoke the skill again to resume from last completed phase.
 
 ## Scope Notes
 
