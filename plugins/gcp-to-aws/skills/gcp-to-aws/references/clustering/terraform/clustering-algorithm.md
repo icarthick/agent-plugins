@@ -56,12 +56,14 @@ All resources with fields:
    - All supporting resources
 
 **Correct Examples (ONE cluster per type):**
+
 - 4× `google_pubsub_topic` → 1 cluster: `messaging_pubsubtopic_us-central1_001`
 - 3× `google_storage_bucket` → 1 cluster: `storage_bucket_us-central1_001`
 - 2× `google_sql_database_instance` → 1 cluster: `database_sql_us-central1_001`
 - 3× `google_container_cluster` → 1 cluster: `compute_gke_us-central1_001` (NOT `k8s_001`, `k8s_002`, `k8s_003`)
 
 **INCORRECT Examples (DO NOT DO THIS):**
+
 - ❌ 4× `google_pubsub_topic` → 4 clusters (`compute_pubsubtopic_001`, `compute_pubsubtopic_002`, etc.)
 - ❌ 3× `google_storage_bucket` → 3 clusters (`compute_storagebucket_001`, `compute_storagebucket_002`, etc.)
 - ❌ 3× `google_container_cluster` → 3 clusters (`k8s_001`, `k8s_002`, `k8s_003`)
@@ -144,7 +146,7 @@ Each cluster includes:
   "creation_order_depth": 2,
   "must_migrate_together": true,
   "dependencies": [],
-  "edges": [{"from": "...", "to": "...", "type": "..."}]
+  "edges": [{ "from": "...", "to": "...", "type": "..." }]
 }
 ```
 

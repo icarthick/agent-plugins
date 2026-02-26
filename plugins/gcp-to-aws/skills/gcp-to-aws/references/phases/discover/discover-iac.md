@@ -3,7 +3,6 @@
 Extracts and clusters GCP resources from Terraform files. Produces final inventory and clusters JSON files.
 **Execute ALL steps in order. Do not skip or optimize.**
 
-
 ## Step 1: Parse Terraform Files
 
 1. Read all `.tf`, `.tfvars`, and `.tfstate` files in working directory (recursively)
@@ -72,6 +71,7 @@ Extracts and clusters GCP resources from Terraform files. Produces final invento
 
 1. Create file: `.migration/[MMDD-HHMM]/gcp-resource-inventory.json`
 2. Write with exact schema (see below):
+
    ```json
    {
      "timestamp": "2026-02-26T14:30:00Z",
@@ -113,6 +113,7 @@ Extracts and clusters GCP resources from Terraform files. Produces final invento
    ```
 
 **CRITICAL field names (use EXACTLY these):**
+
 - `address` (resource Terraform address)
 - `type` (resource Terraform type)
 - `classification` (PRIMARY or SECONDARY)
@@ -125,6 +126,7 @@ Extracts and clusters GCP resources from Terraform files. Produces final invento
 
 1. Create file: `.migration/[MMDD-HHMM]/gcp-resource-clusters.json`
 2. Write with exact schema:
+
    ```json
    {
      "timestamp": "2026-02-26T14:30:00Z",
@@ -139,7 +141,10 @@ Extracts and clusters GCP resources from Terraform files. Produces final invento
          "description": "Primary: cloud_run_service, Secondary: service_account, iam_member",
          "gcp_region": "us-central1",
          "primary_resources": ["google_cloud_run_service.api", "google_cloud_run_service.worker"],
-         "secondary_resources": ["google_service_account.app", "google_cloud_run_service_iam_member.*"],
+         "secondary_resources": [
+           "google_service_account.app",
+           "google_cloud_run_service_iam_member.*"
+         ],
          "network": "network_vpc_001",
          "creation_order_depth": 2,
          "must_migrate_together": true,
@@ -157,6 +162,7 @@ Extracts and clusters GCP resources from Terraform files. Produces final invento
    ```
 
 **CRITICAL field names (use EXACTLY these):**
+
 - `cluster_id` (matches resources' cluster_id)
 - `primary_resources` (array of addresses)
 - `secondary_resources` (array of addresses)

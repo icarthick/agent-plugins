@@ -7,6 +7,7 @@ Lightweight orchestrator that detects available source types and delegates to do
 
 1. Create `.migration/[MMDD-HHMM]/` directory (e.g., `.migration/0226-1430/`) using current timestamp (MMDD = month/day, HHMM = hour/minute)
 2. Write `.phase-status.json` with exact schema:
+
    ```json
    {
      "phase": "discover",
@@ -15,6 +16,7 @@ Lightweight orchestrator that detects available source types and delegates to do
      "version": "1.0.0"
    }
    ```
+
 3. Confirm file exists before proceeding to Step 1.
 
 ## Step 1: Scan for Available Source Types
@@ -44,6 +46,7 @@ Lightweight orchestrator that detects available source types and delegates to do
 ## Step 3: Update Phase Status
 
 1. Update `.phase-status.json` with exact schema:
+
    ```json
    {
      "phase": "clarify",
@@ -52,15 +55,18 @@ Lightweight orchestrator that detects available source types and delegates to do
      "version": "1.0.0"
    }
    ```
+
 2. Output to user: "✅ Discover phase complete. Discovered X total resources across Y clusters. Proceeding to Phase 2: Clarify."
 
 ## Output Files ONLY
 
 **Discover phase produces EXACTLY 2 files in `.migration/[MMDD-HHMM]/`:**
+
 1. `gcp-resource-inventory.json` (REQUIRED)
 2. `gcp-resource-clusters.json` (REQUIRED)
 
 **No other files should be created:**
+
 - ❌ README.md
 - ❌ discovery-summary.md
 - ❌ EXECUTION_REPORT.txt
@@ -81,9 +87,11 @@ All user communication via output messages only.
 ## Future Versions (v1.1+, v1.2+)
 
 **v1.1 (App Code Discovery):**
+
 - Implement `discover-app-code.md` to scan Python/Node/Go imports
 - Merge strategy with Terraform results: TBD
 
 **v1.2 (Billing Discovery):**
+
 - Implement `discover-billing.md` to parse GCP billing exports
 - Merge strategy with other sources: TBD
