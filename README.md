@@ -26,10 +26,10 @@ To maximize the benefits of plugin-assisted development while maintaining securi
 
 ## Plugins
 
-| Plugin                      | Description                                                                                                       | Status    |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------------- | --------- |
-| **amazon-location-service** | Add maps, geocoding, routing, places search, and geospatial features to applications with Amazon Location Service | Available |
-| **deploy-on-aws**           | Deploy applications to AWS with architecture recommendations, cost estimates, and IaC deployment                  | Available |
+| Plugin                      | Description                                                                                                        | Status    |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------ | --------- |
+| **amazon-location-service** | Add maps, geocoding, routing, places search, and geospatial features to applications with Amazon Location Service  | Available |
+| **deploy-on-aws**           | Deploy applications to AWS with architecture recommendations, cost estimates, and IaC deployment                   | Available |
 | **gcp-to-aws**              | Migrate GCP infrastructure to AWS with resource discovery, architecture mapping, cost analysis, and IaC generation | Available |
 
 ## Installation
@@ -127,16 +127,16 @@ Helps you systematically migrate GCP infrastructure to AWS through resource disc
 
 ### Agent Skill Triggers
 
-| Agent Skill    | Triggers                                                                                                            |
-| -------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Agent Skill    | Triggers                                                                                                           |
+| -------------- | ------------------------------------------------------------------------------------------------------------------ |
 | **gcp-to-aws** | "migrate GCP to AWS", "move from GCP", "GCP migration plan", "estimate AWS costs", "GCP infrastructure assessment" |
 
 ### MCP Servers
 
-| Server           | Purpose                                            |
-| ---------------- | -------------------------------------------------- |
-| **awsknowledge** | AWS documentation, architecture guidance          |
-| **awspricing**   | Real-time AWS service pricing for cost estimates  |
+| Server           | Purpose                                          |
+| ---------------- | ------------------------------------------------ |
+| **awsknowledge** | AWS documentation, architecture guidance         |
+| **awspricing**   | Real-time AWS service pricing for cost estimates |
 
 ## Requirements
 
