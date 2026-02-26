@@ -72,7 +72,7 @@ run = [
 [tasks."security:bandit"]
 description = "Run Bandit"
 run = [
-  "bandit -r . -c .bandit"
+  "bandit -r ."
 ]
 
 [tasks."security:semgrep"]
