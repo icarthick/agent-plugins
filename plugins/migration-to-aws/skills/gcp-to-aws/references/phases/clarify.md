@@ -29,9 +29,30 @@ For Modes A/B (Q1-Q8 answered):
 - If user gives free-form answer, map to closest option
 - Store normalized answers
 
-For Modes C/D:
+For Mode C:
 
-- Use defaults from `shared/clarify-questions.md`
+- Use all defaults from `shared/clarify-questions.md`
+
+For Mode D (free-text):
+
+1. Parse user text to extract answers for Q1-Q8
+   - Look for keywords matching question option descriptions
+   - For each question, mark as "extracted" if found or "default" if not
+
+2. **Confirmation step**: Present to user:
+
+   ```
+   Based on your requirements, I extracted:
+   - Q1 (Timeline): [extracted value]
+   - Q2 (Primary concern): [extracted value]
+   - Q3 (Team experience): [default value] ← using default
+   - ...
+
+   Accept these, or re-run with Mode A/B to override?
+   ```
+
+3. If user accepts: store answers with source tracking (extracted vs default)
+4. If user declines: fall back to Mode A or B
 
 ## Step 4: Write Clarified Output
 

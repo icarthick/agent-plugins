@@ -1,8 +1,18 @@
 {
-  "author": { "name": "Amazon Web Services" },
+  "author": {
+    "name": "Amazon Web Services"
+  },
   "description": "Migrate workloads from Google Cloud Platform to AWS with a 5-phase guided process: Terraform infrastructure discovery, requirements clarification, AWS architecture design, cost estimation, and execution planning.",
   "homepage": "https://github.com/awslabs/agent-plugins",
-  "keywords": ["aws", "gcp", "google-cloud", "migration", "cloud-migration", "terraform", "fargate", "cdk"],
+  "keywords": [
+    "aws",
+    "gcp",
+    "google-cloud",
+    "migration",
+    "cloud-migration",
+    "terraform",
+    "fargate"
+  ],
   "license": "Apache-2.0",
   "name": "migration-to-aws",
   "repository": "https://github.com/awslabs/agent-plugins",
