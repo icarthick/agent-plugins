@@ -65,12 +65,21 @@ Apply in order; first match wins:
 - → **AWS: Fargate (0.5 CPU, 1 GB memory)**
 - Confidence: `deterministic` (or `inferred` if variant from fast-path)
 
-### Example 2: Cloud Functions (event processor)
+### Example 2a: Cloud Functions (event processor, short-running)
 
 - GCP: `google_cloudfunctions_function` (runtime=python39, timeout=540s)
-- Signals: Event-driven, 540s > 15min limit
-- Criterion 1 (Eliminators): FAIL on timeout → **cannot use Lambda**
-- Criterion 2 (Operational Model): FARGATE (managed + stateless)
+- Signals: Event-driven, 540s = 9 minutes (< 15min limit)
+- Criterion 1 (Eliminators): PASS on timeout (540s < 900s)
+- Criterion 2 (Operational Model): Lambda preferred for event-driven + short-running
+- → **AWS: Lambda with EventBridge trigger**
+- Confidence: `inferred`
+
+### Example 2b: Cloud Functions (long-running batch processor)
+
+- GCP: `google_cloudfunctions_function` (runtime=python39, timeout=1200s)
+- Signals: Event-driven but 1200s = 20 minutes (> 15min limit)
+- Criterion 1 (Eliminators): FAIL on timeout (1200s > 900s) → **cannot use Lambda**
+- Criterion 2 (Operational Model): Fargate (managed + can handle longer execution)
 - → **AWS: Fargate (0.5 CPU, 1 GB memory) with EventBridge trigger**
 - Confidence: `inferred`
 
