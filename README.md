@@ -28,8 +28,8 @@ To maximize the benefits of plugin-assisted development while maintaining securi
 
 | Plugin                      | Description                                                                                                        | Status    |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------ | --------- |
-| **amazon-location-service** | Add maps, geocoding, routing, places search, and geospatial features to applications with Amazon Location Service  | Available |
 | **deploy-on-aws**           | Deploy applications to AWS with architecture recommendations, cost estimates, and IaC deployment                   | Available |
+| **amazon-location-service** | Add maps, geocoding, routing, places search, and geospatial features to applications with Amazon Location Service  | Available |
 | **migration-to-aws**        | Migrate GCP infrastructure to AWS with resource discovery, architecture mapping, cost analysis, and IaC generation | Available |
 
 ## Installation
@@ -45,13 +45,13 @@ To maximize the benefits of plugin-assisted development while maintaining securi
 #### Install a plugin
 
 ```bash
-/plugin install amazon-location-service@agent-plugins-for-aws
+/plugin install deploy-on-aws@agent-plugins-for-aws
 ```
 
 or
 
 ```bash
-/plugin install deploy-on-aws@agent-plugins-for-aws
+/plugin install amazon-location-service@agent-plugins-for-aws
 ```
 
 or
