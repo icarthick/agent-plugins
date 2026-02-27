@@ -33,24 +33,14 @@ For Modes C/D:
 
 ## Step 4: Write Clarified Output
 
-Write `clarified.json`:
+Write `clarified.json` to `.migration/[MMDD-HHMM]/` directory.
 
-```json
-{
-  "mode": "A|B|C|D",
-  "answers": {
-    "q1_timeline": "3-6 months",
-    "q2_primary_concern": "cost",
-    "q3_team_experience": "moderate",
-    "q4_traffic_profile": "predictable",
-    "q5_database_requirements": "structured",
-    "q6_cost_sensitivity": "high",
-    "q7_multi_cloud": "no",
-    "q8_compliance": "none"
-  },
-  "timestamp": "2026-02-26T14:30:00Z"
-}
-```
+**Schema:** See `references/shared/output-schema.md` → `clarified.json (Phase 2 output)` section for complete schema and field documentation.
+
+**Key fields:**
+- `mode`: "A", "B", "C", or "D" (answering mode selected in Step 2)
+- `answers`: Object with keys q1_timeline through q8_compliance
+- `timestamp`: ISO 8601 timestamp
 
 ## Step 5: Update Phase Status
 

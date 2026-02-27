@@ -171,7 +171,12 @@
 - Option 2: Create dedicated `schemas/` directory with individual schema files
 - Option 3: Use $ref references to avoid duplication
 
-**Status**: ⏳ PENDING
+**Status**: ✅ RESOLVED
+- Implemented Option 1: Consolidated all schemas in output-schema.md
+- clarify.md: Replaced full schema with reference to output-schema.md
+- discover-iac.md: Replaced gcp-resource-inventory.json and gcp-resource-clusters.json schemas with references
+- clarify-questions.md: Kept as-is (provides question definitions, not authoritative schema)
+- Single source of truth established: output-schema.md is now the only place to update schemas
 
 ---
 

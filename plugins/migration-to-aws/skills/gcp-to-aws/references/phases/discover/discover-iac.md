@@ -70,96 +70,22 @@ Extracts and clusters GCP resources from Terraform files. Produces final invento
 ### 6a: Write gcp-resource-inventory.json
 
 1. Create file: `.migration/[MMDD-HHMM]/gcp-resource-inventory.json`
-2. Write with exact schema (see below):
-
-   ```json
-   {
-     "timestamp": "2026-02-26T14:30:00Z",
-     "metadata": {
-       "total_resources": 50,
-       "primary_resources": 12,
-       "secondary_resources": 38,
-       "total_clusters": 6,
-       "terraform_available": true
-     },
-     "resources": [
-       {
-         "address": "google_cloud_run_service.api",
-         "type": "google_cloud_run_service",
-         "classification": "PRIMARY",
-         "secondary_role": null,
-         "cluster_id": "compute_cloudrun_001",
-         "config": {
-           "region": "us-central1",
-           "name": "api"
-         },
-         "dependencies": ["google_sql_database_instance.main"],
-         "depth": 2,
-         "serves": []
-       },
-       {
-         "address": "google_service_account.app",
-         "type": "google_service_account",
-         "classification": "SECONDARY",
-         "secondary_role": "identity",
-         "cluster_id": "compute_cloudrun_001",
-         "config": {},
-         "dependencies": [],
-         "depth": 1,
-         "serves": ["google_cloud_run_service.api"]
-       }
-     ]
-   }
-   ```
+2. Write with exact schema per `references/shared/output-schema.md` → `gcp-resource-inventory.json (Phase 1 output)` section
 
 **CRITICAL field names (use EXACTLY these):**
 
 - `address` (resource Terraform address)
 - `type` (resource Terraform type)
 - `classification` (PRIMARY or SECONDARY)
-- `secondary_role` (for secondaries only)
+- `secondary_role` (for secondaries only; one of: identity, access_control, network_path, configuration, encryption, orchestration)
 - `cluster_id` (assigned cluster)
-- `depth` (topological depth)
-- `serves` (for secondaries only)
+- `depth` (topological depth, integer ≥ 0)
+- `serves` (for secondaries only; list of resources this secondary supports)
 
 ### 6b: Write gcp-resource-clusters.json
 
 1. Create file: `.migration/[MMDD-HHMM]/gcp-resource-clusters.json`
-2. Write with exact schema:
-
-   ```json
-   {
-     "timestamp": "2026-02-26T14:30:00Z",
-     "metadata": {
-       "total_clusters": 6
-     },
-     "clusters": [
-       {
-         "cluster_id": "compute_cloudrun_001",
-         "name": "Cloud Run Services",
-         "type": "compute",
-         "description": "Primary: cloud_run_service, Secondary: service_account, iam_member",
-         "gcp_region": "us-central1",
-         "primary_resources": ["google_cloud_run_service.api", "google_cloud_run_service.worker"],
-         "secondary_resources": [
-           "google_service_account.app",
-           "google_cloud_run_service_iam_member.*"
-         ],
-         "network": "network_vpc_001",
-         "creation_order_depth": 2,
-         "must_migrate_together": true,
-         "dependencies": ["database_sql_001"],
-         "edges": [
-           {
-             "from": "google_cloud_run_service.api",
-             "to": "google_sql_database_instance.main",
-             "relationship_type": "data_dependency"
-           }
-         ]
-       }
-     ]
-   }
-   ```
+2. Write with exact schema per `references/shared/output-schema.md` → `gcp-resource-clusters.json (Phase 1 output)` section
 
 **CRITICAL field names (use EXACTLY these):**
 
@@ -167,6 +93,7 @@ Extracts and clusters GCP resources from Terraform files. Produces final invento
 - `primary_resources` (array of addresses)
 - `secondary_resources` (array of addresses)
 - `creation_order_depth` (matches resource depths)
+- `gcp_region` (GCP region for this cluster)
 - `edges` (array of {from, to, relationship_type})
 
 ### 6c: Validate Both Files Exist
