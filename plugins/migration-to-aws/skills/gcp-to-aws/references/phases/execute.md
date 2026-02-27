@@ -101,9 +101,16 @@ Write `execution.json`:
   ],
   "risks": [
     {
-      "category": "data loss",
+      "category": "data_loss",
       "probability": "low",
+      "impact": "critical",
       "mitigation": "dual-write + backup"
+    },
+    {
+      "category": "performance_regression",
+      "probability": "medium",
+      "impact": "high",
+      "mitigation": "PoC testing (Week 3-5); load testing (Week 6)"
     }
   ],
   "rollback_window": "Reversible until DNS cutover (Week 11)",

@@ -110,6 +110,18 @@ Clustered resources by affinity and deployment order.
       "secondary_resources": [
         "google_compute_network.vpc",
         "google_compute_firewall.web-allow-http"
+      ],
+      "edges": [
+        {
+          "from": "google_compute_instance.web",
+          "to": "google_compute_network.vpc",
+          "relationship_type": "network_path"
+        },
+        {
+          "from": "google_compute_instance.web",
+          "to": "google_compute_firewall.web-allow-http",
+          "relationship_type": "network_path"
+        }
       ]
     },
     {
@@ -119,7 +131,8 @@ Clustered resources by affinity and deployment order.
       "primary_resources": [
         "google_sql_database_instance.prod_postgres"
       ],
-      "secondary_resources": []
+      "secondary_resources": [],
+      "edges": []
     }
   ]
 }

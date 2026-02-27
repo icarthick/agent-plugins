@@ -58,7 +58,7 @@ Extracts and clusters GCP resources from Terraform files. Produces final invento
    - **Rule 3: Seed Clusters** — Each remaining PRIMARY gets cluster + its `serves[]` secondaries
    - **Rule 4: Merge on Dependencies** — Merge only if single deployment unit (rare)
    - **Rule 5: Skip API Services** — `google_project_service` never gets own cluster; attach to service it enables
-   - **Rule 6: Deterministic Naming** — `{type}_{subtype}_{sequence}` (e.g., `compute_cloudrun_001`, `database_sql_001`)
+   - **Rule 6: Deterministic Naming** — `{service_category}_{service_type}_{gcp_region}_{sequence}` (e.g., `compute_cloudrun_us-central1_001`, `database_sql_us-central1_001`)
 3. Assign `cluster_id` to EVERY resource (must match one of generated clusters)
 4. Confirm ALL resources have `cluster_id` field
 5. Report clustering results (e.g., "Generated 6 clusters from 50 resources")
