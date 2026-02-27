@@ -26,11 +26,11 @@ To maximize the benefits of plugin-assisted development while maintaining securi
 
 ## Plugins
 
-| Plugin                      | Description                                                                                                        | Status    |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------ | --------- |
-| **deploy-on-aws**           | Deploy applications to AWS with architecture recommendations, cost estimates, and IaC deployment                   | Available |
-| **amazon-location-service** | Add maps, geocoding, routing, places search, and geospatial features to applications with Amazon Location Service  | Available |
-| **migration-to-aws**        | Migrate GCP infrastructure to AWS with resource discovery, architecture mapping, cost analysis, and IaC generation | Available |
+| Plugin                      | Description                                                                                                            | Status    |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------- | --------- |
+| **deploy-on-aws**           | Deploy applications to AWS with architecture recommendations, cost estimates, and IaC deployment                       | Available |
+| **amazon-location-service** | Add maps, geocoding, routing, places search, and geospatial features to applications with Amazon Location Service      | Available |
+| **migration-to-aws**        | Migrate GCP infrastructure to AWS with resource discovery, architecture mapping, cost analysis, and execution planning | Available |
 
 ## Installation
 
@@ -119,11 +119,11 @@ Helps you systematically migrate GCP infrastructure to AWS through resource disc
 
 ### Workflow
 
-1. **Discover** - Scan GCP infrastructure (Terraform, billing, app code) and extract resources
+1. **Discover** - Scan Terraform files for GCP resources and extract infrastructure
 2. **Clarify** - Understand compute workloads and architecture patterns
 3. **Design** - Map GCP services to AWS equivalents with rationale
 4. **Estimate** - Calculate monthly AWS costs and compare to GCP
-5. **Execute** - Generate working Infrastructure-as-Code (CDK/CloudFormation)
+5. **Execute** - Plan migration timeline and identify deployment risks
 
 ### Agent Skill Triggers
 

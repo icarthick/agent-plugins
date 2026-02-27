@@ -68,9 +68,16 @@ function calculateDepth(resources) {
   // Build graph
   in_degree = {}
   depends_on = {}
+  dependents_of = {}  // Reverse adjacency: resource → resources that depend on it
   for each resource R:
     in_degree[R] = count incoming edges
     depends_on[R] = R.dependencies[]
+    dependents_of[R] = []
+
+  // Populate dependents_of (reverse edges)
+  for each resource R:
+    for each D in R.dependencies[]:
+      dependents_of[D].append(R)
 
   // Initialize depth 0
   depth = {}
@@ -78,10 +85,10 @@ function calculateDepth(resources) {
   for each R in queue:
     depth[R] = 0
 
-  // Process
+  // Process queue (longest path variant)
   while queue not empty:
     R = queue.dequeue()
-    for each D in depends_on[R]:
+    for each D in dependents_of[R]:  // Iterate resources that depend on R
       depth[D] = max(depth[D], depth[R] + 1)
       in_degree[D] -= 1
       if in_degree[D] == 0:
