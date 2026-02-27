@@ -1,5 +1,19 @@
 # Phase 4: Estimate AWS Costs
 
+## Step 0: Validate Design Output
+
+Before pricing queries, validate `aws-design.json`:
+
+1. **File exists**: If missing, **STOP**. Output: "Phase 3 (Design) not completed. Run Phase 3 first."
+2. **Valid JSON**: If parse fails, **STOP**. Output: "Design file corrupted (invalid JSON). Re-run Phase 3."
+3. **Required fields**:
+   - `clusters` array is not empty: If empty, **STOP**. Output: "No clusters in design. Re-run Phase 3."
+   - Each cluster has `resources` array: If missing, **STOP**. Output: "Cluster [id] missing resources. Re-run Phase 3."
+   - Each resource has `aws_service` field: If missing, **STOP**. Output: "Resource [address] missing aws_service. Re-run Phase 3."
+   - Each resource has `aws_config` field: If missing, **STOP**. Output: "Resource [address] missing aws_config. Re-run Phase 3."
+
+If all validations pass, proceed to Step 1.
+
 ## Step 1: Check Pricing Availability
 
 Call MCP `awspricing` with `get_pricing_service_codes()`:

@@ -35,6 +35,11 @@ For resources not covered by fast-path:
    - `google_compute_network` → networking
    - etc.
 
+   **Catch-all for unknown types**: If resource type not found in `index.md`:
+   - Check resource name pattern (e.g., "scheduler" → orchestration, "log" → monitoring, "metric" → monitoring)
+   - If pattern match: use that category
+   - If no pattern match: **STOP**. Output: "Unknown GCP resource type: [type]. Not in fast-path.md or index.md. Cannot auto-map. Please file an issue with this resource type."
+
 2. Load rubric from corresponding `design-refs/*.md` file (e.g., `compute.md`, `database.md`)
 
 3. Evaluate 6 criteria (1-sentence each):
