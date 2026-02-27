@@ -38,6 +38,7 @@ Write `clarified.json` to `.migration/[MMDD-HHMM]/` directory.
 **Schema:** See `references/shared/output-schema.md` → `clarified.json (Phase 2 output)` section for complete schema and field documentation.
 
 **Key fields:**
+
 - `mode`: "A", "B", "C", or "D" (answering mode selected in Step 2)
 - `answers`: Object with keys q1_timeline through q8_compliance
 - `timestamp`: ISO 8601 timestamp

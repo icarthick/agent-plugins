@@ -78,6 +78,7 @@ All discovered GCP resources with full configuration and dependencies.
 ```
 
 **Schema fields:**
+
 - `metadata`: Summary statistics (total_resources, primary/secondary counts, cluster count, terraform_available)
 - `resources`: Array of all discovered resources with fields:
   - `address`: Terraform resource address

@@ -51,6 +51,7 @@ Migration state lives in `.migration/[MMDD-HHMM]/` directory (created by Phase 1
 ```
 
 If `.phase-status.json` exists:
+
 - If `status` is `completed`: advance to next phase (discover→clarify, clarify→design, etc.)
 - If `status` is `in-progress`: resume from that phase
 

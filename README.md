@@ -127,9 +127,9 @@ Helps you systematically migrate GCP infrastructure to AWS through resource disc
 
 ### Agent Skill Triggers
 
-| Agent Skill      | Triggers                                                                                                           |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------ |
-| **gcp-to-aws**   | "migrate GCP to AWS", "move from GCP", "GCP migration plan", "estimate AWS costs", "GCP infrastructure assessment" |
+| Agent Skill    | Triggers                                                                                                           |
+| -------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **gcp-to-aws** | "migrate GCP to AWS", "move from GCP", "GCP migration plan", "estimate AWS costs", "GCP infrastructure assessment" |
 
 ### MCP Servers
 
