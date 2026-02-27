@@ -198,11 +198,19 @@ Monthly operating costs, one-time migration costs, and ROI analysis.
 {
   "pricing_source": {
     "status": "live|fallback",
-    "message": "Using live AWS pricing API" | "Using cached 2026 rates (±15-25% accuracy due to API unavailability)",
+    "message": "Using live AWS pricing API" | "Using cached rates from 2026-02-24 (±15-25% accuracy due to API unavailability)",
+    "fallback_staleness": {
+      "last_updated": "2026-02-24",
+      "days_old": 3,
+      "is_stale": false,
+      "staleness_warning": null | "⚠️ Cached pricing data is >90 days old; accuracy may be significantly degraded"
+    },
     "services_by_source": {
       "live": ["Fargate", "RDS Aurora", "S3", "ALB"],
-      "fallback": []
-    }
+      "fallback": ["NAT Gateway"],
+      "estimated": []
+    },
+    "services_with_missing_fallback": []
   },
   "monthly_costs": {
     "premium": {

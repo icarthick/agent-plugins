@@ -21,11 +21,16 @@ Attempt to reach awspricing with **up to 2 retries** (3 total attempts):
 ### Fallback Path
 
 - **If all 3 attempts fail**:
-  1. Log warning: "AWS pricing API unavailable; using cached 2026 rates (±15-25% accuracy)"
-  2. **Display to user**: Add visible warning to estimation report
-  3. Fall back to `shared/pricing-fallback.json`
-  4. **Pricing source**: Mark as `fallback` in estimation.json with note
-  5. Proceed to Step 2
+  1. Load `shared/pricing-fallback.json`
+  2. **Check staleness**:
+     - Read `metadata.last_updated` (e.g., "2026-02-24")
+     - Calculate days since update: `today - last_updated`
+     - If > 90 days: Add to estimation report: "⚠️ Cached pricing data is >90 days old; accuracy may be significantly degraded"
+     - If ≤ 90 days: Add to estimation report: "Note: Using cached 2026 rates (±15-25% accuracy)"
+  3. Log warning: "AWS pricing API unavailable; using cached rates from [last_updated]"
+  4. **Display to user**: Add visible warning to estimation report with staleness notice
+  5. **Pricing source**: Mark as `fallback` in estimation.json with note
+  6. Proceed to Step 2
 
 ## Step 2: Extract Services from Design
 
@@ -51,7 +56,13 @@ For each service:
      - Service attributes: CPU, memory, storage, etc.
      - Mark: `pricing_source: "live"`
    - **If using fallback**: Look up in `shared/pricing-fallback.json`
-     - Mark: `pricing_source: "fallback"`
+     - Check if service exists in fallback data:
+       - **If found**: Use cached price, mark: `pricing_source: "fallback"`
+       - **If NOT found**:
+         1. Add to `services_with_missing_fallback[]` in estimation.json
+         2. Use conservative estimate (e.g., AWS average tier pricing or ask user)
+         3. Mark: `pricing_source: "estimated"`
+         4. Add warning: "Service [X] not in cached fallback data; cost estimated conservatively"
 3. Calculate monthly cost per service
 
 Handle 3 cost tiers (to show optimization range):
