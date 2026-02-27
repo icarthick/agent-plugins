@@ -156,6 +156,10 @@ AWS services mapped from GCP resources, clustered by affinity.
 
 ```json
 {
+  "validation_status": {
+    "status": "completed|skipped",
+    "message": "All services validated for regional availability and feature parity" | "Validation unavailable (awsknowledge MCP unreachable)"
+  },
   "clusters": [
     {
       "cluster_id": "compute_instance_us-central1_001",
@@ -177,7 +181,9 @@ AWS services mapped from GCP resources, clustered by affinity.
       ]
     }
   ],
-  "warnings": [],
+  "warnings": [
+    "Service X not available in us-east-1; feature parity check deferred to us-west-2"
+  ],
   "timestamp": "2026-02-26T14:30:00Z"
 }
 ```

@@ -55,6 +55,36 @@ For each SECONDARY resource:
 2. Apply fast-path (most secondaries have deterministic mappings)
 3. If rubric needed: apply same 6-criteria approach
 
+## Step 3.5: Validate AWS Architecture (using awsknowledge)
+
+**Validation checks** (if awsknowledge available):
+
+For each mapped AWS service, verify:
+
+1. **Regional Availability**: Is the service available in the target region (e.g., `us-east-1`)?
+   - Use awsknowledge to check regional support
+   - If unavailable: add warning, suggest fallback region
+
+2. **Feature Parity**: Do required features exist in AWS service?
+   - Match GCP features from `clarified.json` answers
+   - Check AWS feature availability via awsknowledge
+   - If feature missing: add warning, suggest alternative service
+
+3. **Service Compatibility**: Are there known issues or constraints?
+   - Check best practices and gotchas via awsknowledge
+   - Add to warnings if applicable
+
+**If awsknowledge unavailable:**
+
+- Set `validation_status: "skipped"` in output
+- Add note to report: "Architecture validation unavailable (non-critical)"
+- Continue with design (validation is informational, not blocking)
+
+**If validation succeeds:**
+
+- Set `validation_status: "completed"` in output
+- List validated services in report
+
 ## Step 4: Write Design Output
 
 **File 1: `aws-design.json`**

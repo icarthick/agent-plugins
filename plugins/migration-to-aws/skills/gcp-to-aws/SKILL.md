@@ -92,8 +92,11 @@ If `.phase-status.json` exists:
 
 **awsknowledge** (for design validation):
 
-1. Use for service best practices, regional availability, feature parity checks
-2. Fallback: none; skip validation if unavailable (non-critical)
+1. Use for regional availability checks (e.g., service available in target region?)
+2. Use for feature parity checks (e.g., do required features exist in AWS service?)
+3. Use for service constraints and best practices
+4. Fallback: if unavailable, set `validation_status: "skipped"` in aws-design.json with note in design report
+5. **Important**: Validation is informational; design proceeds either way (not blocking)
 
 ## Error Handling
 
