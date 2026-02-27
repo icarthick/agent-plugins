@@ -19,6 +19,8 @@ If user selects **Mode C** or **Mode D**: use default answers from `shared/clari
 
 If user selects **Mode A** or **Mode B**: Present all 8 questions (from `shared/clarify-questions.md`), collect answers, continue to Step 3.
 
+**Fallback handling:** If user selects Mode A or B but then declines to answer questions or provides incomplete answers, offer Mode C (use defaults) or Mode D (free-text description) as alternatives. Phase 2 completes using whichever mode provides answers.
+
 ## Step 3: Normalize Answers
 
 For Modes A/B (Q1-Q8 answered):

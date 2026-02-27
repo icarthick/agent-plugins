@@ -74,13 +74,13 @@ If `.phase-status.json` exists:
 
 ## Phase Summary Table
 
-| Phase        | Inputs                                          | Outputs                                                                                   | Reference                                |
-| ------------ | ----------------------------------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------- |
-| **Discover** | `.tf` files                                     | `gcp-resource-inventory.json`, `gcp-resource-clusters.json`, `.phase-status.json` updated | `references/phases/discover/discover.md` |
-| **Clarify**  | `gcp-resource-inventory.json`, user answers     | `clarified.json`, `.phase-status.json` updated                                            | `references/phases/clarify.md`           |
-| **Design**   | `gcp-resource-inventory.json`, `clarified.json` | `aws-design.json`, `aws-design-report.md`, `.phase-status.json` updated                   | `references/phases/design.md`            |
-| **Estimate** | `aws-design.json`, `clarified.json`             | `estimation.json` (cost tables), `.phase-status.json` updated                             | `references/phases/estimate.md`          |
-| **Execute**  | `aws-design.json`, `clarified.json`             | `execution.json` (timeline), `.phase-status.json` updated                                 | `references/phases/execute.md`           |
+| Phase        | Inputs                                                      | Outputs                                                                                   | Reference                                |
+| ------------ | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------- |
+| **Discover** | `.tf` files                                                 | `gcp-resource-inventory.json`, `gcp-resource-clusters.json`, `.phase-status.json` updated | `references/phases/discover/discover.md` |
+| **Clarify**  | `gcp-resource-inventory.json`, `gcp-resource-clusters.json` | `clarified.json`, `.phase-status.json` updated                                            | `references/phases/clarify.md`           |
+| **Design**   | `gcp-resource-inventory.json`, `clarified.json`             | `aws-design.json`, `aws-design-report.md`, `.phase-status.json` updated                   | `references/phases/design.md`            |
+| **Estimate** | `aws-design.json`, `clarified.json`                         | `estimation.json`, `estimation-report.md`, `.phase-status.json` updated                   | `references/phases/estimate.md`          |
+| **Execute**  | `aws-design.json`, `clarified.json`                         | `execution.json`, `execution-timeline.md`, `.phase-status.json` updated                   | `references/phases/execute.md`           |
 
 ## MCP Servers
 
