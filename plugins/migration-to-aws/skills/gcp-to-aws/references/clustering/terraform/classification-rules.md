@@ -17,8 +17,6 @@ These resource types are always PRIMARY:
 - `google_redis_instance` — In-memory cache
 - `google_pubsub_topic` — Message queue
 - `google_dns_managed_zone` — DNS zone
-- `google_monitoring_alert_policy` — Alert rule
-- `google_project_service` — API service enablement
 - `module.*` — Terraform module (treated as primary container)
 
 **Action**: Mark as `PRIMARY`, classification done. No secondary_role.
@@ -52,6 +50,7 @@ Match resource type against secondary classification table. Each match assigns a
 - `google_sql_user` — SQL user
 - `google_secret_manager_secret` — Secret vault
 - `google_dns_record_set` — DNS record
+- `google_monitoring_alert_policy` — Alert rule (skipped in design; no AWS equivalent)
 
 ### Encryption (`encryption`)
 
@@ -62,6 +61,7 @@ Match resource type against secondary classification table. Each match assigns a
 
 - `null_resource` — Terraform orchestration marker
 - `time_sleep` — Orchestration delay
+- `google_project_service` — API service enablement (prerequisite, not a deployable unit)
 
 **Action**: Mark as `SECONDARY` with assigned role.
 
