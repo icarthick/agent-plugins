@@ -4,8 +4,28 @@
 
 Call MCP `awspricing` with `get_pricing_service_codes()`:
 
-- **If success**: Use live AWS pricing for all estimates
-- **If timeout or error**: Log warning, fall back to `shared/pricing-fallback.json`
+### Retry Logic
+
+Attempt to reach awspricing with **up to 2 retries** (3 total attempts):
+
+1. **Attempt 1**: Call `get_pricing_service_codes()`
+2. **If timeout/error**: Wait 1 second, retry (Attempt 2)
+3. **If still fails**: Wait 2 seconds, retry (Attempt 3)
+4. **If all 3 attempts fail**: Proceed to fallback
+
+### Success Path
+
+- **If any attempt succeeds**: Use live AWS pricing for all estimates
+- **Pricing source**: Mark as `live` in estimation.json
+
+### Fallback Path
+
+- **If all 3 attempts fail**:
+  1. Log warning: "AWS pricing API unavailable; using cached 2026 rates (±15-25% accuracy)"
+  2. **Display to user**: Add visible warning to estimation report
+  3. Fall back to `shared/pricing-fallback.json`
+  4. **Pricing source**: Mark as `fallback` in estimation.json with note
+  5. Proceed to Step 2
 
 ## Step 2: Extract Services from Design
 
@@ -25,9 +45,13 @@ Read `aws-design.json`. Build list of unique AWS services mapped:
 For each service:
 
 1. Determine usage scenario from `aws-design.json` config (e.g., Fargate: 0.5 CPU, 1 GB memory, assumed 24/7)
-2. Call awspricing with appropriate filters:
-   - Region: extracted from design (default `us-east-1`)
-   - Service attributes: CPU, memory, storage, etc.
+2. Query pricing and track source:
+   - **If live API available**: Call awspricing with appropriate filters
+     - Region: extracted from design (default `us-east-1`)
+     - Service attributes: CPU, memory, storage, etc.
+     - Mark: `pricing_source: "live"`
+   - **If using fallback**: Look up in `shared/pricing-fallback.json`
+     - Mark: `pricing_source: "fallback"`
 3. Calculate monthly cost per service
 
 Handle 3 cost tiers (to show optimization range):

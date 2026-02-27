@@ -97,13 +97,13 @@ If `.phase-status.json` exists:
 
 ## Error Handling
 
-| Condition                                   | Action                                                                                                         |
-| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| No `.tf` files found                        | Stop. Output: "No Terraform files detected. Please provide `.tf` files with your GCP resources and try again." |
-| `.phase-status.json` missing phase gate     | Stop. Output: "Cannot enter Phase X: Phase Y-1 not completed. Start from Phase Y or resume Phase Y-1."         |
-| awspricing timeout after 2 retries          | Log warning, use `pricing-fallback.json`. Continue estimation.                                                 |
-| User does not answer all Q1-8               | Offer Mode C (defaults) or Mode D (free text). Phase 2 completes either way.                                   |
-| `aws-design.json` missing required clusters | Stop Phase 4. Output: "Re-run Phase 3 to generate missing cluster designs."                                    |
+| Condition                                   | Action                                                                                                                       |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| No `.tf` files found                        | Stop. Output: "No Terraform files detected. Please provide `.tf` files with your GCP resources and try again."               |
+| `.phase-status.json` missing phase gate     | Stop. Output: "Cannot enter Phase X: Phase Y-1 not completed. Start from Phase Y or resume Phase Y-1."                       |
+| awspricing unavailable after 3 attempts     | Display user warning about ±15-25% accuracy. Use `pricing-fallback.json`. Add `pricing_source: fallback` to estimation.json. |
+| User does not answer all Q1-8               | Offer Mode C (defaults) or Mode D (free text). Phase 2 completes either way.                                                 |
+| `aws-design.json` missing required clusters | Stop Phase 4. Output: "Re-run Phase 3 to generate missing cluster designs."                                                  |
 
 ## Defaults
 

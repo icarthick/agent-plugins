@@ -190,6 +190,14 @@ Monthly operating costs, one-time migration costs, and ROI analysis.
 
 ```json
 {
+  "pricing_source": {
+    "status": "live|fallback",
+    "message": "Using live AWS pricing API" | "Using cached 2026 rates (±15-25% accuracy due to API unavailability)",
+    "services_by_source": {
+      "live": ["Fargate", "RDS Aurora", "S3", "ALB"],
+      "fallback": []
+    }
+  },
   "monthly_costs": {
     "premium": {
       "total": 5000,
