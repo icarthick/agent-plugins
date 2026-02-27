@@ -137,7 +137,11 @@
 - Either implement execute phase + awsiac server
 - Or remove IaC generation message from execute completion
 
-**Status**: ⏳ PENDING
+**Status**: ✅ RESOLVED
+- Removed misleading IaC generation message from execute.md line 185
+- Updated final output to clarify: "Use this plan to guide your migration. All phases of the GCP-to-AWS migration analysis are complete."
+- Aligns with v1.0 scope: design/estimate/execute timeline only, not IaC generation
+- IaC generation deferred to v1.1+
 
 ---
 

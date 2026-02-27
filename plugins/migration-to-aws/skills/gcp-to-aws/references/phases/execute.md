@@ -182,4 +182,4 @@ Files saved:
 - estimation.json
 - execution.json
 
-Ready to generate IaC code. Say 'generate CDK code' or 'export Terraform' to proceed."
+Use this plan to guide your migration. All phases of the GCP-to-AWS migration analysis are complete."
