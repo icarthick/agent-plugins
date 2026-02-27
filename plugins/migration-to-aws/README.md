@@ -57,7 +57,7 @@ The plugin uses state files (`.migration/[MMDD-HHMM]/`) to track migration progr
 To test locally:
 
 ```bash
-claude --plugin-dir ./plugins/gcp-to-aws
+claude --plugin-dir ./plugins/migration-to-aws
 ```
 
 ## License
