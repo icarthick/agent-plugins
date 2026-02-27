@@ -100,7 +100,7 @@ Clustered resources by affinity and deployment order.
 {
   "clusters": [
     {
-      "cluster_id": "web-us-central1",
+      "cluster_id": "compute_instance_us-central1_001",
       "gcp_region": "us-central1",
       "creation_order_depth": 1,
       "primary_resources": [
@@ -112,7 +112,7 @@ Clustered resources by affinity and deployment order.
       ]
     },
     {
-      "cluster_id": "database-us-central1",
+      "cluster_id": "database_sql_us-central1_001",
       "gcp_region": "us-central1",
       "creation_order_depth": 0,
       "primary_resources": [
@@ -157,7 +157,7 @@ AWS services mapped from GCP resources, clustered by affinity.
 {
   "clusters": [
     {
-      "cluster_id": "web-us-central1",
+      "cluster_id": "compute_instance_us-central1_001",
       "gcp_region": "us-central1",
       "aws_region": "us-east-1",
       "resources": [
