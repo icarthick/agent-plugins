@@ -4,7 +4,7 @@
   "homepage": "https://github.com/awslabs/agent-plugins",
   "keywords": ["aws", "gcp", "google-cloud", "migration", "cloud-migration", "terraform", "fargate", "cdk"],
   "license": "Apache-2.0",
-  "name": "gcp-to-aws",
+  "name": "migration-to-aws",
   "repository": "https://github.com/awslabs/agent-plugins",
   "version": "1.0.0"
 }

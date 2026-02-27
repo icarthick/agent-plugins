@@ -63,8 +63,8 @@
         "rds",
         "eks"
       ],
-      "name": "gcp-to-aws",
-      "source": "./plugins/gcp-to-aws",
+      "name": "migration-to-aws",
+      "source": "./plugins/migration-to-aws",
       "tags": ["aws", "gcp", "migration", "infrastructure"],
       "version": "1.0.0"
     }

@@ -30,7 +30,7 @@ To maximize the benefits of plugin-assisted development while maintaining securi
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------ | --------- |
 | **amazon-location-service** | Add maps, geocoding, routing, places search, and geospatial features to applications with Amazon Location Service  | Available |
 | **deploy-on-aws**           | Deploy applications to AWS with architecture recommendations, cost estimates, and IaC deployment                   | Available |
-| **gcp-to-aws**              | Migrate GCP infrastructure to AWS with resource discovery, architecture mapping, cost analysis, and IaC generation | Available |
+| **migration-to-aws**        | Migrate GCP infrastructure to AWS with resource discovery, architecture mapping, cost analysis, and IaC generation | Available |
 
 ## Installation
 
@@ -57,7 +57,7 @@ or
 or
 
 ```bash
-/plugin install gcp-to-aws@agent-plugins-for-aws
+/plugin install migration-to-aws@agent-plugins-for-aws
 ```
 
 ### Cursor
@@ -113,7 +113,7 @@ Guides developers through adding maps, places search, geocoding, routing, and ot
 | ----------- | -------------------------------------- |
 | **aws-mcp** | AWS documentation and service guidance |
 
-## gcp-to-aws
+## migration-to-aws
 
 Helps you systematically migrate GCP infrastructure to AWS through resource discovery, architecture mapping, cost analysis, and infrastructure-as-code generation. Analyzes Terraform configurations, billing data, and application code to recommend AWS equivalents and generate deployable IaC.
 
@@ -127,9 +127,9 @@ Helps you systematically migrate GCP infrastructure to AWS through resource disc
 
 ### Agent Skill Triggers
 
-| Agent Skill    | Triggers                                                                                                           |
-| -------------- | ------------------------------------------------------------------------------------------------------------------ |
-| **gcp-to-aws** | "migrate GCP to AWS", "move from GCP", "GCP migration plan", "estimate AWS costs", "GCP infrastructure assessment" |
+| Agent Skill      | Triggers                                                                                                           |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **gcp-to-aws**   | "migrate GCP to AWS", "move from GCP", "GCP migration plan", "estimate AWS costs", "GCP infrastructure assessment" |
 
 ### MCP Servers
 
