@@ -24,35 +24,71 @@ All discovered GCP resources with full configuration and dependencies.
 ```json
 {
   "timestamp": "2026-02-26T14:30:00Z",
-  "total_resources": 24,
+  "metadata": {
+    "total_resources": 50,
+    "primary_resources": 12,
+    "secondary_resources": 38,
+    "total_clusters": 6,
+    "terraform_available": true
+  },
   "resources": [
     {
       "address": "google_sql_database_instance.prod_postgres",
       "type": "google_sql_database_instance",
       "classification": "PRIMARY",
-      "cluster_id": "database-us-central1",
+      "secondary_role": null,
+      "cluster_id": "database_sql_us-central1_001",
       "config": {
         "database_version": "POSTGRES_13",
         "region": "us-central1",
         "tier": "db-custom-2-7680"
       },
-      "dependencies": []
+      "dependencies": [],
+      "depth": 0,
+      "serves": []
     },
     {
       "address": "google_compute_instance.web",
       "type": "google_compute_instance",
       "classification": "PRIMARY",
-      "cluster_id": "web-us-central1",
+      "secondary_role": null,
+      "cluster_id": "compute_instance_us-central1_001",
       "config": {
         "machine_type": "e2-medium",
         "zone": "us-central1-a",
         "image": "debian-11"
       },
-      "dependencies": ["google_compute_network.vpc"]
+      "dependencies": ["google_compute_network.vpc"],
+      "depth": 1,
+      "serves": []
+    },
+    {
+      "address": "google_compute_network.vpc",
+      "type": "google_compute_network",
+      "classification": "SECONDARY",
+      "secondary_role": "network_path",
+      "cluster_id": "compute_instance_us-central1_001",
+      "config": {},
+      "dependencies": [],
+      "depth": 0,
+      "serves": ["google_compute_instance.web"]
     }
   ]
 }
 ```
+
+**Schema fields:**
+- `metadata`: Summary statistics (total_resources, primary/secondary counts, cluster count, terraform_available)
+- `resources`: Array of all discovered resources with fields:
+  - `address`: Terraform resource address
+  - `type`: Terraform resource type
+  - `classification`: PRIMARY or SECONDARY
+  - `secondary_role`: Role if SECONDARY (identity, access_control, network_path, configuration, encryption, orchestration); null for PRIMARY
+  - `cluster_id`: Assigned cluster identifier
+  - `config`: Resource configuration (varies by type)
+  - `dependencies`: List of Terraform addresses this resource depends on
+  - `depth`: Topological depth (0 = no dependencies, N = depends on depth N-1)
+  - `serves`: List of resources this secondary supports (for SECONDARY only)
 
 ---
 
