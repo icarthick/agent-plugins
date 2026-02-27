@@ -117,7 +117,12 @@
 2. Handle automatically (e.g., create .gitignore entry in skill)
 3. Store state elsewhere (e.g., `.claude/plugin-state/`)
 
-**Status**: ⏳ PENDING
+**Status**: ✅ RESOLVED
+- Implemented Option 2: Handle automatically
+- Phase 1 (discover.md Step 0) now creates `.migration/.gitignore` automatically
+- .gitignore content: `*` and `!.gitignore` (excludes all state files from git)
+- Updated SKILL.md State Management section to document this protection
+- Users no longer need manual .gitignore configuration
 
 ---
 

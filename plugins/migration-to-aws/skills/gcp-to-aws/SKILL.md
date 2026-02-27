@@ -26,6 +26,7 @@ Migration state lives in `.migration/[MMDD-HHMM]/` directory (created by Phase 1
 
 ```
 .migration/
+├── .gitignore                       # Auto-created to protect state files from git
 └── 0226-1430/                       # MMDD-HHMM timestamp
     ├── .phase-status.json           # Current phase tracking
     ├── gcp-resource-inventory.json  # All GCP resources found
@@ -35,6 +36,8 @@ Migration state lives in `.migration/[MMDD-HHMM]/` directory (created by Phase 1
     ├── estimation.json              # Cost breakdown (Phase 4 output)
     └── execution.json               # Timeline + risks (Phase 5 output)
 ```
+
+**Note:** The `.migration/` directory is automatically protected by a `.gitignore` file created in Phase 1. Migration state files will not be accidentally committed to version control.
 
 **.phase-status.json schema:**
 

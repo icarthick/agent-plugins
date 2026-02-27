@@ -6,7 +6,17 @@ Lightweight orchestrator that detects available source types and delegates to do
 ## Step 0: Initialize Migration State
 
 1. Create `.migration/[MMDD-HHMM]/` directory (e.g., `.migration/0226-1430/`) using current timestamp (MMDD = month/day, HHMM = hour/minute)
-2. Write `.phase-status.json` with exact schema:
+2. Create `.migration/.gitignore` file (if not already present) with exact content:
+
+   ```
+   # Auto-generated migration state (temporary, should not be committed)
+   *
+   !.gitignore
+   ```
+
+   This prevents accidental commits of migration artifacts.
+
+3. Write `.phase-status.json` with exact schema:
 
    ```json
    {
@@ -17,7 +27,7 @@ Lightweight orchestrator that detects available source types and delegates to do
    }
    ```
 
-3. Confirm file exists before proceeding to Step 1.
+4. Confirm both `.migration/.gitignore` and `.phase-status.json` exist before proceeding to Step 1.
 
 ## Step 1: Scan for Available Source Types
 
@@ -78,6 +88,7 @@ All user communication via output messages only.
 ## Error Handling
 
 - **Missing `.migration` directory**: Create it (Step 0)
+- **Missing `.migration/.gitignore`**: Create it automatically (Step 0) — prevents accidental commits
 - **No Terraform files found**: STOP with error message (Step 1). Terraform is required for v1.0.
 - **discover-iac.md fails**: STOP and report exact failure point
 - **discover-iac.md completes but output files missing**: STOP with error listing missing files
