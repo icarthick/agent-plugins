@@ -39,10 +39,12 @@ Assign: `depth[resource] = 0` for all queued resources.
 While queue not empty:
 
 1. **Dequeue** resource R
-2. **For each** resource D in R's `dependencies[]`:
+2. **For each** resource D that depends on R (traverse reverse edges):
    - Update: `depth[D] = max(depth[D], depth[R] + 1)`
    - Decrement: `in_degree[D] -= 1`
    - **If** `in_degree[D]` becomes 0: **Enqueue** D
+
+**Note:** "Resources that depend on R" means all resources X where X's `dependencies[]` contains R. This correctly assigns higher depths to dependent resources (which must deploy later).
 
 ### Step 4: Cycle Detection
 

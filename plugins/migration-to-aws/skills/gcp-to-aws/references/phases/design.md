@@ -63,7 +63,7 @@ For each SECONDARY resource:
 {
   "clusters": [
     {
-      "cluster_id": "web-app-us-central1",
+      "cluster_id": "compute_instance_us-central1_001",
       "gcp_region": "us-central1",
       "aws_region": "us-east-1",
       "resources": [
