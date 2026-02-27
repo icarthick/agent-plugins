@@ -88,13 +88,24 @@ Data transfer: Y GB × $0.02/GB (egress from GCP)
 
 **ROI (vs GCP):**
 
+Monthly GCP cost determination (in priority order):
+
+1. **From inventory**: If `gcp-resource-inventory.json` contains pricing data, sum all service costs
+2. **From clarified.json**: If user provided "current GCP monthly spend" in Phase 2 answers, use that value
+3. **From user prompt**: If neither available, ask user: "What is your current monthly GCP spend? (This is used for ROI; provide best estimate)"
+4. **Conservative default**: If user cannot provide, use: `AWS monthly balanced * 1.25` (assume 25% premium)
+
+Then calculate:
+
 ```
-Monthly GCP cost: (estimate from inventory or ask user)
+Monthly GCP cost: (from above)
 AWS monthly cost: (from Step 3)
 Monthly savings: GCP - AWS
 Payback period: One-time cost / Monthly savings (in months)
 5-year savings: (Monthly savings × 60) - One-time cost
 ```
+
+Add to assumptions: "GCP monthly cost: [SOURCE - actual, user estimate, or default]"
 
 ## Step 5: Write Estimation Output
 
@@ -109,15 +120,15 @@ Write `estimation.json`:
   },
   "one_time_costs": {
     "dev_hours": "150 hours @ $150/hr = $22,500",
-    "data_transfer": "500 GB @ $0.02/GB = $10,000",
-    "total": 32500
+    "data_transfer": "500 GB @ $0.02/GB = $10",
+    "total": 22510
   },
   "roi": {
     "assumed_gcp_monthly": 4500,
     "aws_monthly_balanced": 3500,
     "monthly_savings": 1000,
-    "payback_months": 32.5,
-    "five_year_savings": 28500
+    "payback_months": 22.51,
+    "five_year_savings": 37490
   },
   "assumptions": [
     "24/7 workload usage",

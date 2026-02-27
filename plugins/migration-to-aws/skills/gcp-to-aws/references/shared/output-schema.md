@@ -246,16 +246,16 @@ Monthly operating costs, one-time migration costs, and ROI analysis.
   },
   "one_time_costs": {
     "dev_hours": "150 hours @ $150/hr = $22,500",
-    "data_transfer": "500 GB @ $0.02/GB = $10,000",
+    "data_transfer": "500 GB @ $0.02/GB = $10",
     "training": "Team AWS training = $5,000",
-    "total": 37500
+    "total": 27510
   },
   "roi": {
     "assumed_gcp_monthly": 4500,
     "aws_monthly_balanced": 3500,
     "monthly_savings": 1000,
-    "payback_months": 37.5,
-    "five_year_savings": 22500
+    "payback_months": 27.51,
+    "five_year_savings": 32490
   },
   "assumptions": [
     "24/7 workload operation",

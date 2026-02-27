@@ -46,9 +46,10 @@ Apply in order:
 
 - GCP: `google_pubsub_topic` (name="user-events", message_retention_duration="7d")
 - Signals: Broadcast events, multiple subscribers likely
-- Criterion 1 (Eliminators): PASS
+- Criterion 1 (Eliminators): PASS (retention not critical for broadcast)
 - Criterion 2 (Operational Model): SNS (pub/sub)
-- → **AWS: SNS Topic (Standard, 7-day message retention)**
+- → **AWS: SNS Topic (Standard)**
+- Note: SNS does not support message retention like GCP Pub/Sub. If retention is critical, consider SQS instead.
 - Confidence: `inferred`
 
 ### Example 2: Pub/Sub Topic (exactly-once)
@@ -80,7 +81,6 @@ Apply in order:
   "aws_service": "SNS",
   "aws_config": {
     "topic_name": "user-events",
-    "message_retention_period": 86400,
     "display_name": "User Events"
   },
   "confidence": "inferred",
