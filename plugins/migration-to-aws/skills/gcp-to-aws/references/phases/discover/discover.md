@@ -49,7 +49,7 @@ Lightweight orchestrator that detects available source types and delegates to do
 
    ```json
    {
-     "phase": "clarify",
+     "phase": "discover",
      "status": "completed",
      "timestamp": "2026-02-26T14:30:00Z",
      "version": "1.0.0"

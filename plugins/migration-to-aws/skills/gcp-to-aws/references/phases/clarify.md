@@ -58,7 +58,7 @@ Update `.phase-status.json`:
 
 ```json
 {
-  "phase": "design",
+  "phase": "clarify",
   "status": "completed",
   "timestamp": "2026-02-26T14:30:00Z",
   "version": "1.0.0"
