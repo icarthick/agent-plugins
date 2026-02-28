@@ -33,8 +33,8 @@ Apply in order:
 1. **Eliminators**: Does GCP config require AWS-unsupported features? If yes: switch
 2. **Operational Model**: Managed (SNS, SQS, EventBridge) vs Custom queue?
    - Prefer managed
-3. **User Preference**: From `clarified.json`, q2 (primary concern)?
-   - If `"reliability"` → SQS (FIFO for exactly-once); else SNS
+3. **User Preference**: From `preferences.json`: `design_constraints.availability`?
+   - If `availability = "multi-az-ha"` or `"multi-region"` → SQS FIFO (exactly-once for reliability); else SNS
 4. **Feature Parity**: Does GCP config need features unavailable in AWS?
    - Example: Pub/Sub ordering guarantee → SQS FIFO (has ordering)
 5. **Cluster Context**: Are other resources using SNS/SQS? Match if possible

@@ -2,7 +2,7 @@
 
 ## Step 0: Validate Inputs
 
-Read `clarified.json`. If missing: **STOP**. Output: "Phase 2 (Clarify) not completed. Run Phase 2 first."
+Read `preferences.json`. If missing: **STOP**. Output: "Phase 2 (Clarify) not completed. Run Phase 2 first."
 
 Read `gcp-resource-clusters.json`.
 
@@ -45,7 +45,7 @@ For resources not covered by fast-path:
 3. Evaluate 6 criteria (1-sentence each):
    - **Eliminators**: Feature incompatibility (hard blocker)
    - **Operational Model**: Managed vs self-hosted fit
-   - **User Preference**: From `clarified.json` answers
+   - **User Preference**: From `preferences.json` design_constraints
    - **Feature Parity**: GCP feature → AWS feature availability
    - **Cluster Context**: Affinity with other resources in this cluster
    - **Simplicity**: Prefer fewer resources / less config
@@ -71,7 +71,7 @@ For each mapped AWS service, verify:
    - If unavailable: add warning, suggest fallback region
 
 2. **Feature Parity**: Do required features exist in AWS service?
-   - Match GCP features from `clarified.json` answers
+   - Match GCP features from `preferences.json` design_constraints
    - Check AWS feature availability via awsknowledge
    - If feature missing: add warning, suggest alternative service
 

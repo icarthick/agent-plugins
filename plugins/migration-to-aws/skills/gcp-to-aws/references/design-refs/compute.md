@@ -44,9 +44,10 @@ Apply in order; first match wins:
 1. **Eliminators**: Does GCP config violate AWS constraints? If yes: switch to alternative
 2. **Operational Model**: Managed (Lambda, Fargate) vs Self-Hosted (EC2, EKS)?
    - Prefer managed unless: Always-on + high baseline cost → EC2
-3. **User Preference**: From `clarified.json`, q3 (team experience) or q2 (primary concern)?
-   - If `team_experience = "expert"` + `primary_concern = "control"` → EC2
-   - If `team_experience = "novice"` + `primary_concern = "cost"` → Fargate
+3. **User Preference**: From `preferences.json`: `design_constraints.kubernetes`, `design_constraints.cost_sensitivity`?
+   - If `kubernetes = "eks-managed"` → EKS (preserves K8s investment)
+   - If `kubernetes = "ecs-fargate"` → Fargate (simpler managed containers)
+   - If `cost_sensitivity` present and high → prefer Fargate (lower operational cost)
 4. **Feature Parity**: Does GCP config require AWS-unsupported features?
    - Example: GCP auto-scaling to zero + cold-start-sensitive → Fargate (not Lambda)
 5. **Cluster Context**: Are other resources in this cluster using EKS/EC2/Fargate?
@@ -89,7 +90,7 @@ Apply in order; first match wins:
 - Signals: Periodic batch job (inferred from startup script), always-on
 - Criterion 1 (Eliminators): PASS
 - Criterion 2 (Operational Model): EC2 (explicit compute control)
-- Criterion 3 (User Preference): If q2=`cost`, prefer auto-scaling → EC2 + ASG (scale to 0)
+- Criterion 3 (User Preference): If `design_constraints.gcp_monthly_spend` indicates cost sensitivity, prefer auto-scaling → EC2 + ASG (scale to 0)
 - → **AWS: EC2 t3.medium + Auto Scaling Group (min=0 in dev)**
 - Confidence: `inferred`
 

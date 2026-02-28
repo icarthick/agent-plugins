@@ -90,7 +90,7 @@ Migration state lives in `$MIGRATION_DIR` (`.migration/[MMDD-HHMM]/`), created b
     "clarify": {
       "status": "completed",
       "timestamp": "2026-02-26T14:32:00Z",
-      "outputs": ["clarified.json"]
+      "outputs": ["preferences.json"]
     },
     "design": { "status": "in_progress", "timestamp": null, "outputs": [] },
     "estimate": { "status": "pending", "timestamp": null, "outputs": [] },
@@ -110,10 +110,10 @@ The `.migration/` directory is automatically protected by a `.gitignore` file cr
 | Phase        | Inputs                                                      | Outputs                                                                                   | Reference                                |
 | ------------ | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------- |
 | **Discover** | `.tf` files                                                 | `gcp-resource-inventory.json`, `gcp-resource-clusters.json`, `.phase-status.json` updated | `references/phases/discover/discover.md` |
-| **Clarify**  | `gcp-resource-inventory.json`, `gcp-resource-clusters.json` | `clarified.json`, `.phase-status.json` updated                                            | `references/phases/clarify.md`           |
-| **Design**   | `gcp-resource-inventory.json`, `clarified.json`             | `aws-design.json`, `aws-design-report.md`, `.phase-status.json` updated                   | `references/phases/design.md`            |
-| **Estimate** | `aws-design.json`, `clarified.json`                         | `estimation.json`, `estimation-report.md`, `.phase-status.json` updated                   | `references/phases/estimate.md`          |
-| **Execute**  | `aws-design.json`, `clarified.json`                         | `execution.json`, `execution-timeline.md`, `.phase-status.json` updated                   | `references/phases/execute.md`           |
+| **Clarify**  | `gcp-resource-inventory.json`, `gcp-resource-clusters.json` | `preferences.json`, `.phase-status.json` updated                                          | `references/phases/clarify.md`           |
+| **Design**   | `gcp-resource-inventory.json`, `preferences.json`           | `aws-design.json`, `aws-design-report.md`, `.phase-status.json` updated                   | `references/phases/design.md`            |
+| **Estimate** | `aws-design.json`, `preferences.json`                       | `estimation.json`, `estimation-report.md`, `.phase-status.json` updated                   | `references/phases/estimate.md`          |
+| **Execute**  | `aws-design.json`, `preferences.json`                       | `execution.json`, `execution-timeline.md`, `.phase-status.json` updated                   | `references/phases/execute.md`           |
 
 ---
 
@@ -163,7 +163,6 @@ gcp-to-aws/
 │   │
 │   └── shared/
 │       ├── output-schema.md                    # JSON schemas for all output files
-│       ├── clarify-questions.md                # Q1-Q8 definitions and defaults
 │       └── pricing-fallback.json               # Cached AWS pricing (±15-25%)
 ```
 
@@ -174,7 +173,7 @@ gcp-to-aws/
 **v1.0 includes:**
 
 - Terraform infrastructure discovery (no app code scanning)
-- User requirement clarification (8 structured questions)
+- User requirement clarification (adaptive questions by category)
 - Structured Design (cluster-based mapping from Terraform)
 - AWS cost estimation (from pricing API or fallback)
 - Execution timeline and risk assessment

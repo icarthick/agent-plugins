@@ -105,7 +105,7 @@ Data transfer: Y GB × $0.02/GB (egress from GCP)
 Monthly GCP cost determination (in priority order):
 
 1. **From inventory**: If `gcp-resource-inventory.json` contains pricing data, sum all service costs
-2. **From clarified.json**: If user provided "current GCP monthly spend" in Phase 2 answers, use that value
+2. **From preferences.json**: If `design_constraints.gcp_monthly_spend.value` exists, use that value
 3. **From user prompt**: If neither available, ask user: "What is your current monthly GCP spend? (This is used for ROI; provide best estimate)"
 4. **Conservative default**: If user cannot provide, use: `AWS monthly balanced * 1.25` (assume 25% premium)
 

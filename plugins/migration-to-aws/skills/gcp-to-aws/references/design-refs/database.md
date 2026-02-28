@@ -40,10 +40,10 @@ Apply in order:
 1. **Eliminators**: Does GCP config require AWS-unsupported features? If yes: switch
 2. **Operational Model**: Managed (Aurora, DynamoDB) vs Provisioned (EC2-based RDS)?
    - Prefer managed unless: Production + cost-optimized + predictable load → Provisioned RDS
-3. **User Preference**: From `clarified.json`, q5 (database requirements)?
-   - `"structured"` → RDS (relational)
-   - `"document"` → DynamoDB (NoSQL)
-   - `"analytics"` → Redshift or Athena
+3. **User Preference**: From `preferences.json`: `design_constraints.database_tier`, `design_constraints.db_io_workload`?
+   - If `database_tier = "standard"` → Standard Aurora Multi-AZ
+   - If `database_tier = "aurora-scale"` → Aurora DSQL considered for global active-active
+   - If `db_io_workload = "high"` → Aurora I/O-Optimized recommended
 4. **Feature Parity**: Does GCP config need features unavailable in AWS?
    - Example: Cloud SQL with binary log replication → Aurora (full support)
    - Example: Firestore with offline-first SDK → DynamoDB (plus app-level sync)
@@ -68,7 +68,7 @@ Apply in order:
 - Signals: NoSQL, real-time, offline-first (inferred from Firestore choice)
 - Criterion 1 (Eliminators): PASS (DynamoDB supports eventual consistency)
 - Criterion 2 (Operational Model): DynamoDB (managed NoSQL)
-- Criterion 3 (User Preference): If q5=`"document"` → DynamoDB confirmed
+- Criterion 3 (User Preference): NoSQL type detected from GCP resource → DynamoDB confirmed
 - → **AWS: DynamoDB (on-demand billing for dev)**
 - Confidence: `inferred`
 
@@ -78,7 +78,7 @@ Apply in order:
 - Signals: Analytics warehouse, large queries
 - Criterion 1 (Eliminators): PASS
 - Criterion 2 (Operational Model): Redshift (managed data warehouse) or Athena (serverless SQL)
-- Criterion 3 (User Preference): If q6=`cost_sensitive` → Athena (pay per query, no idle cost)
+- Criterion 3 (User Preference): If `design_constraints.gcp_monthly_spend` indicates cost sensitivity → Athena (pay per query, no idle cost)
 - → **AWS: Athena (Glue catalog, parquet format in S3)**
 - Confidence: `inferred`
 
@@ -105,7 +105,7 @@ Apply in order:
   "rubric_applied": [
     "Eliminators: PASS",
     "Operational Model: Managed RDS Aurora",
-    "User Preference: Structured (q5)",
+    "User Preference: database_tier=standard, db_io_workload=medium",
     "Feature Parity: Full (binary logs, replication)",
     "Cluster Context: Consistent with app tier",
     "Simplicity: RDS Aurora (managed, multi-AZ)"

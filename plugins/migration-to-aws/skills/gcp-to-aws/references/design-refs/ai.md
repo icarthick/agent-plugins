@@ -29,8 +29,8 @@ Apply in order:
 1. **Eliminators**: Does GCP config require AWS-unsupported features? If yes: use alternative
 2. **Operational Model**: Managed (SageMaker) vs Custom (EC2 + training)?
    - Prefer managed
-3. **User Preference**: From `clarified.json`, q2 (primary concern)?
-   - If `"cost"` → check SageMaker Spot + Autopilot
+3. **User Preference**: From `preferences.json`: `design_constraints.cost_sensitivity` (+ `ai_constraints` when Category F is implemented in v1.1)?
+   - If cost-sensitive → check SageMaker Spot + Autopilot
 4. **Feature Parity**: Does GCP config need model type unavailable in AWS?
    - Example: TensorFlow 2.x → SageMaker (supported)
 5. **Cluster Context**: Are other compute resources running ML? Prefer SageMaker affinity

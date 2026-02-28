@@ -47,8 +47,8 @@ Apply in order:
 1. **Eliminators**: Does GCP config require AWS-unsupported features? If yes: switch
 2. **Operational Model**: Managed (ALB, Route 53) vs Custom (VPN, custom routing)?
    - Prefer managed
-3. **User Preference**: From `clarified.json`, q2 (primary concern)?
-   - If `"compliance"` → use Direct Connect (explicit data path); else VPN fine
+3. **User Preference**: From `preferences.json`: `design_constraints.compliance`?
+   - If `compliance` includes `"pci"`, `"hipaa"`, or `"fedramp"` → use Direct Connect (explicit data path); else VPN fine
 4. **Feature Parity**: Does GCP config require AWS-unsupported features?
    - Example: GCP policy-based routing → Custom route table rules (AWS does this)
 5. **Cluster Context**: Are other resources in cluster using specific load balancers? Match

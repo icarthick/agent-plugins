@@ -2,7 +2,7 @@
 
 ## Step 1: Validate Design and Estimation
 
-Read `aws-design.json` and `estimation.json`. If either missing or incomplete: **STOP**. Output: "Prior phases incomplete. Complete Phase 3 (Design) and Phase 4 (Estimation) first."
+Read `aws-design.json`, `estimation.json`, and `preferences.json`. If any missing or incomplete: **STOP**. Output: "Prior phases incomplete. Complete Phase 2 (Clarify), Phase 3 (Design), and Phase 4 (Estimation) first."
 
 ## Step 2: Build Execution Timeline
 
