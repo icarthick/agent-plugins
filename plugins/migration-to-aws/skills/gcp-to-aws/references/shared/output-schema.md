@@ -62,124 +62,219 @@ Hierarchical phase tracking with per-phase metadata. This is the SINGLE source o
 
 ## gcp-resource-inventory.json (Phase 1 output)
 
-All discovered GCP resources with full configuration and dependencies.
+Complete inventory of discovered GCP resources with classification, dependencies, and AI detection.
 
 ```json
 {
-  "timestamp": "2026-02-26T14:30:00Z",
   "metadata": {
+    "report_date": "2026-02-26",
+    "project_directory": "/path/to/terraform",
+    "terraform_version": ">= 1.0.0"
+  },
+  "summary": {
     "total_resources": 50,
     "primary_resources": 12,
     "secondary_resources": 38,
     "total_clusters": 6,
-    "terraform_available": true
+    "classification_coverage": "100%"
   },
   "resources": [
     {
-      "address": "google_sql_database_instance.prod_postgres",
-      "type": "google_sql_database_instance",
+      "address": "google_cloud_run_service.orders_api",
+      "type": "google_cloud_run_service",
+      "name": "orders_api",
+      "file": "cloudrun.tf",
       "classification": "PRIMARY",
-      "secondary_role": null,
-      "cluster_id": "database_sql_us-central1_001",
+      "tier": "compute",
+      "classification_source": "hardcoded_rules",
+      "confidence": 0.99,
       "config": {
-        "database_version": "POSTGRES_13",
-        "region": "us-central1",
-        "tier": "db-custom-2-7680"
+        "timeout": 60,
+        "memory_mb": 512,
+        "concurrency": 100
       },
-      "dependencies": [],
-      "depth": 0,
-      "serves": []
+      "variables_used": ["var.app_name"],
+      "dynamic": false,
+      "depth": 3,
+      "cluster_id": "compute_cloudrun_us-central1_001"
     },
     {
-      "address": "google_compute_instance.web",
-      "type": "google_compute_instance",
-      "classification": "PRIMARY",
-      "secondary_role": null,
-      "cluster_id": "compute_instance_us-central1_001",
-      "config": {
-        "machine_type": "e2-medium",
-        "zone": "us-central1-a",
-        "image": "debian-11"
-      },
-      "dependencies": ["google_compute_network.vpc"],
-      "depth": 1,
-      "serves": []
-    },
-    {
-      "address": "google_compute_network.vpc",
-      "type": "google_compute_network",
+      "address": "google_service_account.app",
+      "type": "google_service_account",
+      "name": "app",
+      "file": "iam.tf",
       "classification": "SECONDARY",
-      "secondary_role": "network_path",
-      "cluster_id": "compute_instance_us-central1_001",
-      "config": {},
-      "dependencies": [],
+      "tier": "identity",
+      "classification_source": "hardcoded_rules",
+      "confidence": 0.99,
+      "secondary_role": "identity",
+      "serves": ["google_cloud_run_service.orders_api", "google_cloud_run_service.products_api"],
+      "config": {
+        "account_id": "app-sa"
+      },
+      "depth": 2,
+      "cluster_id": "compute_cloudrun_us-central1_001"
+    },
+    {
+      "address": "google_compute_network.main",
+      "type": "google_compute_network",
+      "name": "main",
+      "file": "vpc.tf",
+      "classification": "PRIMARY",
+      "tier": "networking",
+      "classification_source": "hardcoded_rules",
+      "confidence": 0.99,
+      "config": {
+        "auto_create_subnetworks": false
+      },
       "depth": 0,
-      "serves": ["google_compute_instance.web"]
+      "cluster_id": "networking_vpc_us-central1_001"
     }
-  ]
+  ],
+  "variables": [],
+  "outputs": [],
+  "data_sources": [],
+  "modules": [],
+  "ai_detection": {
+    "has_ai_workload": false,
+    "confidence": 0,
+    "confidence_level": "none",
+    "signals_found": [],
+    "ai_services": []
+  }
 }
 ```
 
-**Schema fields:**
+**CRITICAL Field Names** (use EXACTLY these keys):
 
-- `metadata`: Summary statistics (total_resources, primary/secondary counts, cluster count, terraform_available)
-- `resources`: Array of all discovered resources with fields:
-  - `address`: Terraform resource address
-  - `type`: Terraform resource type
-  - `classification`: PRIMARY or SECONDARY
-  - `secondary_role`: Role if SECONDARY (identity, access_control, network_path, configuration, encryption, orchestration); null for PRIMARY
-  - `cluster_id`: Assigned cluster identifier
-  - `config`: Resource configuration (varies by type)
-  - `dependencies`: List of Terraform addresses this resource depends on
-  - `depth`: Topological depth (0 = no dependencies, N = depends on depth N-1)
-  - `serves`: List of resources this secondary supports (for SECONDARY only)
+- `address` — Terraform resource address (NOT `id`, `resource_address`)
+- `type` — Resource type (NOT `resource_type`)
+- `name` — Resource name component (NOT `resource_name`)
+- `file` — Source file path (NOT `source_file`, `filename`)
+- `classification` — `"PRIMARY"` or `"SECONDARY"` (NOT `class`, `category`)
+- `tier` — Infrastructure layer: compute, database, storage, networking, identity, messaging, monitoring (NOT `layer`)
+- `classification_source` — `"hardcoded_rules"` or `"llm_inference"` (NOT `source`)
+- `confidence` — Classification confidence 0.0-1.0 (NOT `certainty`)
+- `secondary_role` — For secondaries only: identity, access_control, network_path, configuration, encryption, orchestration
+- `serves` — For secondaries only: array of primary resource addresses served
+- `depth` — Dependency depth (0 = foundational, N = depends on depth N-1)
+- `cluster_id` — Which cluster this resource belongs to
+- `variables_used` — List of Terraform variables referenced
+- `dynamic` — Boolean, whether resource uses count/for_each
+
+**Key Sections:**
+
+- `metadata` — Report metadata (report_date, project_directory, terraform_version)
+- `summary` — Aggregate statistics (total_resources, primary/secondary counts, cluster count, classification_coverage)
+- `resources[]` — All discovered resources with fields above
+- `variables[]` — Extracted Terraform variable blocks
+- `outputs[]` — Extracted Terraform output blocks
+- `data_sources[]` — Extracted Terraform data sources
+- `modules[]` — Extracted Terraform module blocks
+- `ai_detection` — AI workload detection results:
+  - `has_ai_workload` — boolean
+  - `confidence` — 0.0-1.0
+  - `confidence_level` — "very_high" (90%+), "high" (70-89%), "medium" (50-69%), "low" (< 50%), "none" (0%)
+  - `signals_found[]` — array of detection signals with method, pattern, confidence, evidence
+  - `ai_services[]` — list of AI services detected (vertex_ai, bigquery_ml, etc.)
 
 ---
 
 ## gcp-resource-clusters.json (Phase 1 output)
 
-Clustered resources by affinity and deployment order.
+Resources grouped into logical clusters for migration with full dependency graph and creation order.
 
 ```json
 {
   "clusters": [
     {
-      "cluster_id": "compute_instance_us-central1_001",
+      "cluster_id": "networking_vpc_us-central1_001",
       "gcp_region": "us-central1",
-      "creation_order_depth": 1,
       "primary_resources": [
-        "google_compute_instance.web"
+        "google_compute_network.main"
       ],
       "secondary_resources": [
-        "google_compute_network.vpc",
-        "google_compute_firewall.web-allow-http"
+        "google_compute_subnetwork.app",
+        "google_compute_firewall.app"
       ],
-      "edges": [
-        {
-          "from": "google_compute_instance.web",
-          "to": "google_compute_network.vpc",
-          "relationship_type": "network_path"
-        },
-        {
-          "from": "google_compute_instance.web",
-          "to": "google_compute_firewall.web-allow-http",
-          "relationship_type": "network_path"
-        }
-      ]
+      "network": null,
+      "creation_order_depth": 0,
+      "must_migrate_together": true,
+      "dependencies": [],
+      "edges": []
     },
     {
       "cluster_id": "database_sql_us-central1_001",
       "gcp_region": "us-central1",
-      "creation_order_depth": 0,
       "primary_resources": [
-        "google_sql_database_instance.prod_postgres"
+        "google_sql_database_instance.db"
       ],
-      "secondary_resources": [],
-      "edges": []
+      "secondary_resources": [
+        "google_sql_database.main"
+      ],
+      "network": "networking_vpc_us-central1_001",
+      "creation_order_depth": 2,
+      "must_migrate_together": true,
+      "dependencies": ["networking_vpc_us-central1_001"],
+      "edges": [
+        {
+          "from": "google_sql_database_instance.db",
+          "to": "google_compute_network.main",
+          "relationship_type": "network_membership",
+          "evidence": {
+            "field_path": "settings.ip_configuration.private_network",
+            "reference": "VPC membership"
+          }
+        }
+      ]
+    },
+    {
+      "cluster_id": "compute_cloudrun_us-central1_001",
+      "gcp_region": "us-central1",
+      "primary_resources": [
+        "google_cloud_run_service.orders_api",
+        "google_cloud_run_service.products_api"
+      ],
+      "secondary_resources": [
+        "google_service_account.app"
+      ],
+      "network": "networking_vpc_us-central1_001",
+      "creation_order_depth": 3,
+      "must_migrate_together": true,
+      "dependencies": ["database_sql_us-central1_001"],
+      "edges": [
+        {
+          "from": "google_cloud_run_service.orders_api",
+          "to": "google_sql_database_instance.db",
+          "relationship_type": "data_dependency",
+          "evidence": {
+            "field_path": "template.spec.containers[0].env[].value",
+            "reference": "DATABASE_URL"
+          }
+        }
+      ]
     }
+  ],
+  "creation_order": [
+    { "depth": 0, "clusters": ["networking_vpc_us-central1_001"] },
+    { "depth": 2, "clusters": ["database_sql_us-central1_001"] },
+    { "depth": 3, "clusters": ["compute_cloudrun_us-central1_001"] }
   ]
 }
 ```
+
+**Key Fields:**
+
+- `cluster_id` — Unique cluster identifier (deterministic format: `{type}_{subtype}_{region}_{sequence}`)
+- `gcp_region` — GCP region for this cluster
+- `primary_resources` — GCP resources that map independently
+- `secondary_resources` — GCP resources that support primary resources
+- `network` — Which VPC cluster this cluster belongs to (cluster ID reference, or null if networking cluster itself)
+- `creation_order_depth` — Depth level in topological sort (0 = foundational)
+- `must_migrate_together` — Boolean indicating if cluster is an atomic deployment unit
+- `dependencies` — Other cluster IDs this cluster depends on (derived from cross-cluster Primary→Primary edges)
+- `edges` — Typed relationships between resources with structured evidence
+- `creation_order` — Global ordering of clusters by depth level (for migration sequencing)
 
 ---
 

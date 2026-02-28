@@ -129,6 +129,37 @@ Apply consistent cluster naming:
 
 **Reasoning**: Names reflect deployment intent; deterministic for reproducibility.
 
+## Post-Clustering: Populate Cluster Metadata
+
+After all clusters are formed, populate these fields for each cluster:
+
+### `network`
+
+Identify which VPC/network the cluster's resources belong to. Trace `network_path` edges from resources in this cluster to find the `google_compute_network` they reference. Store the network cluster ID (e.g., `networking_vpc_us-central1_001`). Set to `null` if resources have no network association.
+
+### `must_migrate_together`
+
+Default: `true` for all clusters. Set to `false` only if the cluster contains resources that can be independently migrated without breaking dependencies (rare — most clusters are atomic).
+
+### `dependencies`
+
+Derive from Primary→Primary edges that cross cluster boundaries. If cluster A contains a resource with a `data_dependency` edge to a resource in cluster B, then cluster A depends on cluster B. Store as array of cluster IDs.
+
+### `creation_order`
+
+Build a global ordering of clusters by depth level:
+
+```json
+"creation_order": [
+  { "depth": 0, "clusters": ["networking_vpc_us-central1_001"] },
+  { "depth": 1, "clusters": ["security_iam_us-central1_001"] },
+  { "depth": 2, "clusters": ["database_sql_us-central1_001", "storage_gcs_us-central1_001"] },
+  { "depth": 3, "clusters": ["compute_cloudrun_us-central1_001"] }
+]
+```
+
+Cluster depth = minimum depth across all primary resources in the cluster. Clusters at the same depth can be migrated in parallel.
+
 ## Output Cluster Schema
 
 Each cluster includes:
@@ -136,17 +167,24 @@ Each cluster includes:
 ```json
 {
   "cluster_id": "compute_cloudrun_us-central1_001",
-  "name": "Cloud Run Application",
-  "type": "compute",
-  "description": "Primary: cloud_run_service.app, Secondary: service_account, iam_policy",
   "gcp_region": "us-central1",
   "primary_resources": ["google_cloud_run_service.app"],
   "secondary_resources": ["google_service_account.app_runner"],
-  "network": "network_vpc_us-central1_000",
+  "network": "networking_vpc_us-central1_001",
   "creation_order_depth": 2,
   "must_migrate_together": true,
-  "dependencies": [],
-  "edges": [{ "from": "...", "to": "...", "type": "..." }]
+  "dependencies": ["database_sql_us-central1_001"],
+  "edges": [
+    {
+      "from": "google_cloud_run_service.app",
+      "to": "google_sql_database_instance.db",
+      "relationship_type": "data_dependency",
+      "evidence": {
+        "field_path": "template.spec.containers[0].env[].value",
+        "reference": "DATABASE_URL"
+      }
+    }
+  ]
 }
 ```
 

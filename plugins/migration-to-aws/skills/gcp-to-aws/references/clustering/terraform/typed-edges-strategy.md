@@ -2,6 +2,10 @@
 
 Infers edge types from HCL context to classify relationships between resources.
 
+Edges are categorized into two groups:
+- **Secondary→Primary relationships** — infrastructure support (identity, network, encryption)
+- **Primary→Primary relationships** — service communication (data, cache, messaging, storage)
+
 ## Pass 1: Extract References from HCL
 
 Parse HCL configuration text for all `resource_type.name.attribute` patterns:
@@ -18,9 +22,24 @@ Store each reference with:
 
 ## Pass 2: Classify Edge Type by Field Context
 
-For each reference, determine edge type:
+For each reference, determine edge type. Use the `secondary_role` of the source resource to guide classification.
 
-### Data Dependencies
+### Secondary→Primary Relationships
+
+These use the secondary's `secondary_role` as the relationship type:
+
+- `identity_binding` — service account attached to compute resource
+- `network_path` — VPC connector, subnet, firewall serving a resource
+- `access_control` — IAM binding granting access to resource
+- `configuration` — database user, secret version, DNS record configuring resource
+- `encryption` — KMS key protecting a resource
+- `orchestration` — null_resource, time_sleep sequencing
+
+### Primary→Primary Relationships
+
+Infer from field paths and environment variable names:
+
+#### Data Dependencies
 
 Field name matches: `DATABASE*`, `DB_*`, `SQL*`, `CONNECTION_*`
 
@@ -29,21 +48,21 @@ Environment variable name matches: `DATABASE*`, `DB_HOST`, `SQL_*`
 - **Type**: `data_dependency`
 - **Example**: `google_cloud_run_service.app.env.DATABASE_URL` → `google_sql_database_instance.prod.id`
 
-### Cache Dependencies
+#### Cache Dependencies
 
 Field name matches: `REDIS*`, `CACHE*`, `MEMCACHE*`
 
 - **Type**: `cache_dependency`
 - **Example**: `google_cloudfunctions_function.worker.env.REDIS_HOST` → `google_redis_instance.cache.host`
 
-### Publish Dependencies
+#### Publish Dependencies
 
 Field name matches: `PUBSUB*`, `TOPIC*`, `QUEUE*`, `STREAM*`
 
 - **Type**: `publishes_to`
 - **Example**: `google_cloud_run_service.publisher.env.PUBSUB_TOPIC` → `google_pubsub_topic.events.id`
 
-### Storage Dependencies
+#### Storage Dependencies
 
 Field name matches: `BUCKET*`, `STORAGE*`, `S3*`
 
@@ -55,21 +74,39 @@ Direction determined by context:
 
 - **Example**: `google_cloud_run_service.worker.env.STORAGE_BUCKET` → `google_storage_bucket.data.name`
 
-### Network Path
+#### DNS Resolution
 
-Field name: `vpc_connector`
+A DNS record pointing to a compute resource.
+
+- **Type**: `dns_resolution`
+- **Example**: `google_dns_record_set.api` → `google_compute_instance.web` (A record pointing to compute IP)
+
+#### Network Membership
+
+Resources sharing the same VPC/subnet.
+
+- **Type**: `network_membership`
+- **Example**: Multiple primary resources referencing the same `google_compute_network.main`
+
+### Infrastructure Relationships
+
+These apply to both Secondary→Primary and resource-to-resource references:
+
+#### Network Path
+
+Field name: `vpc_connector`, `network`, `subnetwork`
 
 - **Type**: `network_path`
 - **Example**: `google_cloudfunctions_function.app.vpc_connector` → `google_vpc_access_connector.main.id`
 
-### Encryption
+#### Encryption
 
 Field name: `kms_key_name`, `encryption_key`, `key_ring`
 
 - **Type**: `encryption`
 - **Example**: `google_sql_database_instance.db.backup_encryption_key_name` → `google_kms_crypto_key.sql.id`
 
-### Orchestration
+#### Orchestration
 
 Explicit `depends_on` array
 
@@ -88,18 +125,22 @@ If LLM uncertain: `unknown_dependency` with confidence field.
 
 ## Evidence Structure
 
-Store edge evidence:
+Every edge must include a structured `evidence` object:
 
 ```json
 {
-  "target": "google_sql_database_instance.prod",
-  "edge_type": "data_dependency",
+  "from": "google_cloud_run_service.api",
+  "to": "google_sql_database_instance.db",
+  "relationship_type": "data_dependency",
   "evidence": {
-    "field_path": "env.DATABASE_URL",
-    "env_var_name": "DATABASE_URL",
-    "reference": "google_sql_database_instance.prod.connection_name"
+    "field_path": "template.spec.containers[0].env[].value",
+    "reference": "DATABASE_URL"
   }
 }
 ```
 
-All edges stored in resource's `typed_edges[]` array.
+Evidence fields:
+- `field_path` — HCL attribute path where the reference appears
+- `reference` — the specific value, variable name, or env var that creates the relationship
+
+All edges stored in resource's `typed_edges[]` array and in the cluster's `edges[]` array.
