@@ -5,8 +5,15 @@ Lightweight orchestrator that detects available source types and delegates to do
 
 ## Step 0: Initialize Migration State
 
-1. Create `.migration/[MMDD-HHMM]/` directory (e.g., `.migration/0226-1430/`) using current timestamp (MMDD = month/day, HHMM = hour/minute)
-2. Create `.migration/.gitignore` file (if not already present) with exact content:
+1. Check for existing `.migration/` directory at the project root.
+   - **If existing runs found:** List them with their phase status and ask:
+     - `[A] Resume: Continue with [latest run]`
+     - `[B] Fresh: Create new migration run`
+     - `[C] Cancel`
+   - **If resuming:** Set `$MIGRATION_DIR` to the selected run's directory. Read its `.phase-status.json` and skip to the appropriate phase per the State Machine in SKILL.md.
+   - **If fresh or no existing runs:** Continue to step 2.
+2. Create `.migration/[MMDD-HHMM]/` directory (e.g., `.migration/0226-1430/`) using current timestamp (MMDD = month/day, HHMM = hour/minute). Set `$MIGRATION_DIR` to this new directory.
+3. Create `.migration/.gitignore` file (if not already present) with exact content:
 
    ```
    # Auto-generated migration state (temporary, should not be committed)
@@ -16,7 +23,7 @@ Lightweight orchestrator that detects available source types and delegates to do
 
    This prevents accidental commits of migration artifacts.
 
-3. Write `.phase-status.json` with exact schema:
+4. Write `.phase-status.json` with exact schema:
 
    ```json
    {
@@ -36,7 +43,9 @@ Lightweight orchestrator that detects available source types and delegates to do
    }
    ```
 
-4. Confirm both `.migration/.gitignore` and `.phase-status.json` exist before proceeding to Step 1.
+   **Schema reference:** See `references/shared/output-schema.md` > ".phase-status.json" for the canonical schema.
+
+5. Confirm both `.migration/.gitignore` and `.phase-status.json` exist before proceeding to Step 1.
 
 ## Step 1: Scan for Available Source Types
 
@@ -52,9 +61,8 @@ Lightweight orchestrator that detects available source types and delegates to do
 **This step is MANDATORY for v1.0. Produces final outputs directly.**
 
 1. **IF Terraform files found** (from Step 1):
-   - Read `references/phases/discover/discover-iac.md` completely
-   - Follow ALL steps in discover-iac.md exactly as written
-   - **WAIT for completion**: Confirm BOTH output files exist in `.migration/[MMDD-HHMM]/`:
+   - Load `references/phases/discover/discover-iac.md`
+   - **WAIT for completion**: Confirm BOTH output files exist in `$MIGRATION_DIR/`:
      - `gcp-resource-inventory.json` (REQUIRED)
      - `gcp-resource-clusters.json` (REQUIRED)
    - **Validate schemas**: Confirm files contain all required fields
