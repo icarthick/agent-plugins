@@ -184,6 +184,7 @@ Output to user: "AWS Architecture designed. Proceeding to Phase 4: Estimate Cost
 **This phase covers architecture mapping ONLY.**
 
 FORBIDDEN — Do NOT include ANY of:
+
 - Cost calculations or pricing estimates
 - Execution timelines or migration schedules
 - Terraform or IaC code generation

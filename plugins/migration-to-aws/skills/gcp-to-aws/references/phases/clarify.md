@@ -35,6 +35,7 @@ At least one discovery artifact must exist to proceed.
 Present a discovery summary:
 
 **If `gcp-resource-inventory.json` exists:**
+
 > **Infrastructure discovered:** [total resources] GCP resources across [cluster count] clusters
 > **Top resource types:** [list top 3-5 types]
 
@@ -55,23 +56,23 @@ Record extracted values. Questions whose answers are fully determined by extract
 
 ### Category Definitions and Firing Rules
 
-| Category | Name | Firing Rule | Questions |
-|----------|------|-------------|-----------|
-| **A** | Global/Strategic | **Always fires** | Q1 (location), Q2 (compliance), Q3 (GCP spend), Q4 (multi-cloud), Q5 (uptime), Q6 (maintenance window) |
-| **B** | Configuration Gaps | Inventory exists with `metadata.source == "billing"` AND at least one resource has `config_confidence == "assumed"` | *(v1.2 stub — fires when billing discovery is implemented)* |
-| **C** | Compute Model | Compute resources present (Cloud Run, Cloud Functions, GKE, GCE) | Q7 (K8s sentiment), Q8 (WebSocket), Q9 (Cloud Run traffic), Q10 (Cloud Run spend) |
-| **D** | Database Model | Database resources present (Cloud SQL, Spanner, Memorystore) | Q11 (DB scale), Q12 (DB I/O) |
-| **E** | Migration Posture | **Disabled by default** — requires explicit user opt-in | HA upgrades, right-sizing from billing utilization |
-| **F** | AI/Bedrock | `ai-workload-profile.json` exists | *(v1.1 stub — fires when AI discovery is implemented)* |
+| Category | Name               | Firing Rule                                                                                                         | Questions                                                                                              |
+| -------- | ------------------ | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| **A**    | Global/Strategic   | **Always fires**                                                                                                    | Q1 (location), Q2 (compliance), Q3 (GCP spend), Q4 (multi-cloud), Q5 (uptime), Q6 (maintenance window) |
+| **B**    | Configuration Gaps | Inventory exists with `metadata.source == "billing"` AND at least one resource has `config_confidence == "assumed"` | _(v1.2 stub — fires when billing discovery is implemented)_                                            |
+| **C**    | Compute Model      | Compute resources present (Cloud Run, Cloud Functions, GKE, GCE)                                                    | Q7 (K8s sentiment), Q8 (WebSocket), Q9 (Cloud Run traffic), Q10 (Cloud Run spend)                      |
+| **D**    | Database Model     | Database resources present (Cloud SQL, Spanner, Memorystore)                                                        | Q11 (DB scale), Q12 (DB I/O)                                                                           |
+| **E**    | Migration Posture  | **Disabled by default** — requires explicit user opt-in                                                             | HA upgrades, right-sizing from billing utilization                                                     |
+| **F**    | AI/Bedrock         | `ai-workload-profile.json` exists                                                                                   | _(v1.1 stub — fires when AI discovery is implemented)_                                                 |
 
 **Apply firing rules:**
 
 1. Always include Category A.
-2. Check inventory `metadata.source` — if `"billing"` with assumed configs, include Category B. *(v1.2: currently never fires)*
+2. Check inventory `metadata.source` — if `"billing"` with assumed configs, include Category B. _(v1.2: currently never fires)_
 3. Check for compute resources — if present, include Category C. Within Category C, skip Q7 if no GKE is present. Skip Q9/Q10 if no Cloud Run is present.
 4. Check for database resources — if present, include Category D. Skip Q11/Q12 if no Cloud SQL is present.
 5. Category E is disabled by default. Do not present unless user opts in.
-6. Check for `ai-workload-profile.json` — if present, include Category F. *(v1.1: currently never fires)*
+6. Check for `ai-workload-profile.json` — if present, include Category F. _(v1.1: currently never fires)_
 
 **If no IaC, billing data, or code is available** (empty discovery): fire only Category A. All service-specific categories are skipped.
 
@@ -103,6 +104,7 @@ Present questions grouped by section. Use a conversational tone with brief conte
 > D) I don't know
 
 Interpret:
+
 ```
 A -> target_region: "<closest AWS region to GCP region in inventory>"
 B -> target_region: "<closest AWS region>", replication: "cross-region"
@@ -110,7 +112,7 @@ C -> target_region: "<closest AWS region>", replication: "cross-region", cdn: "r
 D -> same as default (A)
 ```
 
-*Note: Multi-region infrastructure (Aurora Global Database, multi-region compute) is NOT determined by geography alone — it requires Q5 = Catastrophic to justify the cost and complexity.*
+_Note: Multi-region infrastructure (Aurora Global Database, multi-region compute) is NOT determined by geography alone — it requires Q5 = Catastrophic to justify the cost and complexity._
 
 Default: A — single region, closest AWS region to GCP region in inventory.
 
@@ -128,9 +130,10 @@ Default: A — single region, closest AWS region to GCP region in inventory.
 > F) GDPR / Data residency — EU data sovereignty requirements
 > G) I don't know
 >
-> *(Multiple selections allowed)*
+> _(Multiple selections allowed)_
 
 Interpret:
+
 ```
 A -> (no constraint written — full service catalog available, any region)
 B -> compliance: ["soc2"] — CloudTrail, Config, Security Hub enabled; encryption at rest required
@@ -157,6 +160,7 @@ Default: A — no constraint.
 > F) I don't know
 
 Interpret:
+
 ```
 A -> gcp_monthly_spend: "<$1K" — AWS Activate credits eligibility (~$5K-$25K)
 B -> gcp_monthly_spend: "$1K-$5K" — IW Migrate credits at 25% of ARR (~$3K-$15K/yr)
@@ -179,6 +183,7 @@ Default: B — `gcp_monthly_spend: "$1K-$5K"`.
 > C) I don't know
 
 Interpret:
+
 ```
 A -> compute: "eks" — Immediate EKS recommendation. EARLY EXIT: skip Q7.
 B -> (no constraint written — full compute decision tree continues)
@@ -200,6 +205,7 @@ Default: B — no constraint, evaluate full compute options.
 > E) I don't know
 
 Interpret:
+
 ```
 A -> availability: "single-az" — Single-AZ RDS acceptable, standard deployment
 B -> availability: "multi-az" — Multi-AZ RDS required, ALB with health checks, auto-scaling
@@ -224,6 +230,7 @@ Default: B — `availability: "multi-az"`.
 > E) I don't know
 
 Interpret:
+
 ```
 A -> cutover_strategy: "maintenance-window-weekly" — pg_dump/pg_restore recommended; standard cutover with DNS switchover
 B -> cutover_strategy: "maintenance-window-monthly" — pg_dump/pg_restore recommended; blue/green for app layer
@@ -238,7 +245,7 @@ Default: D — `cutover_strategy: "flexible"`.
 
 ## Category B — Configuration Gaps (v1.2 Stub)
 
-*Fire when:* `gcp-resource-inventory.json` exists with `metadata.source == "billing"` AND at least one resource has `config_confidence == "assumed"`.
+_Fire when:_ `gcp-resource-inventory.json` exists with `metadata.source == "billing"` AND at least one resource has `config_confidence == "assumed"`.
 
 **This category is not yet active.** It will fire when billing discovery (`discover-billing.md`) is implemented in v1.2. When active, it fills factual gaps in billing-inferred inventories:
 
@@ -253,13 +260,13 @@ Category B answers are recorded in `metadata.inventory_clarifications` and updat
 
 ## Category C — Compute Model (If Compute Resources Present)
 
-*Fire when:* Compute resources present (Cloud Run, Cloud Functions, GKE, GCE).
+_Fire when:_ Compute resources present (Cloud Run, Cloud Functions, GKE, GCE).
 
 ---
 
 **Q7 — How does your team feel about managing Kubernetes?**
 
-*Fire when:* GKE cluster present AND Q4 != A (multi-cloud). Skip when: Q4 = A (already resolved to EKS) or no GKE in inventory.
+_Fire when:_ GKE cluster present AND Q4 != A (multi-cloud). Skip when: Q4 = A (already resolved to EKS) or no GKE in inventory.
 
 > Your team's Kubernetes experience determines whether we recommend EKS (Kubernetes on AWS) or ECS Fargate (simpler managed containers).
 >
@@ -270,6 +277,7 @@ Category B answers are recorded in `metadata.inventory_clarifications` and updat
 > E) I don't know
 
 Interpret:
+
 ```
 A -> kubernetes: "eks-managed" — EKS recommended, preserves K8s investment
 B -> kubernetes: "eks-or-ecs" — EKS with managed node groups to reduce operational burden
@@ -284,7 +292,7 @@ Default: B — `kubernetes: "eks-or-ecs"`.
 
 **Q8 — Do any of your services need WebSocket support or long-lived connections?**
 
-*Fire when:* Compute resources present AND WebSocket usage cannot be determined from inventory.
+_Fire when:_ Compute resources present AND WebSocket usage cannot be determined from inventory.
 
 > WebSocket support affects load balancer configuration. This confirms whether ALB WebSocket configuration is needed in the migration templates.
 >
@@ -293,6 +301,7 @@ Default: B — `kubernetes: "eks-or-ecs"`.
 > C) I don't know
 
 Interpret:
+
 ```
 A -> websocket: "required" — ALB with WebSocket support, ECS Fargate or EKS required
 B -> (no constraint written)
@@ -305,7 +314,7 @@ Default: B — no constraint.
 
 **Q9 — What's your typical traffic pattern for your Cloud Run services?**
 
-*Fire when:* Cloud Run present in inventory. Skip when: no Cloud Run.
+_Fire when:_ Cloud Run present in inventory. Skip when: no Cloud Run.
 
 > Cloud Run's scale-to-zero is its primary cost advantage. Understanding your traffic pattern helps me determine whether migrating Cloud Run to AWS makes financial sense.
 >
@@ -316,6 +325,7 @@ Default: B — no constraint.
 > E) I don't know
 
 Interpret:
+
 ```
 A -> cloud_run_traffic_pattern: "business-hours" — AWS likely 40-50% MORE expensive; flag cost increase
 B -> cloud_run_traffic_pattern: "most-of-day" — Moderate cost difference; present both options
@@ -330,7 +340,7 @@ Default: C — `cloud_run_traffic_pattern: "constant-24-7"`.
 
 **Q10 — Approximately how much are you spending on Cloud Run per month?**
 
-*Fire when:* Cloud Run present in inventory. Skip when: no Cloud Run.
+_Fire when:_ Cloud Run present in inventory. Skip when: no Cloud Run.
 
 > Absolute Cloud Run spend determines whether the migration math makes financial sense regardless of traffic pattern.
 >
@@ -342,6 +352,7 @@ Default: C — `cloud_run_traffic_pattern: "constant-24-7"`.
 > F) I don't know
 
 Interpret:
+
 ```
 A -> cloud_run_monthly_spend: "<$100" — Recommend staying on Cloud Run; migration cost exceeds savings
 B -> cloud_run_monthly_spend: "$100-$500" — Present cost comparison; migration may make sense if consolidating
@@ -357,13 +368,13 @@ Default: B — `cloud_run_monthly_spend: "$100-$500"`.
 
 ## Category D — Database Model (If Database Resources Present)
 
-*Fire when:* Database resources present (Cloud SQL, Spanner, Memorystore).
+_Fire when:_ Database resources present (Cloud SQL, Spanner, Memorystore).
 
 ---
 
 **Q11 — Are you experiencing scale limitations with Cloud SQL?**
 
-*Fire when:* Cloud SQL present in inventory. Skip when: no Cloud SQL.
+_Fire when:_ Cloud SQL present in inventory. Skip when: no Cloud SQL.
 
 > Scale limitations indicate whether standard Aurora is sufficient or whether more specialized options are needed.
 >
@@ -373,6 +384,7 @@ Default: B — `cloud_run_monthly_spend: "$100-$500"`.
 > D) I don't know
 
 Interpret:
+
 ```
 A -> database_tier: "standard" — Standard Aurora Multi-AZ
 B -> database_tier: "aurora-scale" — Aurora DSQL considered for global active-active; architecture review flagged
@@ -386,7 +398,7 @@ Default: A — `database_tier: "standard"`.
 
 **Q12 — What's your typical database I/O workload?**
 
-*Fire when:* Cloud SQL present in inventory. Skip when: no Cloud SQL.
+_Fire when:_ Cloud SQL present in inventory. Skip when: no Cloud SQL.
 
 > Aurora has two pricing modes — standard and I/O-Optimized. Choosing wrong can mean paying 40% more than necessary.
 >
@@ -397,6 +409,7 @@ Default: A — `database_tier: "standard"`.
 > E) I don't know
 
 Interpret:
+
 ```
 A -> db_io_workload: "low" — Aurora standard pricing
 B -> db_io_workload: "medium" — Aurora standard; flag I/O-Optimized as option if workload grows
@@ -411,8 +424,8 @@ Default: B — `db_io_workload: "medium"`.
 
 ## Category E — Migration Posture (Disabled by Default)
 
-*Fire when:* User explicitly opts in.
-*Default behavior when disabled:* Apply conservative defaults — no HA upgrades, no right-sizing.
+_Fire when:_ User explicitly opts in.
+_Default behavior when disabled:_ Apply conservative defaults — no HA upgrades, no right-sizing.
 
 If the user opts in, present after all other categories:
 
@@ -425,7 +438,7 @@ If the user opts in, present after all other categories:
 
 ## Category F — AI/Bedrock (v1.1 Stub)
 
-*Fire when:* `ai-workload-profile.json` exists in `$MIGRATION_DIR/`.
+_Fire when:_ `ai-workload-profile.json` exists in `$MIGRATION_DIR/`.
 
 **This category is not yet active.** It will fire when AI discovery (`discover-app-code.md`) is implemented in v1.1. When active, it asks up to 5 questions (Q13-Q17) covering:
 
@@ -467,17 +480,17 @@ Wait for the user's response. Do NOT proceed to Design without a response or an 
 
 ## Answer Combination Triggers
 
-| Scenario | Key Answers | Recommendation |
-|----------|-------------|----------------|
-| Must stay portable | Q4 = Yes multi-cloud | EKS only, no ECS Fargate |
-| Kubernetes-averse | Q4 = No + Q7 = Frustrated | ECS Fargate strongly recommended |
-| WebSocket app | Q8 = Yes | ALB WebSocket config required |
-| Low-traffic Cloud Run | Q9 = Business hours + Q10 < $100 | Recommend staying on Cloud Run |
-| High I/O database | Q12 = High IOPS | Aurora I/O-Optimized |
-| Global active-active DB | Q5 = Catastrophic + Q1 = Global | Aurora Global Database + multi-region |
-| Zero downtime required | Q6 = No downtime | Blue/green + AWS DMS required |
-| HIPAA compliance | Q2 = HIPAA | BAA services only, specific regions |
-| FedRAMP required | Q2 = FedRAMP | GovCloud regions only |
+| Scenario                | Key Answers                      | Recommendation                        |
+| ----------------------- | -------------------------------- | ------------------------------------- |
+| Must stay portable      | Q4 = Yes multi-cloud             | EKS only, no ECS Fargate              |
+| Kubernetes-averse       | Q4 = No + Q7 = Frustrated        | ECS Fargate strongly recommended      |
+| WebSocket app           | Q8 = Yes                         | ALB WebSocket config required         |
+| Low-traffic Cloud Run   | Q9 = Business hours + Q10 < $100 | Recommend staying on Cloud Run        |
+| High I/O database       | Q12 = High IOPS                  | Aurora I/O-Optimized                  |
+| Global active-active DB | Q5 = Catastrophic + Q1 = Global  | Aurora Global Database + multi-region |
+| Zero downtime required  | Q6 = No downtime                 | Blue/green + AWS DMS required         |
+| HIPAA compliance        | Q2 = HIPAA                       | BAA services only, specific regions   |
+| FedRAMP required        | Q2 = FedRAMP                     | GovCloud regions only                 |
 
 ---
 
@@ -521,26 +534,26 @@ Apply the interpret rule for every answered question. For skipped questions, app
 6. `metadata.questions_skipped_early_exit` records questions skipped due to early-exit logic (e.g., Q7 skipped because Q4=multi-cloud).
 7. `metadata.questions_skipped_extracted` records questions skipped because inventory already provided the answer.
 8. `metadata.questions_skipped_not_applicable` records questions skipped because the relevant service wasn't in the inventory.
-9. `ai_constraints` section is present ONLY if Category F fired. Omit entirely if no AI artifacts exist. *(v1.1: currently always omitted)*
+9. `ai_constraints` section is present ONLY if Category F fired. Omit entirely if no AI artifacts exist. _(v1.1: currently always omitted)_
 
 ---
 
 ## Defaults Table
 
-| Question | Default | Constraint |
-|---|---|---|
-| Q1 — Location | A (single region) | `target_region`: closest AWS region to GCP region |
-| Q2 — Compliance | A (none) | no constraint |
-| Q3 — GCP spend | B ($1K-$5K) | `gcp_monthly_spend: "$1K-$5K"` |
-| Q4 — Multi-cloud | B (AWS-only) | no constraint |
-| Q5 — Uptime | B (significant) | `availability: "multi-az"` |
-| Q6 — Maintenance | D (flexible) | `cutover_strategy: "flexible"` |
-| Q7 — K8s sentiment | B (neutral) | `kubernetes: "eks-or-ecs"` |
-| Q8 — WebSocket | B (no) | no constraint |
-| Q9 — Cloud Run traffic | C (24/7) | `cloud_run_traffic_pattern: "constant-24-7"` |
-| Q10 — Cloud Run spend | B ($100-$500) | `cloud_run_monthly_spend: "$100-$500"` |
-| Q11 — DB scale | A (no limits) | `database_tier: "standard"` |
-| Q12 — DB I/O | B (medium) | `db_io_workload: "medium"` |
+| Question               | Default           | Constraint                                        |
+| ---------------------- | ----------------- | ------------------------------------------------- |
+| Q1 — Location          | A (single region) | `target_region`: closest AWS region to GCP region |
+| Q2 — Compliance        | A (none)          | no constraint                                     |
+| Q3 — GCP spend         | B ($1K-$5K)       | `gcp_monthly_spend: "$1K-$5K"`                    |
+| Q4 — Multi-cloud       | B (AWS-only)      | no constraint                                     |
+| Q5 — Uptime            | B (significant)   | `availability: "multi-az"`                        |
+| Q6 — Maintenance       | D (flexible)      | `cutover_strategy: "flexible"`                    |
+| Q7 — K8s sentiment     | B (neutral)       | `kubernetes: "eks-or-ecs"`                        |
+| Q8 — WebSocket         | B (no)            | no constraint                                     |
+| Q9 — Cloud Run traffic | C (24/7)          | `cloud_run_traffic_pattern: "constant-24-7"`      |
+| Q10 — Cloud Run spend  | B ($100-$500)     | `cloud_run_monthly_spend: "$100-$500"`            |
+| Q11 — DB scale         | A (no limits)     | `database_tier: "standard"`                       |
+| Q12 — DB I/O           | B (medium)        | `db_io_workload: "medium"`                        |
 
 ---
 
@@ -555,7 +568,7 @@ Before handing off to Design:
 - [ ] Every entry in `design_constraints` has `value` and `chosen_by` fields
 - [ ] Config gap answers recorded in `metadata.inventory_clarifications` (billing mode only)
 - [ ] Early-exit skips recorded in `metadata.questions_skipped_early_exit`
-- [ ] `ai_constraints` section present ONLY if Category F fired *(v1.1: currently always omitted)*
+- [ ] `ai_constraints` section present ONLY if Category F fired _(v1.1: currently always omitted)_
 - [ ] Output is valid JSON
 
 ---
@@ -578,6 +591,7 @@ Output to user: "Clarification complete. Proceeding to Phase 3: Design AWS Archi
 **This phase covers requirements gathering ONLY.**
 
 FORBIDDEN — Do NOT include ANY of:
+
 - Detailed AWS architecture or service configurations
 - Code migration examples or SDK snippets
 - Detailed cost calculations

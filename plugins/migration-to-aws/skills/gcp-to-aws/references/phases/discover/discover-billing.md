@@ -19,10 +19,12 @@ Scan the target directory for billing data:
 ## Step 1: Parse Billing Data (v1.2+)
 
 Supported formats:
+
 - GCP billing export CSV
 - BigQuery billing export JSON
 
 Extract from each line item:
+
 - `service_description` — GCP service name
 - `sku_description` — Specific SKU/resource
 - `cost` — Cost amount
@@ -62,6 +64,7 @@ Write `$MIGRATION_DIR/billing_resources.json`:
 **This phase covers Discover & Analysis ONLY.**
 
 FORBIDDEN — Do NOT include ANY of:
+
 - AWS service names, recommendations, or equivalents
 - Migration strategies, phases, or timelines
 - Terraform generation for AWS

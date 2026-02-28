@@ -10,11 +10,13 @@
 Recursively scan the target directory for source code and dependency manifests:
 
 **Source code:**
+
 - `**/*.py` (Python)
 - `**/*.js`, `**/*.ts` (JavaScript/TypeScript)
 - `**/*.go` (Go)
 
 **Dependency manifests:**
+
 - `requirements.txt`, `setup.py`, `pyproject.toml` (Python)
 - `package.json` (JavaScript)
 - `go.mod` (Go)
@@ -24,11 +26,13 @@ Recursively scan the target directory for source code and dependency manifests:
 ## Step 1: Detect GCP SDK Imports (v1.1+)
 
 Scan source files for GCP service imports:
+
 - `google.cloud` (Python: `from google.cloud import ...`)
 - `@google-cloud/` (JS/TS: `import ... from '@google-cloud/...'`)
 - `cloud.google.com/go` (Go: `import "cloud.google.com/go/..."`)
 
 For each import found, record:
+
 - `file_path` — Source file containing the import
 - `import_statement` — The actual import line
 - `inferred_gcp_service` — Which GCP service this maps to
@@ -38,16 +42,16 @@ For each import found, record:
 
 Map SDK imports to likely GCP resources:
 
-| Import pattern | Inferred GCP resource |
-|---|---|
-| `google.cloud.storage` | Cloud Storage bucket |
-| `google.cloud.firestore` | Firestore database |
-| `google.cloud.pubsub` | Pub/Sub topic |
-| `google.cloud.bigquery` | BigQuery dataset |
-| `google.cloud.sql` | Cloud SQL instance |
-| `google.cloud.run` | Cloud Run service |
-| `google.cloud.functions` | Cloud Functions |
-| `google.cloud.secretmanager` | Secret Manager |
+| Import pattern               | Inferred GCP resource |
+| ---------------------------- | --------------------- |
+| `google.cloud.storage`       | Cloud Storage bucket  |
+| `google.cloud.firestore`     | Firestore database    |
+| `google.cloud.pubsub`        | Pub/Sub topic         |
+| `google.cloud.bigquery`      | BigQuery dataset      |
+| `google.cloud.sql`           | Cloud SQL instance    |
+| `google.cloud.run`           | Cloud Run service     |
+| `google.cloud.functions`     | Cloud Functions       |
+| `google.cloud.secretmanager` | Secret Manager        |
 
 ## Step 3: Write Output (v1.1+)
 
@@ -72,6 +76,7 @@ Write `$MIGRATION_DIR/app_code_resources.json`:
 **This phase covers Discover & Analysis ONLY.**
 
 FORBIDDEN — Do NOT include ANY of:
+
 - AWS service names, recommendations, or equivalents
 - Migration strategies, phases, or timelines
 - Terraform generation for AWS

@@ -224,6 +224,7 @@ Output to user: "Cost estimation complete. Balanced tier: $X/month, Payback: X m
 **This phase covers financial analysis ONLY.**
 
 FORBIDDEN — Do NOT include ANY of:
+
 - Changes to architecture mappings from the Design phase
 - Execution timelines or migration schedules
 - Terraform or IaC code generation

@@ -122,6 +122,7 @@ All user communication via output messages only.
 **This phase covers Discover & Analysis ONLY.**
 
 FORBIDDEN — Do NOT include ANY of:
+
 - AWS service names, recommendations, or equivalents
 - Migration strategies, phases, or timelines
 - Terraform generation for AWS

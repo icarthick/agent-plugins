@@ -215,20 +215,20 @@ Adaptive migration preferences organized as design constraints. Each constraint 
 
 ### Field Definitions
 
-| Field | Description |
-|-------|-------------|
-| `metadata.timestamp` | ISO 8601 timestamp |
-| `metadata.discovery_artifacts` | List of discovery files that existed when clarify ran |
-| `metadata.questions_asked` | Questions presented to the user |
-| `metadata.questions_defaulted` | Questions where the user skipped and default was applied |
-| `metadata.questions_skipped_extracted` | Questions skipped because inventory already provided the answer |
-| `metadata.questions_skipped_early_exit` | Questions skipped due to early-exit logic (e.g., Q7 skipped because Q4=multi-cloud) |
-| `metadata.questions_skipped_not_applicable` | Questions skipped because the relevant service wasn't in the inventory |
-| `metadata.category_e_enabled` | Whether the user opted into Category E (Migration Posture) |
-| `metadata.inventory_clarifications` | Category B answers for billing-source inventories (v1.2) |
-| `design_constraints.<key>.value` | The constraint value |
-| `design_constraints.<key>.chosen_by` | Provenance: `"user"` (explicitly answered), `"default"` (system default — includes "I don't know"), `"extracted"` (inferred from inventory), `"derived"` (computed from combination of answers) |
-| `ai_constraints` | *(v1.1)* Present ONLY if Category F fired (AI discovery). Omit entirely otherwise |
+| Field                                       | Description                                                                                                                                                                                     |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `metadata.timestamp`                        | ISO 8601 timestamp                                                                                                                                                                              |
+| `metadata.discovery_artifacts`              | List of discovery files that existed when clarify ran                                                                                                                                           |
+| `metadata.questions_asked`                  | Questions presented to the user                                                                                                                                                                 |
+| `metadata.questions_defaulted`              | Questions where the user skipped and default was applied                                                                                                                                        |
+| `metadata.questions_skipped_extracted`      | Questions skipped because inventory already provided the answer                                                                                                                                 |
+| `metadata.questions_skipped_early_exit`     | Questions skipped due to early-exit logic (e.g., Q7 skipped because Q4=multi-cloud)                                                                                                             |
+| `metadata.questions_skipped_not_applicable` | Questions skipped because the relevant service wasn't in the inventory                                                                                                                          |
+| `metadata.category_e_enabled`               | Whether the user opted into Category E (Migration Posture)                                                                                                                                      |
+| `metadata.inventory_clarifications`         | Category B answers for billing-source inventories (v1.2)                                                                                                                                        |
+| `design_constraints.<key>.value`            | The constraint value                                                                                                                                                                            |
+| `design_constraints.<key>.chosen_by`        | Provenance: `"user"` (explicitly answered), `"default"` (system default — includes "I don't know"), `"extracted"` (inferred from inventory), `"derived"` (computed from combination of answers) |
+| `ai_constraints`                            | _(v1.1)_ Present ONLY if Category F fired (AI discovery). Omit entirely otherwise                                                                                                               |
 
 ### Rules
 
