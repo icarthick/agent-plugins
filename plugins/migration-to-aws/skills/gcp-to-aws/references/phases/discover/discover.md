@@ -28,10 +28,10 @@ Lightweight orchestrator that detects available source types and delegates to do
      "discovery_outputs": [],
      "phases": {
        "discover": { "status": "in_progress", "timestamp": null, "outputs": [] },
-       "clarify":  { "status": "pending", "timestamp": null, "outputs": [] },
-       "design":   { "status": "pending", "timestamp": null, "outputs": [] },
+       "clarify": { "status": "pending", "timestamp": null, "outputs": [] },
+       "design": { "status": "pending", "timestamp": null, "outputs": [] },
        "estimate": { "status": "pending", "timestamp": null, "outputs": [] },
-       "execute":  { "status": "pending", "timestamp": null, "outputs": [] }
+       "execute": { "status": "pending", "timestamp": null, "outputs": [] }
      }
    }
    ```

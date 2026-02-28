@@ -35,14 +35,14 @@ If no Terraform files are found, stop immediately and ask user to provide them.
 
 This is the execution controller. After completing each phase, consult this table to determine the next action.
 
-| Current State | Condition | Next Action |
-|--------------|-----------|-------------|
-| `start` | always | Load `references/phases/discover/discover.md` |
-| `discover_done` | always | Load `references/phases/clarify.md` |
-| `clarify_done` | always | Load `references/phases/design.md` |
-| `design_done` | always | Load `references/phases/estimate.md` |
-| `estimate_done` | always | Load `references/phases/execute.md` |
-| `execute_done` | always | Migration planning complete |
+| Current State   | Condition | Next Action                                   |
+| --------------- | --------- | --------------------------------------------- |
+| `start`         | always    | Load `references/phases/discover/discover.md` |
+| `discover_done` | always    | Load `references/phases/clarify.md`           |
+| `clarify_done`  | always    | Load `references/phases/design.md`            |
+| `design_done`   | always    | Load `references/phases/estimate.md`          |
+| `estimate_done` | always    | Load `references/phases/execute.md`           |
+| `execute_done`  | always    | Migration planning complete                   |
 
 **How to determine current state:** Read `$MIGRATION_DIR/.phase-status.json` → check `phases` object → find the last phase with `status: "completed"`.
 
@@ -82,11 +82,19 @@ Migration state lives in `$MIGRATION_DIR` (`.migration/[MMDD-HHMM]/`), created b
     "gcp-resource-clusters.json"
   ],
   "phases": {
-    "discover": { "status": "completed", "timestamp": "2026-02-26T14:31:00Z", "outputs": ["gcp-resource-inventory.json", "gcp-resource-clusters.json"] },
-    "clarify":  { "status": "completed", "timestamp": "2026-02-26T14:32:00Z", "outputs": ["clarified.json"] },
-    "design":   { "status": "in_progress", "timestamp": null, "outputs": [] },
+    "discover": {
+      "status": "completed",
+      "timestamp": "2026-02-26T14:31:00Z",
+      "outputs": ["gcp-resource-inventory.json", "gcp-resource-clusters.json"]
+    },
+    "clarify": {
+      "status": "completed",
+      "timestamp": "2026-02-26T14:32:00Z",
+      "outputs": ["clarified.json"]
+    },
+    "design": { "status": "in_progress", "timestamp": null, "outputs": [] },
     "estimate": { "status": "pending", "timestamp": null, "outputs": [] },
-    "execute":  { "status": "pending", "timestamp": null, "outputs": [] }
+    "execute": { "status": "pending", "timestamp": null, "outputs": [] }
   }
 }
 ```

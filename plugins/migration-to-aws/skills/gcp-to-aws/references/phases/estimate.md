@@ -189,6 +189,7 @@ Write `estimation-report.md`:
 ## Step 6: Update Phase Status
 
 Update `$MIGRATION_DIR/.phase-status.json`:
+
 - Set `phases.estimate.status` to `"completed"`
 - Set `phases.estimate.timestamp` to current ISO 8601 timestamp
 - Set `phases.estimate.outputs` to `["estimation.json", "estimation-report.md"]`

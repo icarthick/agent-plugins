@@ -69,6 +69,7 @@ Write `clarified.json` to `.migration/[MMDD-HHMM]/` directory.
 ## Step 5: Update Phase Status
 
 Update `$MIGRATION_DIR/.phase-status.json`:
+
 - Set `phases.clarify.status` to `"completed"`
 - Set `phases.clarify.timestamp` to current ISO 8601 timestamp
 - Set `phases.clarify.outputs` to `["clarified.json"]`

@@ -151,6 +151,7 @@ Mapped X GCP resources to Y AWS services across Z clusters.
 ## Step 5: Update Phase Status
 
 Update `$MIGRATION_DIR/.phase-status.json`:
+
 - Set `phases.design.status` to `"completed"`
 - Set `phases.design.timestamp` to current ISO 8601 timestamp
 - Set `phases.design.outputs` to `["aws-design.json", "aws-design-report.md"]`

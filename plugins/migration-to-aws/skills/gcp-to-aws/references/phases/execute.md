@@ -164,6 +164,7 @@ Write `execution-timeline.md`:
 ## Step 7: Update Phase Status
 
 Update `$MIGRATION_DIR/.phase-status.json`:
+
 - Set `phases.execute.status` to `"completed"`
 - Set `phases.execute.timestamp` to current ISO 8601 timestamp
 - Set `phases.execute.outputs` to `["execution.json", "execution-timeline.md"]`

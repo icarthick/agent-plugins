@@ -21,30 +21,39 @@ Hierarchical phase tracking with per-phase metadata. This is the SINGLE source o
     "gcp-resource-clusters.json"
   ],
   "phases": {
-    "discover": { "status": "completed", "timestamp": "2026-02-26T14:31:00Z", "outputs": ["gcp-resource-inventory.json", "gcp-resource-clusters.json"] },
-    "clarify":  { "status": "completed", "timestamp": "2026-02-26T14:32:00Z", "outputs": ["clarified.json"] },
-    "design":   { "status": "in_progress", "timestamp": null, "outputs": [] },
+    "discover": {
+      "status": "completed",
+      "timestamp": "2026-02-26T14:31:00Z",
+      "outputs": ["gcp-resource-inventory.json", "gcp-resource-clusters.json"]
+    },
+    "clarify": {
+      "status": "completed",
+      "timestamp": "2026-02-26T14:32:00Z",
+      "outputs": ["clarified.json"]
+    },
+    "design": { "status": "in_progress", "timestamp": null, "outputs": [] },
     "estimate": { "status": "pending", "timestamp": null, "outputs": [] },
-    "execute":  { "status": "pending", "timestamp": null, "outputs": [] }
+    "execute": { "status": "pending", "timestamp": null, "outputs": [] }
   }
 }
 ```
 
 **Field Definitions:**
 
-| Field | Type | Set When |
-|-------|------|----------|
-| `migration_id` | string | Created (matches folder name, never changes) |
-| `started_at` | ISO 8601 | Created (never changes) |
-| `last_updated` | ISO 8601 | After each phase update |
-| `project_directory` | string | Start of Discover |
-| `input_files_detected` | object | End of Discover (terraform_files count, terraform_lines count) |
-| `discovery_outputs` | string[] | End of Discover (list of artifact filenames produced) |
-| `phases.*.status` | string | Phase transitions: `"pending"` → `"in_progress"` → `"completed"` |
-| `phases.*.timestamp` | ISO 8601 or null | Phase completion |
-| `phases.*.outputs` | string[] | Phase completion (files created by that phase) |
+| Field                  | Type             | Set When                                                         |
+| ---------------------- | ---------------- | ---------------------------------------------------------------- |
+| `migration_id`         | string           | Created (matches folder name, never changes)                     |
+| `started_at`           | ISO 8601         | Created (never changes)                                          |
+| `last_updated`         | ISO 8601         | After each phase update                                          |
+| `project_directory`    | string           | Start of Discover                                                |
+| `input_files_detected` | object           | End of Discover (terraform_files count, terraform_lines count)   |
+| `discovery_outputs`    | string[]         | End of Discover (list of artifact filenames produced)            |
+| `phases.*.status`      | string           | Phase transitions: `"pending"` → `"in_progress"` → `"completed"` |
+| `phases.*.timestamp`   | ISO 8601 or null | Phase completion                                                 |
+| `phases.*.outputs`     | string[]         | Phase completion (files created by that phase)                   |
 
 **Rules:**
+
 - `phases.*.status` progresses: `"pending"` → `"in_progress"` → `"completed"`. Never goes backward.
 - `discovery_outputs` is populated at the end of Discover. Subsequent phases read this to determine available artifacts.
 - `input_files_detected` is populated during Discover and never changed.
