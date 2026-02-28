@@ -1,7 +1,19 @@
 # Discover Phase: IaC (Terraform) Discovery
 
-Extracts and clusters GCP resources from Terraform files. Produces final inventory and clusters JSON files.
+> Self-contained IaC discovery sub-file. Scans for Terraform files, extracts GCP resources, classifies, clusters, and writes inventory.
+> If no Terraform files are found, exits cleanly with no output.
+
 **Execute ALL steps in order. Do not skip or optimize.**
+
+## Step 0: Self-Scan for Terraform Files
+
+Recursively scan the target directory for Terraform files:
+
+- `**/*.tf` — Terraform configuration
+- `**/*.tfvars` — Terraform variables
+- `**/*.tfstate` — Terraform state
+
+**Exit gate:** If NO Terraform files are found, **exit cleanly**. Return no output artifacts. Other sub-discovery files may still produce artifacts.
 
 ## Step 1: Parse Terraform Files
 

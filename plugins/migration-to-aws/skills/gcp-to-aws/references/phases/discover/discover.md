@@ -1,7 +1,15 @@
 # Phase 1: Discover GCP Resources
 
-Lightweight orchestrator that detects available source types and delegates to domain-specific discoverers.
+Lightweight orchestrator that delegates to domain-specific discoverers. Each sub-discovery file is self-contained — it scans for its own input, processes what it finds, and exits cleanly if nothing is relevant.
 **Execute ALL steps in order. Do not skip or deviate.**
+
+## Sub-Discovery Files
+
+- **discover-iac.md** → `gcp-resource-inventory.json` + `gcp-resource-clusters.json` (if Terraform found)
+- **discover-app-code.md** → `app_code_resources.json` (if source code with GCP imports found)
+- **discover-billing.md** → `billing_resources.json` (if billing data found)
+
+Multiple artifacts can be produced in a single run — they are not mutually exclusive.
 
 ## Step 0: Initialize Migration State
 
@@ -47,33 +55,32 @@ Lightweight orchestrator that detects available source types and delegates to do
 
 5. Confirm both `.migration/.gitignore` and `.phase-status.json` exist before proceeding to Step 1.
 
-## Step 1: Scan for Available Source Types
+## Step 1: Run Sub-Discoveries
 
-1. Recursively scan working directory for source files:
-   - **Terraform**: `.tf`, `.tfvars`, `.tfstate` files (primary v1.0)
-   - **Billing** (v1.2+): GCP billing CSV/JSON exports (skip if not available)
-   - **App code** (v1.1+): Python/Node/Go with `google.cloud.*` imports (skip if not available)
-2. **IF zero sources found**: STOP and output: "No GCP sources detected (no `.tf` files, billing exports, or app code). Provide at least one source type and try again."
-3. Report detected sources to user (e.g., "Found Terraform files in: [list]")
+Load ALL three sub-discovery files. Each is self-contained — it scans for its own input, processes what it finds, and exits cleanly if nothing is relevant.
 
-## Step 2: Invoke Terraform Discoverer (v1.0 — REQUIRED)
+1. Load `references/phases/discover/discover-iac.md`
+2. Load `references/phases/discover/discover-app-code.md`
+3. Load `references/phases/discover/discover-billing.md`
 
-**This step is MANDATORY for v1.0. Produces final outputs directly.**
+Each sub-file handles its own exit gate. No conditional loading needed — just run all three.
 
-1. **IF Terraform files found** (from Step 1):
-   - Load `references/phases/discover/discover-iac.md`
-   - **WAIT for completion**: Confirm BOTH output files exist in `$MIGRATION_DIR/`:
-     - `gcp-resource-inventory.json` (REQUIRED)
-     - `gcp-resource-clusters.json` (REQUIRED)
-   - **Validate schemas**: Confirm files contain all required fields
-   - Proceed to Step 3
-2. **IF Terraform files NOT found**:
-   - Skip this step. Terraform is required for v1.0. If other sources available, defer to v1.1/v1.2 handling.
+## Step 2: Check Outputs
+
+After all sub-discoveries complete, check what artifacts were produced in `$MIGRATION_DIR/`:
+
+1. Check for output files:
+   - `gcp-resource-inventory.json` — IaC discovery succeeded
+   - `gcp-resource-clusters.json` — IaC discovery produced clusters
+   - `app_code_resources.json` — App code discovery detected GCP imports
+   - `billing_resources.json` — Billing data parsed
+2. **If NO artifacts were produced**: STOP and output: "No GCP sources detected. Provide at least one source type (Terraform files, application code, or billing exports) and try again."
+3. Record produced artifacts in `.phase-status.json` → `discovery_outputs`.
 
 ## Step 3: Update Phase Status
 
 1. Update `.phase-status.json`:
-   - Set `input_files_detected` with counts from Step 1 (e.g., `{"terraform_files": 12, "terraform_lines": 850}`)
+   - Set `input_files_detected` with counts from sub-discoveries (e.g., `{"terraform_files": 12, "terraform_lines": 850}`)
    - Set `discovery_outputs` to the list of output files produced (e.g., `["gcp-resource-inventory.json", "gcp-resource-clusters.json"]`)
    - Set `phases.discover.status` to `"completed"`
    - Set `phases.discover.timestamp` to current ISO 8601 timestamp
@@ -82,20 +89,22 @@ Lightweight orchestrator that detects available source types and delegates to do
 
 2. Output to user: "Discover phase complete. Discovered X total resources across Y clusters. Proceeding to Phase 2: Clarify."
 
-## Output Files ONLY
+## Output Files
 
-**Discover phase produces EXACTLY 2 files in `.migration/[MMDD-HHMM]/`:**
+**Discover phase writes files to `$MIGRATION_DIR/`. Possible outputs (depending on what sub-discoverers find):**
 
-1. `gcp-resource-inventory.json` (REQUIRED)
-2. `gcp-resource-clusters.json` (REQUIRED)
+1. `gcp-resource-inventory.json` — from discover-iac.md
+2. `gcp-resource-clusters.json` — from discover-iac.md
+3. `app_code_resources.json` — from discover-app-code.md
+4. `billing_resources.json` — from discover-billing.md
 
 **No other files should be created:**
 
-- ❌ README.md
-- ❌ discovery-summary.md
-- ❌ EXECUTION_REPORT.txt
-- ❌ discovery-log.md
-- ❌ Any documentation or report files
+- No README.md
+- No discovery-summary.md
+- No EXECUTION_REPORT.txt
+- No discovery-log.md
+- No documentation or report files
 
 All user communication via output messages only.
 
@@ -103,23 +112,10 @@ All user communication via output messages only.
 
 - **Missing `.migration` directory**: Create it (Step 0)
 - **Missing `.migration/.gitignore`**: Create it automatically (Step 0) — prevents accidental commits
-- **No Terraform files found**: STOP with error message (Step 1). Terraform is required for v1.0.
-- **discover-iac.md fails**: STOP and report exact failure point
-- **discover-iac.md completes but output files missing**: STOP with error listing missing files
+- **No artifacts produced by any sub-discoverer**: STOP with error message (Step 2)
+- **Sub-discoverer fails**: STOP and report exact failure point and which sub-discoverer failed
 - **Output file validation fails**: STOP and report schema errors
-- **Extra files created (README, reports, etc.)**: Failure. Discover must produce ONLY the two JSON files.
-
-## Future Versions (v1.1+, v1.2+)
-
-**v1.1 (App Code Discovery):**
-
-- Implement `discover-app-code.md` to scan Python/Node/Go imports
-- Merge strategy with Terraform results: TBD
-
-**v1.2 (Billing Discovery):**
-
-- Implement `discover-billing.md` to parse GCP billing exports
-- Merge strategy with other sources: TBD
+- **Extra files created (README, reports, etc.)**: Failure. Discover must produce ONLY the JSON artifact files.
 
 ## Scope Boundary
 

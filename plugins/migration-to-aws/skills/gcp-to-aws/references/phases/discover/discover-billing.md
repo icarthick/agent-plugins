@@ -1,18 +1,48 @@
-# Discover Phase: Billing Discovery (v1.2+)
+# Discover Phase: Billing Discovery
 
-**Status**: Not yet implemented (v1.2 feature).
+> Self-contained billing discovery sub-file. Scans for billing CSV/JSON files, parses billing data, and builds service usage profiles.
+> If no billing files are found, exits cleanly with no output.
 
-## Overview
+**Status**: Not yet implemented (v1.2 feature). Steps 1-3 below describe expected behavior when implemented.
 
-This discoverer will import GCP billing data from CSV/JSON exports to identify active services and cost signals.
+## Step 0: Self-Scan for Billing Files
 
-## Expected Behavior (v1.2+)
+Scan the target directory for billing data:
 
-- Read GCP billing CSV or JSON export files
-- Extract service SKUs, monthly cost, consumption patterns
-- Output: `billing_resources.json` with flat list of detected services
+- `**/*billing*.csv` — GCP billing export CSV
+- `**/*billing*.json` — BigQuery billing export JSON
+- `**/*cost*.csv`, `**/*cost*.json` — Cost report exports
+- `**/*usage*.csv`, `**/*usage*.json` — Usage report exports
 
-## Expected Output Schema (v1.2+)
+**Exit gate:** If NO billing files are found, **exit cleanly**. Return no output artifacts. Other sub-discovery files may still produce artifacts.
+
+## Step 1: Parse Billing Data (v1.2+)
+
+Supported formats:
+- GCP billing export CSV
+- BigQuery billing export JSON
+
+Extract from each line item:
+- `service_description` — GCP service name
+- `sku_description` — Specific SKU/resource
+- `cost` — Cost amount
+- `usage_amount` — Usage quantity
+- `usage_unit` — Usage unit (e.g., hours, bytes, requests)
+
+Group by service and calculate monthly totals.
+
+## Step 2: Build Service Usage Profile (v1.2+)
+
+From the parsed billing data:
+
+1. List all GCP services with non-zero spend
+2. Calculate monthly cost per service
+3. Identify top services by spend (sorted descending)
+4. Note usage patterns (consistent vs bursty spend)
+
+## Step 3: Write Output (v1.2+)
+
+Write `$MIGRATION_DIR/billing_resources.json`:
 
 ```json
 {
@@ -27,8 +57,15 @@ This discoverer will import GCP billing data from CSV/JSON exports to identify a
 }
 ```
 
-## Integration with Unify Phase
+## Scope Boundary
 
-`unify-resources.md` will check for `billing_resources.json` and merge service evidence into final inventory.
+**This phase covers Discover & Analysis ONLY.**
 
-**Current Action**: Skip if v1.2 not available. `discover.md` will not call this discoverer in v1.0.
+FORBIDDEN — Do NOT include ANY of:
+- AWS service names, recommendations, or equivalents
+- Migration strategies, phases, or timelines
+- Terraform generation for AWS
+- Cost estimates or comparisons
+- Effort estimates
+
+**Your ONLY job: Inventory what exists in GCP. Nothing else.**
