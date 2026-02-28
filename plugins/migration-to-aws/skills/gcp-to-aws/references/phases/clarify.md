@@ -68,15 +68,10 @@ Write `clarified.json` to `.migration/[MMDD-HHMM]/` directory.
 
 ## Step 5: Update Phase Status
 
-Update `.phase-status.json`:
-
-```json
-{
-  "phase": "clarify",
-  "status": "completed",
-  "timestamp": "2026-02-26T14:30:00Z",
-  "version": "1.0.0"
-}
-```
+Update `$MIGRATION_DIR/.phase-status.json`:
+- Set `phases.clarify.status` to `"completed"`
+- Set `phases.clarify.timestamp` to current ISO 8601 timestamp
+- Set `phases.clarify.outputs` to `["clarified.json"]`
+- Update `last_updated` to current timestamp
 
 Output to user: "Clarification complete. Proceeding to Phase 3: Design AWS Architecture."

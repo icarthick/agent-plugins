@@ -11,6 +11,15 @@ description: "Migrate workloads from Google Cloud Platform to AWS. Triggers on: 
 - **Dev sizing unless specified**: Default to development-tier capacity (e.g., db.t4g.micro, single AZ). Upgrade only on user direction.
 - **Infrastructure-first approach**: v1.0 migrates Terraform-defined infrastructure only. App code scanning and billing import are v1.1+.
 
+---
+
+## Definitions
+
+- **"Load"** = Read the file using the Read tool and follow its instructions. Do not summarize or skip sections.
+- **`$MIGRATION_DIR`** = The run-specific directory under `.migration/` (e.g., `.migration/0226-1430/`). Set during Phase 1 (Discover).
+
+---
+
 ## Prerequisites
 
 User must provide GCP infrastructure-as-code:
@@ -20,62 +29,73 @@ User must provide GCP infrastructure-as-code:
 
 If no Terraform files are found, stop immediately and ask user to provide them.
 
+---
+
+## State Machine
+
+This is the execution controller. After completing each phase, consult this table to determine the next action.
+
+| Current State | Condition | Next Action |
+|--------------|-----------|-------------|
+| `start` | always | Load `references/phases/discover/discover.md` |
+| `discover_done` | always | Load `references/phases/clarify.md` |
+| `clarify_done` | always | Load `references/phases/design.md` |
+| `design_done` | always | Load `references/phases/estimate.md` |
+| `estimate_done` | always | Load `references/phases/execute.md` |
+| `execute_done` | always | Migration planning complete |
+
+**How to determine current state:** Read `$MIGRATION_DIR/.phase-status.json` → check `phases` object → find the last phase with `status: "completed"`.
+
+**Phase gate checks**: If prior phase incomplete, do not advance (e.g., cannot enter estimate without completed design).
+
+---
+
+## State Validation
+
+When reading `$MIGRATION_DIR/.phase-status.json`, validate before proceeding:
+
+1. **Multiple sessions**: If multiple directories exist under `.migration/`, STOP. Output: "Multiple migration sessions detected. Pick one to continue: [list]"
+2. **Invalid JSON**: If `.phase-status.json` fails to parse, STOP. Output: "State file corrupted (invalid JSON). Delete the file and restart the current phase."
+3. **Unrecognized phase**: If `phases` object contains a phase not in {discover, clarify, design, estimate, execute}, STOP. Output: "Unrecognized phase: [value]. Valid phases: discover, clarify, design, estimate, execute."
+4. **Unrecognized status**: If any `phases.*.status` is not in {pending, in_progress, completed}, STOP. Output: "Unrecognized status: [value]. Valid values: pending, in_progress, completed."
+
+---
+
 ## State Management
 
-Migration state lives in `.migration/[MMDD-HHMM]/` directory (created by Phase 1, persists across invocations):
-
-```
-.migration/
-├── .gitignore                       # Auto-created to protect state files from git
-└── 0226-1430/                       # MMDD-HHMM timestamp
-    ├── .phase-status.json           # Current phase tracking
-    ├── gcp-resource-inventory.json  # All GCP resources found
-    ├── gcp-resource-clusters.json   # Clustered resources by affinity
-    ├── clarified.json               # User answers (Phase 2 output)
-    ├── aws-design.json              # AWS services mapping (Phase 3 output)
-    ├── estimation.json              # Cost breakdown (Phase 4 output)
-    └── execution.json               # Timeline + risks (Phase 5 output)
-```
-
-**Note:** The `.migration/` directory is automatically protected by a `.gitignore` file created in Phase 1. Migration state files will not be accidentally committed to version control.
+Migration state lives in `$MIGRATION_DIR` (`.migration/[MMDD-HHMM]/`), created by Phase 1 and persisted across invocations.
 
 **.phase-status.json schema:**
 
 ```json
 {
-  "phase": "discover|clarify|design|estimate|execute",
-  "status": "in-progress|completed",
-  "timestamp": "2026-02-26T14:30:00Z",
-  "version": "1.0.0"
+  "migration_id": "0226-1430",
+  "started_at": "2026-02-26T14:30:00Z",
+  "last_updated": "2026-02-26T15:35:22Z",
+  "project_directory": "/path/to/project",
+  "input_files_detected": {
+    "terraform_files": 12,
+    "terraform_lines": 850
+  },
+  "discovery_outputs": [
+    "gcp-resource-inventory.json",
+    "gcp-resource-clusters.json"
+  ],
+  "phases": {
+    "discover": { "status": "completed", "timestamp": "2026-02-26T14:31:00Z", "outputs": ["gcp-resource-inventory.json", "gcp-resource-clusters.json"] },
+    "clarify":  { "status": "completed", "timestamp": "2026-02-26T14:32:00Z", "outputs": ["clarified.json"] },
+    "design":   { "status": "in_progress", "timestamp": null, "outputs": [] },
+    "estimate": { "status": "pending", "timestamp": null, "outputs": [] },
+    "execute":  { "status": "pending", "timestamp": null, "outputs": [] }
+  }
 }
 ```
 
-If `.phase-status.json` exists:
+**Status values:** `"pending"` → `"in_progress"` → `"completed"`. Never goes backward.
 
-- If `status` is `completed`: advance to next phase (discover→clarify, clarify→design, etc.)
-- If `status` is `in-progress`: resume from that phase
+The `.migration/` directory is automatically protected by a `.gitignore` file created in Phase 1.
 
-## Phase Routing
-
-1. **On skill invocation**: Check for `.migration/*/` directory
-   - If none exist: Initialize Phase 1 (Discover), set status to `in-progress`
-   - If multiple exist: **STOP**. Output: "Multiple migration sessions detected in `.migration/`. Pick one to continue: [list]"
-   - If exists: Load `.phase-status.json` and validate:
-     - **If invalid JSON**: STOP. Output: "State file corrupted (invalid JSON). Delete `.migration/[MMDD-HHMM]/.phase-status.json` and restart Phase [X]."
-     - **If unrecognized phase value**: STOP. Output: "Unrecognized phase: [value]. Valid values: discover, clarify, design, estimate, execute."
-     - **If status not in {in-progress, completed}**: STOP. Output: "Unrecognized status: [value]. Valid values: in-progress, completed."
-     - **If valid**: Determine next action:
-       - If phase status is `in-progress`: Resume that phase
-       - If phase status is `completed`: Advance to next phase
-
-2. **Phase transition mapping** (when phase is `completed`):
-   - discover (completed) → Route to clarify
-   - clarify (completed) → Route to design
-   - design (completed) → Route to estimate
-   - estimate (completed) → Route to execute
-   - execute (completed) → Migration complete; offer summary and cleanup options
-
-3. **Phase gate checks**: If prior phase incomplete, do not advance (e.g., cannot enter estimate without completed design)
+---
 
 ## Phase Summary Table
 
@@ -87,72 +107,59 @@ If `.phase-status.json` exists:
 | **Estimate** | `aws-design.json`, `clarified.json`                         | `estimation.json`, `estimation-report.md`, `.phase-status.json` updated                   | `references/phases/estimate.md`          |
 | **Execute**  | `aws-design.json`, `clarified.json`                         | `execution.json`, `execution-timeline.md`, `.phase-status.json` updated                   | `references/phases/execute.md`           |
 
+---
+
 ## MCP Servers
 
 **awspricing** (for cost estimation):
 
-1. Call `get_pricing_service_codes()` to detect availability
-2. If success: use live AWS pricing
-3. If timeout/error: fall back to `references/shared/pricing-fallback.json` (includes 2026 on-demand rates for major services)
+- Provides `get_pricing`, `get_pricing_service_codes`, `get_pricing_service_attributes` tools
+- Only needed during Estimate phase. Discover and Design do not require it.
+- Fallback: if unavailable, uses `references/shared/pricing-fallback.json` (cached 2026 rates, ±15-25% accuracy)
 
-**awsknowledge** (for design validation):
+---
 
-1. Use for regional availability checks (e.g., service available in target region?)
-2. Use for feature parity checks (e.g., do required features exist in AWS service?)
-3. Use for service constraints and best practices
-4. Fallback: if unavailable, set `validation_status: "skipped"` in aws-design.json with note in design report
-5. **Important**: Validation is informational; design proceeds either way (not blocking)
+## Files in This Skill
 
-## Error Handling
+```
+gcp-to-aws/
+├── SKILL.md                                    ← You are here (orchestrator + state machine)
+│
+├── references/
+│   ├── phases/
+│   │   ├── discover/
+│   │   │   ├── discover.md                     # Phase 1: Discover orchestrator
+│   │   │   ├── discover-iac.md                 # Terraform/IaC discovery
+│   │   │   ├── discover-app-code.md            # App code discovery (v1.1+)
+│   │   │   └── discover-billing.md             # Billing data discovery (v1.2+)
+│   │   ├── clarify.md                          # Phase 2: Clarify requirements
+│   │   ├── design.md                           # Phase 3: Design AWS architecture
+│   │   ├── estimate.md                         # Phase 4: Cost estimation
+│   │   └── execute.md                          # Phase 5: Execution planning
+│   │
+│   ├── design-refs/
+│   │   ├── index.md                            # Lookup table: GCP type → design-ref file
+│   │   ├── fast-path.md                        # Deterministic 1:1 mappings (Pass 1)
+│   │   ├── compute.md                          # Compute mappings (Cloud Run, GCE, GKE, etc.)
+│   │   ├── database.md                         # Database mappings (Cloud SQL, Spanner, etc.)
+│   │   ├── storage.md                          # Storage mappings (GCS, Filestore, etc.)
+│   │   ├── networking.md                       # Networking mappings (VPC, LB, DNS, etc.)
+│   │   ├── messaging.md                        # Messaging mappings (Pub/Sub, etc.)
+│   │   └── ai.md                               # AI mappings (Vertex AI → Bedrock)
+│   │
+│   ├── clustering/terraform/
+│   │   ├── classification-rules.md             # Primary/secondary classification
+│   │   ├── clustering-algorithm.md             # Cluster formation rules
+│   │   ├── depth-calculation.md                # Topological depth calculation
+│   │   └── typed-edges-strategy.md             # Edge type assignment
+│   │
+│   └── shared/
+│       ├── output-schema.md                    # JSON schemas for all output files
+│       ├── clarify-questions.md                # Q1-Q8 definitions and defaults
+│       └── pricing-fallback.json               # Cached AWS pricing (±15-25%)
+```
 
-| Condition                                   | Action                                                                                                                       |
-| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| No `.tf` files found                        | Stop. Output: "No Terraform files detected. Please provide `.tf` files with your GCP resources and try again."               |
-| `.phase-status.json` missing phase gate     | Stop. Output: "Cannot enter Phase X: Phase Y-1 not completed. Start from Phase Y or resume Phase Y-1."                       |
-| awspricing unavailable after 3 attempts     | Display user warning about ±15-25% accuracy. Use `pricing-fallback.json`. Add `pricing_source: fallback` to estimation.json. |
-| User does not answer all Q1-8               | Offer Mode C (defaults) or Mode D (free text). Phase 2 completes either way.                                                 |
-| `aws-design.json` missing required clusters | Stop Phase 4. Output: "Re-run Phase 3 to generate missing cluster designs."                                                  |
-
-## Defaults
-
-- **IaC**: CDK TypeScript (no Terraform output; v1.0 is design/estimate only)
-- **Region**: `us-east-1` (unless user specifies, or GCP region → AWS region mapping suggests otherwise)
-- **Sizing**: Development tier (e.g., `db.t4g.micro` for databases, 0.5 CPU for Fargate)
-- **Migration mode**: Full infrastructure path (no AI-only subset path in v1.0)
-- **Cost currency**: USD
-- **Timeline assumption**: 8-12 weeks total
-
-## Workflow Execution
-
-When invoked, the agent **MUST follow this exact sequence**:
-
-1. **Load phase status**: Read `.phase-status.json` from `.migration/*/`.
-   - If missing: Initialize for Phase 1 (Discover)
-   - If exists: Determine current phase based on phase field and status value
-
-2. **Determine phase to execute**:
-   - If status is `in-progress`: Resume that phase (read corresponding reference file)
-   - If status is `completed`: Advance to next phase (read next reference file)
-   - Phase mapping for advancement:
-     - discover (completed) → Execute clarify (read `references/phases/clarify.md`)
-     - clarify (completed) → Execute design (read `references/phases/design.md`)
-     - design (completed) → Execute estimate (read `references/phases/estimate.md`)
-     - estimate (completed) → Execute execute (read `references/phases/execute.md`)
-     - execute (completed) → Migration complete
-
-3. **Read phase reference**: Load the full reference file for the target phase.
-
-4. **Execute ALL steps in order**: Follow every numbered step in the reference file. **Do not skip, optimize, or deviate.**
-
-5. **Validate outputs**: Confirm all required output files exist with correct schema before proceeding.
-
-6. **Update phase status**: Each phase reference file specifies the final `.phase-status.json` update (records the phase that just completed).
-
-7. **Display summary**: Show user what was accomplished, highlight next phase, or confirm migration completion.
-
-**Critical constraint**: Agent must strictly adhere to the reference file's workflow. If unable to complete a step, stop and report the exact step that failed.
-
-User can invoke the skill again to resume from last completed phase.
+---
 
 ## Scope Notes
 

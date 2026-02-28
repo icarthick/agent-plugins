@@ -20,10 +20,19 @@ Lightweight orchestrator that detects available source types and delegates to do
 
    ```json
    {
-     "phase": "discover",
-     "status": "in-progress",
-     "timestamp": "2026-02-26T14:30:00Z",
-     "version": "1.0.0"
+     "migration_id": "[MMDD-HHMM]",
+     "started_at": "[ISO 8601 timestamp]",
+     "last_updated": "[ISO 8601 timestamp]",
+     "project_directory": "[absolute path to scanned project]",
+     "input_files_detected": {},
+     "discovery_outputs": [],
+     "phases": {
+       "discover": { "status": "in_progress", "timestamp": null, "outputs": [] },
+       "clarify":  { "status": "pending", "timestamp": null, "outputs": [] },
+       "design":   { "status": "pending", "timestamp": null, "outputs": [] },
+       "estimate": { "status": "pending", "timestamp": null, "outputs": [] },
+       "execute":  { "status": "pending", "timestamp": null, "outputs": [] }
+     }
    }
    ```
 
@@ -55,18 +64,15 @@ Lightweight orchestrator that detects available source types and delegates to do
 
 ## Step 3: Update Phase Status
 
-1. Update `.phase-status.json` with exact schema:
+1. Update `.phase-status.json`:
+   - Set `input_files_detected` with counts from Step 1 (e.g., `{"terraform_files": 12, "terraform_lines": 850}`)
+   - Set `discovery_outputs` to the list of output files produced (e.g., `["gcp-resource-inventory.json", "gcp-resource-clusters.json"]`)
+   - Set `phases.discover.status` to `"completed"`
+   - Set `phases.discover.timestamp` to current ISO 8601 timestamp
+   - Set `phases.discover.outputs` to same list as `discovery_outputs`
+   - Update `last_updated` to current timestamp
 
-   ```json
-   {
-     "phase": "discover",
-     "status": "completed",
-     "timestamp": "2026-02-26T14:30:00Z",
-     "version": "1.0.0"
-   }
-   ```
-
-2. Output to user: "✅ Discover phase complete. Discovered X total resources across Y clusters. Proceeding to Phase 2: Clarify."
+2. Output to user: "Discover phase complete. Discovered X total resources across Y clusters. Proceeding to Phase 2: Clarify."
 
 ## Output Files ONLY
 

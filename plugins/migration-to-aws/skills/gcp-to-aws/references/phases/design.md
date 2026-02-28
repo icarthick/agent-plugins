@@ -150,15 +150,10 @@ Mapped X GCP resources to Y AWS services across Z clusters.
 
 ## Step 5: Update Phase Status
 
-Update `.phase-status.json`:
-
-```json
-{
-  "phase": "design",
-  "status": "completed",
-  "timestamp": "2026-02-26T14:30:00Z",
-  "version": "1.0.0"
-}
-```
+Update `$MIGRATION_DIR/.phase-status.json`:
+- Set `phases.design.status` to `"completed"`
+- Set `phases.design.timestamp` to current ISO 8601 timestamp
+- Set `phases.design.outputs` to `["aws-design.json", "aws-design-report.md"]`
+- Update `last_updated` to current timestamp
 
 Output to user: "AWS Architecture designed. Proceeding to Phase 4: Estimate Costs."

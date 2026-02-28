@@ -188,15 +188,10 @@ Write `estimation-report.md`:
 
 ## Step 6: Update Phase Status
 
-Update `.phase-status.json`:
-
-```json
-{
-  "phase": "estimate",
-  "status": "completed",
-  "timestamp": "2026-02-26T14:30:00Z",
-  "version": "1.0.0"
-}
-```
+Update `$MIGRATION_DIR/.phase-status.json`:
+- Set `phases.estimate.status` to `"completed"`
+- Set `phases.estimate.timestamp` to current ISO 8601 timestamp
+- Set `phases.estimate.outputs` to `["estimation.json", "estimation-report.md"]`
+- Update `last_updated` to current timestamp
 
 Output to user: "Cost estimation complete. Balanced tier: $X/month, Payback: X months. Proceeding to Phase 5: Execution Plan."
