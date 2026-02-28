@@ -112,3 +112,16 @@ All user communication via output messages only.
 
 - Implement `discover-billing.md` to parse GCP billing exports
 - Merge strategy with other sources: TBD
+
+## Scope Boundary
+
+**This phase covers Discover & Analysis ONLY.**
+
+FORBIDDEN — Do NOT include ANY of:
+- AWS service names, recommendations, or equivalents
+- Migration strategies, phases, or timelines
+- Terraform generation for AWS
+- Cost estimates or comparisons
+- Effort estimates
+
+**Your ONLY job: Inventory what exists in GCP. Nothing else.**

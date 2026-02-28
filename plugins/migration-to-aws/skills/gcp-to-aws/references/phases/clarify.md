@@ -76,3 +76,16 @@ Update `$MIGRATION_DIR/.phase-status.json`:
 - Update `last_updated` to current timestamp
 
 Output to user: "Clarification complete. Proceeding to Phase 3: Design AWS Architecture."
+
+## Scope Boundary
+
+**This phase covers requirements gathering ONLY.**
+
+FORBIDDEN — Do NOT include ANY of:
+- Detailed AWS architecture or service configurations
+- Code migration examples or SDK snippets
+- Detailed cost calculations
+- Migration timelines or execution plans
+- Terraform generation
+
+**Your ONLY job: Understand what the user needs. Nothing else.**

@@ -102,4 +102,17 @@ Extracts and clusters GCP resources from Terraform files. Produces final invento
 2. Confirm `.migration/[MMDD-HHMM]/gcp-resource-clusters.json` exists and is valid JSON
 3. Verify all resource addresses in inventory appear in exactly one cluster
 4. Verify all cluster IDs match resource cluster_id assignments
-5. Report to user: "✅ Wrote gcp-resource-inventory.json (X resources) and gcp-resource-clusters.json (Y clusters)"
+5. Report to user: "Wrote gcp-resource-inventory.json (X resources) and gcp-resource-clusters.json (Y clusters)"
+
+## Scope Boundary
+
+**This phase covers Discover & Analysis ONLY.**
+
+FORBIDDEN — Do NOT include ANY of:
+- AWS service names, recommendations, or equivalents
+- Migration strategies, phases, or timelines
+- Terraform generation for AWS
+- Cost estimates or comparisons
+- Effort estimates
+
+**Your ONLY job: Inventory what exists in GCP. Nothing else.**

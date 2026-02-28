@@ -196,3 +196,16 @@ Update `$MIGRATION_DIR/.phase-status.json`:
 - Update `last_updated` to current timestamp
 
 Output to user: "Cost estimation complete. Balanced tier: $X/month, Payback: X months. Proceeding to Phase 5: Execution Plan."
+
+## Scope Boundary
+
+**This phase covers financial analysis ONLY.**
+
+FORBIDDEN — Do NOT include ANY of:
+- Changes to architecture mappings from the Design phase
+- Execution timelines or migration schedules
+- Terraform or IaC code generation
+- Detailed migration procedures or runbooks
+- Team staffing or resource allocation
+
+**Your ONLY job: Show the financial picture of moving to AWS. Nothing else.**

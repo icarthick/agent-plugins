@@ -158,3 +158,16 @@ Update `$MIGRATION_DIR/.phase-status.json`:
 - Update `last_updated` to current timestamp
 
 Output to user: "AWS Architecture designed. Proceeding to Phase 4: Estimate Costs."
+
+## Scope Boundary
+
+**This phase covers architecture mapping ONLY.**
+
+FORBIDDEN — Do NOT include ANY of:
+- Cost calculations or pricing estimates
+- Execution timelines or migration schedules
+- Terraform or IaC code generation
+- Risk assessments or rollback procedures
+- Team staffing or resource allocation
+
+**Your ONLY job: Map GCP resources to AWS services. Nothing else.**
