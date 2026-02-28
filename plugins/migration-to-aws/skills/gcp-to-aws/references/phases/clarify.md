@@ -1,8 +1,20 @@
 # Phase 2: Clarify Requirements
 
+## Step 0: Prior Run Check
+
+If `$MIGRATION_DIR/clarified.json` already exists:
+
+> "I found existing clarification answers from a previous run. Would you like to:"
+>
+> A) Re-use these answers and skip questions
+> B) Start fresh and re-answer all questions
+
+- If A: skip to Validation Checklist, proceed with existing file.
+- If B: continue to Step 1.
+
 ## Step 1: Load Inventory
 
-Read `gcp-resource-inventory.json` and `gcp-resource-clusters.json` from `.migration/*/`.
+Read `gcp-resource-inventory.json` and `gcp-resource-clusters.json` from `$MIGRATION_DIR/`.
 
 ## Step 2: Select Answering Mode
 
