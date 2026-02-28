@@ -148,6 +148,26 @@ Mapped X GCP resources to Y AWS services across Z clusters.
 - Service X: falling back to region Y due to regional unavailability
 ```
 
+## Output Validation Checklist
+
+### aws-design.json
+
+- `clusters` array is non-empty
+- Every cluster has `cluster_id` matching a cluster from `gcp-resource-clusters.json`
+- Every cluster has `gcp_region` and `aws_region`
+- Every resource has `gcp_address`, `gcp_type`, `gcp_config`, `aws_service`, `aws_config`
+- All `confidence` values are either `"deterministic"` or `"inferred"`
+- All `rationale` fields are non-empty
+- Every resource from every evaluated cluster appears in the output
+- No duplicate `gcp_address` values across clusters
+- Output is valid JSON
+
+### aws-design-report.md
+
+- Overview section lists total resources, services, and clusters
+- Every cluster has a section with per-resource mappings
+- Warnings section present (even if empty)
+
 ## Step 5: Update Phase Status
 
 Update `$MIGRATION_DIR/.phase-status.json`:

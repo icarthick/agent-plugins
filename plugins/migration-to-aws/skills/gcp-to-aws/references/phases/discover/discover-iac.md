@@ -116,6 +116,30 @@ Recursively scan the target directory for Terraform files:
 4. Verify all cluster IDs match resource cluster_id assignments
 5. Report to user: "Wrote gcp-resource-inventory.json (X resources) and gcp-resource-clusters.json (Y clusters)"
 
+## Output Validation Checklist
+
+### gcp-resource-inventory.json
+
+- Every resource has `address`, `type`, and `classification` fields
+- Every PRIMARY resource has `depth` field (integer >= 0)
+- Every SECONDARY resource has `secondary_role` and `serves` fields
+- Every resource has `cluster_id` matching one of the generated clusters
+- All field names use EXACT required keys (see Step 6a)
+- No duplicate resource addresses
+- Output is valid JSON
+
+### gcp-resource-clusters.json
+
+- Every cluster has `cluster_id`, `primary_resources`, `secondary_resources`
+- `primary_resources` and `secondary_resources` are non-overlapping
+- `creation_order_depth` matches resource depths
+- `gcp_region` is populated for every cluster
+- `edges` array uses `{from, to, relationship_type}` format
+- All resource addresses across all clusters account for every resource in inventory
+- No duplicate cluster_ids
+- No cycles in dependency graph
+- Output is valid JSON
+
 ## Scope Boundary
 
 **This phase covers Discover & Analysis ONLY.**

@@ -161,6 +161,26 @@ Write `execution-timeline.md`:
 - [ ] Close project
 ```
 
+## Output Validation Checklist
+
+### execution.json
+
+- `timeline_weeks` is a positive integer
+- `critical_path` is a non-empty array of milestone strings
+- `risks` array has at least one entry
+- Each risk has `category`, `probability`, `impact`, and `mitigation` fields
+- `impact` values are one of: `"critical"`, `"high"`, `"medium"`, `"low"`
+- `probability` values are one of: `"high"`, `"medium"`, `"low"`
+- `rollback_window` is a non-empty string
+- `gcp_teardown` is a non-empty string
+- Output is valid JSON
+
+### execution-timeline.md
+
+- All week phases present (Planning, PoC, Infrastructure, Data Migration, Cutover, Cleanup)
+- Each phase has actionable checklist items
+- GCP teardown section present
+
 ## Step 7: Update Phase Status
 
 Update `$MIGRATION_DIR/.phase-status.json`:

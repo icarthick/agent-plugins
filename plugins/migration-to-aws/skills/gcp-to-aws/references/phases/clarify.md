@@ -66,6 +66,19 @@ Write `clarified.json` to `.migration/[MMDD-HHMM]/` directory.
 - `answers`: Object with keys q1_timeline through q8_compliance
 - `timestamp`: ISO 8601 timestamp
 
+## Validation Checklist
+
+Before handing off to Design:
+
+- `clarified.json` written to `$MIGRATION_DIR/`
+- `mode` field is one of "A", "B", "C", or "D"
+- `answers` object contains keys q1 through q8
+- Each answer value is within the documented option set (or mapped from free-form)
+- `timestamp` is a valid ISO 8601 timestamp
+- For Mode D: source tracking present (extracted vs default per answer)
+- No null values in answers
+- Output is valid JSON
+
 ## Step 5: Update Phase Status
 
 Update `$MIGRATION_DIR/.phase-status.json`:

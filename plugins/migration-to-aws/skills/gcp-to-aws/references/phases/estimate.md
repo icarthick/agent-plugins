@@ -186,6 +186,28 @@ Write `estimation-report.md`:
 - **5-year savings: $28,500**
 ```
 
+## Output Validation Checklist
+
+### estimation.json
+
+- `monthly_costs` has all three tiers: `premium`, `balanced`, `optimized`
+- Each tier has `total` (number) and `breakdown` (object with per-service costs)
+- Every service from `aws-design.json` is represented in the breakdown
+- `one_time_costs` has `dev_hours`, `data_transfer`, `training`, and `total`
+- `one_time_costs.total` equals the sum of its components
+- `roi` has `assumed_gcp_monthly`, `aws_monthly_balanced`, `monthly_savings`, `payback_months`, `five_year_savings`
+- `roi` is honest — if migration increases cost, savings are negative
+- `assumptions` array documents all key assumptions (workload hours, region, pricing source)
+- All cost values are numbers, not strings
+- Output is valid JSON
+
+### estimation-report.md
+
+- Balanced tier section shows per-service breakdown with total
+- Comparison tiers section lists premium and optimized totals
+- One-time costs section present
+- ROI analysis section present with payback period
+
 ## Step 6: Update Phase Status
 
 Update `$MIGRATION_DIR/.phase-status.json`:
