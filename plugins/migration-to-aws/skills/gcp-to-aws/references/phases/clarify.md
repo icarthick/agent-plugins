@@ -68,15 +68,21 @@ For Mode D (free-text):
 
 ## Step 4: Write Clarified Output
 
-Write `clarified.json` to `.migration/[MMDD-HHMM]/` directory.
+Write `clarified.json` to `$MIGRATION_DIR/`.
 
 **Schema:** See `references/shared/output-schema.md` → `clarified.json (Phase 2 output)` section for complete schema and field documentation.
 
 **Key fields:**
 
 - `mode`: "A", "B", "C", or "D" (answering mode selected in Step 2)
-- `answers`: Object with keys q1_timeline through q8_compliance
+- `answers`: Object with keys q1_timeline through q8_compliance, each containing `{value, chosen_by}`
 - `timestamp`: ISO 8601 timestamp
+
+**`chosen_by` values:**
+
+- `"user"` — explicitly answered by user (Modes A/B)
+- `"default"` — system default applied (Mode C, or skipped questions in A/B)
+- `"extracted"` — inferred from free text (Mode D) or inventory data
 
 ## Validation Checklist
 
@@ -85,9 +91,12 @@ Before handing off to Design:
 - `clarified.json` written to `$MIGRATION_DIR/`
 - `mode` field is one of "A", "B", "C", or "D"
 - `answers` object contains keys q1 through q8
-- Each answer value is within the documented option set (or mapped from free-form)
+- Every answer is an object with `value` and `chosen_by` fields
+- Each `value` is within the documented option set (or mapped from free-form)
+- Each `chosen_by` is one of: `"user"`, `"default"`, `"extracted"`
+- Mode C: all `chosen_by` values are `"default"`
+- Mode A/B: answered questions have `chosen_by: "user"`, skipped have `"default"`
 - `timestamp` is a valid ISO 8601 timestamp
-- For Mode D: source tracking present (extracted vs default per answer)
 - No null values in answers
 - Output is valid JSON
 

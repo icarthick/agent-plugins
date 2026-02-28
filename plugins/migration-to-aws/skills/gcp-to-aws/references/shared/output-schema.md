@@ -185,24 +185,40 @@ Clustered resources by affinity and deployment order.
 
 ## clarified.json (Phase 2 output)
 
-User answers to clarification questions.
+User answers to clarification questions. Each answer tracks its provenance via `chosen_by`.
 
 ```json
 {
   "mode": "A",
   "answers": {
-    "q1_timeline": "6-12 months",
-    "q2_primary_concern": "cost",
-    "q3_team_experience": "novice",
-    "q4_traffic_profile": "predictable",
-    "q5_database_requirements": "structured",
-    "q6_cost_sensitivity": "moderate",
-    "q7_multi_cloud": "no",
-    "q8_compliance": "none"
+    "q1_timeline": { "value": "6-12 months", "chosen_by": "user" },
+    "q2_primary_concern": { "value": "cost", "chosen_by": "user" },
+    "q3_team_experience": { "value": "novice", "chosen_by": "default" },
+    "q4_traffic_profile": { "value": "predictable", "chosen_by": "user" },
+    "q5_database_requirements": { "value": "structured", "chosen_by": "user" },
+    "q6_cost_sensitivity": { "value": "moderate", "chosen_by": "extracted" },
+    "q7_multi_cloud": { "value": "no", "chosen_by": "default" },
+    "q8_compliance": { "value": "none", "chosen_by": "user" }
   },
   "timestamp": "2026-02-26T14:30:00Z"
 }
 ```
+
+### Field Definitions
+
+| Field | Description |
+|-------|-------------|
+| `mode` | Answering mode: "A" (all at once), "B" (one-by-one), "C" (defaults), "D" (free text) |
+| `answers.<key>.value` | The normalized answer value |
+| `answers.<key>.chosen_by` | Provenance: `"user"` (explicitly answered), `"default"` (system default), `"extracted"` (inferred from free text or inventory) |
+| `timestamp` | ISO 8601 timestamp |
+
+### Rules
+
+- Mode C: all answers have `chosen_by: "default"`
+- Mode D: answers parsed from free text have `chosen_by: "extracted"`, unparsed use `chosen_by: "default"`
+- Mode A/B: answered questions have `chosen_by: "user"`, skipped questions use `chosen_by: "default"`
+- No null values in answers
 
 ---
 
