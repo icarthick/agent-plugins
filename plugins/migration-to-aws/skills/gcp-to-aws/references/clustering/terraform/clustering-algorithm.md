@@ -17,7 +17,7 @@ All resources with fields:
 **IF** `google_compute_network` resource exists:
 
 - Group: `google_compute_network` + ALL network_path secondaries (subnetworks, firewalls, routers)
-- Cluster ID: `network_{gcp_region}` (e.g., `network_us-central1`)
+- Cluster ID: `network_vpc_{gcp_region}_{sequence}` (e.g., `network_vpc_us-central1_001`)
 - **Reasoning**: Network is shared infrastructure; groups all config together
 
 **Output**: 1 cluster (or 0 if no networks found)
@@ -125,7 +125,7 @@ Apply consistent cluster naming:
 - `compute_cloudrun_us-central1_001`
 - `database_sql_us-west1_001`
 - `storage_bucket_multi-region_001`
-- `network_vpc_us-central1_000` (rule 1 network cluster)
+- `network_vpc_us-central1_001` (rule 1 network cluster)
 
 **Reasoning**: Names reflect deployment intent; deterministic for reproducibility.
 
@@ -142,11 +142,11 @@ Each cluster includes:
   "gcp_region": "us-central1",
   "primary_resources": ["google_cloud_run_service.app"],
   "secondary_resources": ["google_service_account.app_runner"],
-  "network": "network_vpc_us-central1_000",
+  "network": "network_vpc_us-central1_001",
   "creation_order_depth": 2,
   "must_migrate_together": true,
   "dependencies": [],
-  "edges": [{ "from": "...", "to": "...", "type": "..." }]
+  "edges": [{ "from": "...", "to": "...", "relationship_type": "..." }]
 }
 ```
 

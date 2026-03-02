@@ -67,13 +67,15 @@ All discovered GCP resources with full configuration and dependencies.
     {
       "address": "google_compute_network.vpc",
       "type": "google_compute_network",
-      "classification": "SECONDARY",
-      "secondary_role": "network_path",
-      "cluster_id": "compute_instance_us-central1_001",
-      "config": {},
+      "classification": "PRIMARY",
+      "secondary_role": null,
+      "cluster_id": "network_vpc_us-central1_001",
+      "config": {
+        "auto_create_subnetworks": false
+      },
       "dependencies": [],
       "depth": 0,
-      "serves": ["google_compute_instance.web"]
+      "serves": []
     }
   ]
 }
@@ -103,26 +105,30 @@ Clustered resources by affinity and deployment order.
 {
   "clusters": [
     {
+      "cluster_id": "network_vpc_us-central1_001",
+      "gcp_region": "us-central1",
+      "creation_order_depth": 0,
+      "primary_resources": [
+        "google_compute_network.vpc"
+      ],
+      "secondary_resources": [
+        "google_compute_firewall.web-allow-http"
+      ],
+      "edges": []
+    },
+    {
       "cluster_id": "compute_instance_us-central1_001",
       "gcp_region": "us-central1",
       "creation_order_depth": 1,
       "primary_resources": [
         "google_compute_instance.web"
       ],
-      "secondary_resources": [
-        "google_compute_network.vpc",
-        "google_compute_firewall.web-allow-http"
-      ],
+      "secondary_resources": [],
       "edges": [
         {
           "from": "google_compute_instance.web",
           "to": "google_compute_network.vpc",
-          "relationship_type": "network_path"
-        },
-        {
-          "from": "google_compute_instance.web",
-          "to": "google_compute_firewall.web-allow-http",
-          "relationship_type": "network_path"
+          "relationship_type": "network_membership"
         }
       ]
     },
@@ -226,7 +232,7 @@ Monthly operating costs, one-time migration costs, and ROI analysis.
       "last_updated": "2026-02-24",
       "days_old": 3,
       "is_stale": false,
-      "staleness_warning": "|WARNING: Cached pricing data is >90 days old; accuracy may be significantly degraded"
+      "staleness_warning": null
     },
     "services_by_source": {
       "live": ["Fargate", "RDS Aurora", "S3", "ALB"],

@@ -118,8 +118,8 @@ D: depends on [B, C] → depth 2
 
 1. Initial queue: [A] (in_degree 0)
 2. Dequeue A, depth[A]=0; enqueue B, C (both now in_degree 0)
-3. Dequeue B, depth[B]=1; update depth[D]=max(0,1+1)=2; enqueue D (in_degree 0)
-4. Dequeue C, depth[C]=1; update depth[D]=max(2,1+1)=2; D already enqueued
+3. Dequeue B, depth[B]=1; update depth[D]=max(0,1+1)=2; in_degree[D]=1
+4. Dequeue C, depth[C]=1; update depth[D]=max(2,1+1)=2; enqueue D (in_degree 0)
 5. Dequeue D, depth[D]=2
 6. Queue empty; all depths assigned
 
