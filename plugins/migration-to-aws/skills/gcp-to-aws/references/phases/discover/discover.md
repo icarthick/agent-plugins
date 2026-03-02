@@ -6,7 +6,7 @@ Lightweight orchestrator that delegates to domain-specific discoverers. Each sub
 ## Sub-Discovery Files
 
 - **discover-iac.md** → `gcp-resource-inventory.json` + `gcp-resource-clusters.json` (if Terraform found)
-- **discover-app-code.md** → `app_code_resources.json` (if source code with GCP imports found)
+- **discover-app-code.md** → `ai-workload-profile.json` (if source code with AI signals found)
 - **discover-billing.md** → `billing_resources.json` (if billing data found)
 
 Multiple artifacts can be produced in a single run — they are not mutually exclusive.
@@ -72,7 +72,7 @@ After all sub-discoveries complete, check what artifacts were produced in `$MIGR
 1. Check for output files:
    - `gcp-resource-inventory.json` — IaC discovery succeeded
    - `gcp-resource-clusters.json` — IaC discovery produced clusters
-   - `app_code_resources.json` — App code discovery detected GCP imports
+   - `ai-workload-profile.json` — App code discovery detected AI workloads
    - `billing_resources.json` — Billing data parsed
 2. **If NO artifacts were produced**: STOP and output: "No GCP sources detected. Provide at least one source type (Terraform files, application code, or billing exports) and try again."
 3. Record produced artifacts in `.phase-status.json` → `discovery_outputs`.
@@ -80,7 +80,7 @@ After all sub-discoveries complete, check what artifacts were produced in `$MIGR
 ## Step 3: Update Phase Status
 
 1. Update `.phase-status.json`:
-   - Set `input_files_detected` with counts from sub-discoveries (e.g., `{"terraform_files": 12, "terraform_lines": 850}`)
+   - Set `input_files_detected` with counts from sub-discoveries (e.g., `{"terraform_files": 12, "terraform_lines": 850, "app_code_languages": ["python"]}`)
    - Set `discovery_outputs` to the list of output files produced (e.g., `["gcp-resource-inventory.json", "gcp-resource-clusters.json"]`)
    - Set `phases.discover.status` to `"completed"`
    - Set `phases.discover.timestamp` to current ISO 8601 timestamp
@@ -95,7 +95,7 @@ After all sub-discoveries complete, check what artifacts were produced in `$MIGR
 
 1. `gcp-resource-inventory.json` — from discover-iac.md
 2. `gcp-resource-clusters.json` — from discover-iac.md
-3. `app_code_resources.json` — from discover-app-code.md
+3. `ai-workload-profile.json` — from discover-app-code.md
 4. `billing_resources.json` — from discover-billing.md
 
 **No other files should be created:**
