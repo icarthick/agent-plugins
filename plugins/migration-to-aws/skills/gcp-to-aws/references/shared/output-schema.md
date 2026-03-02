@@ -226,7 +226,7 @@ Monthly operating costs, one-time migration costs, and ROI analysis.
       "last_updated": "2026-02-24",
       "days_old": 3,
       "is_stale": false,
-      "staleness_warning": null | "⚠️ Cached pricing data is >90 days old; accuracy may be significantly degraded"
+      "staleness_warning": "|WARNING: Cached pricing data is >90 days old; accuracy may be significantly degraded"
     },
     "services_by_source": {
       "live": ["Fargate", "RDS Aurora", "S3", "ALB"],
