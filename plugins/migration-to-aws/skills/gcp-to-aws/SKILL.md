@@ -139,7 +139,7 @@ gcp-to-aws/
 │   │   │   ├── discover.md                     # Phase 1: Discover orchestrator
 │   │   │   ├── discover-iac.md                 # Terraform/IaC discovery
 │   │   │   ├── discover-app-code.md            # App code discovery
-│   │   │   └── discover-billing.md             # Billing data discovery (v1.2+)
+│   │   │   └── discover-billing.md             # Billing data discovery
 │   │   ├── clarify.md                          # Phase 2: Clarify requirements
 │   │   ├── design.md                           # Phase 3: Design AWS architecture
 │   │   ├── estimate.md                         # Phase 4: Cost estimation

@@ -99,17 +99,18 @@ Match resource type against secondary classification table. Each match assigns a
 
 If resource type not in Priority 1 or 2, apply these **deterministic fallback heuristics** BEFORE free-form LLM reasoning:
 
-| Pattern | Classification | secondary_role | confidence |
-|---------|---------------|----------------|------------|
-| Name contains `scheduler`, `task`, `job`, `workflow` | SECONDARY | orchestration | 0.65 |
-| Name contains `log`, `metric`, `alert`, `dashboard` | SECONDARY | configuration | 0.60 |
-| Resource has zero references to/from other resources | SECONDARY | configuration | 0.50 |
-| Resource only referenced by a `module` block | SECONDARY | configuration | 0.55 |
-| Type contains `policy` or `binding` | SECONDARY | access_control | 0.65 |
-| Type contains `network` or `subnet` | SECONDARY | network_path | 0.60 |
-| None of the above match | Use LLM reasoning | — | 0.50-0.75 |
+| Pattern                                              | Classification    | secondary_role | confidence |
+| ---------------------------------------------------- | ----------------- | -------------- | ---------- |
+| Name contains `scheduler`, `task`, `job`, `workflow` | SECONDARY         | orchestration  | 0.65       |
+| Name contains `log`, `metric`, `alert`, `dashboard`  | SECONDARY         | configuration  | 0.60       |
+| Resource has zero references to/from other resources | SECONDARY         | configuration  | 0.50       |
+| Resource only referenced by a `module` block         | SECONDARY         | configuration  | 0.55       |
+| Type contains `policy` or `binding`                  | SECONDARY         | access_control | 0.65       |
+| Type contains `network` or `subnet`                  | SECONDARY         | network_path   | 0.60       |
+| None of the above match                              | Use LLM reasoning | —              | 0.50-0.75  |
 
 If still uncertain after heuristics, use LLM reasoning. Mark with:
+
 - `classification_source: "llm_inference"`
 - `confidence: 0.5-0.75`
 

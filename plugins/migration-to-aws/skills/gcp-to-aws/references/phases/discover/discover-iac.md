@@ -10,6 +10,7 @@
 Recursively scan the entire target directory tree for infrastructure files:
 
 **Terraform:**
+
 - `**/*.tf`, `**/*.tf.json` — resource definitions
 - `**/*.tfvars`, `**/*.auto.tfvars` — variable values
 - `**/*.tfstate` — state files (read-only, if present)
@@ -17,6 +18,7 @@ Recursively scan the entire target directory tree for infrastructure files:
 - `**/modules/*/` — module directories and nested modules
 
 **Contextual files** (recorded but not processed — useful for future discovery phases):
+
 - **Kubernetes:** `**/k8s/*.yaml`, `**/kubernetes/*.yaml`, `**/manifests/*.yaml`
 - **Docker:** `**/Dockerfile`, `**/docker-compose*.yml`
 - **CI/CD:** `**/cloudbuild.yaml`, `**/.github/workflows/*.yml`, `**/.gitlab-ci.yml`, `**/Jenkinsfile`
@@ -51,13 +53,13 @@ Record file paths and types for all files found.
 
 Scan all `.tf` files for AI-relevant patterns. For each match, record the pattern, file location, and confidence score.
 
-| Pattern | What to look for | Confidence |
-|---------|-----------------|------------|
-| Vertex AI resources | `google_vertex_ai_*` resource types (`_model`, `_endpoint`, `_training_pipeline`, `_custom_job`, `_index`, `_featurestore`, `_tensorboard`, `_batch_prediction_job`) | 95% |
-| BigQuery ML | `google_bigquery_ml_*` resource types | 85% |
-| Cloud AI Services | `google_cloud_document_ai_*`, `google_cloud_vision_*`, `google_cloud_speech_*`, `google_cloud_translation_*`, `google_cloud_dialogflow_*` | 80% |
-| AI module usage | Module names containing `*ai*`, `*ml*`, `*model*`, `*prediction*`; variable values referencing `vertex-ai`, `bigquery-ml` | 70% |
-| Variable references | Variable/local names matching `*vertex*`, `*prediction*`, `*model*`, `*ml*`; values containing `vertex-ai`, `bigquery`, `gemini`, `palm` | 60% |
+| Pattern             | What to look for                                                                                                                                                     | Confidence |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Vertex AI resources | `google_vertex_ai_*` resource types (`_model`, `_endpoint`, `_training_pipeline`, `_custom_job`, `_index`, `_featurestore`, `_tensorboard`, `_batch_prediction_job`) | 95%        |
+| BigQuery ML         | `google_bigquery_ml_*` resource types                                                                                                                                | 85%        |
+| Cloud AI Services   | `google_cloud_document_ai_*`, `google_cloud_vision_*`, `google_cloud_speech_*`, `google_cloud_translation_*`, `google_cloud_dialogflow_*`                            | 80%        |
+| AI module usage     | Module names containing `*ai*`, `*ml*`, `*model*`, `*prediction*`; variable values referencing `vertex-ai`, `bigquery-ml`                                            | 70%        |
+| Variable references | Variable/local names matching `*vertex*`, `*prediction*`, `*model*`, `*ml*`; values containing `vertex-ai`, `bigquery`, `gemini`, `palm`                             | 60%        |
 
 Record all signals for the `ai_detection` section in `gcp-resource-inventory.json`. If any signal has confidence >= 70%, set `has_ai_workload: true`.
 
@@ -147,6 +149,7 @@ Record all signals for the `ai_detection` section in `gcp-resource-inventory.jso
 - `dynamic` (boolean — uses count/for_each)
 
 Include top-level sections:
+
 - `metadata` — report_date, project_directory, terraform_version
 - `summary` — total_resources, primary_resources, secondary_resources, total_clusters, classification_coverage
 - `resources[]` — all resources with above fields
@@ -174,6 +177,7 @@ Include top-level sections:
 - `edges` (array of {from, to, relationship_type, evidence})
 
 Include top-level `creation_order` array:
+
 ```json
 "creation_order": [
   { "depth": 0, "clusters": ["networking_vpc_us-central1_001"] },
@@ -185,6 +189,7 @@ Include top-level `creation_order` array:
 ### 7c: Write discovery-log.md (Optional)
 
 Human-readable summary with:
+
 - Scan summary (files found by type, resources extracted)
 - Resource classification (primary count, secondary count, tier breakdown)
 - AI signal detection results

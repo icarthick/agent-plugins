@@ -3,6 +3,7 @@
 Infers edge types from HCL context to classify relationships between resources.
 
 Edges are categorized into two groups:
+
 - **Secondary→Primary relationships** — infrastructure support (identity, network, encryption)
 - **Primary→Primary relationships** — service communication (data, cache, messaging, storage)
 
@@ -140,6 +141,7 @@ Every edge must include a structured `evidence` object:
 ```
 
 Evidence fields:
+
 - `field_path` — HCL attribute path where the reference appears
 - `reference` — the specific value, variable name, or env var that creates the relationship
 

@@ -1,9 +1,17 @@
 # Discover Phase: Billing Discovery
 
-> Self-contained billing discovery sub-file. Scans for billing CSV/JSON files, parses billing data, and builds service usage profiles.
+> Self-contained billing discovery sub-file. Scans for billing CSV/JSON files, parses billing data, builds service usage profiles, flags AI signals, and generates `billing-profile.json`.
 > If no billing files are found, exits cleanly with no output.
 
-**Status**: Not yet implemented (v1.2 feature). Steps 1-3 below describe expected behavior when implemented.
+**Execute ALL steps in order. Do not skip or optimize.**
+
+<!-- TODO: Billing parsing sophistication improvements needed:
+     - Multi-month trend analysis (growth/decline patterns)
+     - Currency handling (non-USD billing exports)
+     - Usage pattern detection (consistent vs bursty vs seasonal spend)
+     - SKU-level detail extraction for better config inference -->
+
+---
 
 ## Step 0: Self-Scan for Billing Files
 
@@ -16,7 +24,9 @@ Scan the target directory for billing data:
 
 **Exit gate:** If NO billing files are found, **exit cleanly**. Return no output artifacts. Other sub-discovery files may still produce artifacts.
 
-## Step 1: Parse Billing Data (v1.2+)
+---
+
+## Step 1: Parse Billing Data
 
 Supported formats:
 
@@ -33,7 +43,9 @@ Extract from each line item:
 
 Group by service and calculate monthly totals.
 
-## Step 2: Build Service Usage Profile (v1.2+)
+---
+
+## Step 2: Build Service Usage Profile
 
 From the parsed billing data:
 
@@ -42,22 +54,74 @@ From the parsed billing data:
 3. Identify top services by spend (sorted descending)
 4. Note usage patterns (consistent vs bursty spend)
 
-## Step 3: Write Output (v1.2+)
+---
 
-Write `$MIGRATION_DIR/billing_resources.json`:
+## Step 3: Flag AI Signals
+
+Scan billing line items for AI-relevant patterns. For each match, record the pattern, line item details, and confidence score.
+
+| Pattern                     | What to look for                                                                                        | Confidence |
+| --------------------------- | ------------------------------------------------------------------------------------------------------- | ---------- |
+| 3.1 Vertex AI billing       | Description contains "Vertex AI", "AI Platform"; monthly cost > $10                                     | 98%        |
+| 3.2 BigQuery ML billing     | "BigQuery ML" line items + high BigQuery analysis costs (>$500/month)                                   | 80%        |
+| 3.3 Generative AI API       | "Generative AI API", "Gemini API", foundation model token charges                                       | 95%        |
+| 3.4 Specialized AI services | "Document AI", "Vision AI", "Speech-to-Text", "Natural Language API", "Cloud Translation", "Dialogflow" | 85%        |
+
+---
+
+## Step 4: Generate billing-profile.json
+
+Write `$MIGRATION_DIR/billing-profile.json` with the following structure:
 
 ```json
 {
-  "billing_resources": [
+  "metadata": {
+    "report_date": "[ISO 8601 date]",
+    "billing_files_analyzed": ["path/to/billing.csv"],
+    "currency": "USD"
+  },
+  "summary": {
+    "total_monthly_spend": 0.00,
+    "total_services": 0,
+    "top_services_by_spend": []
+  },
+  "services": [
     {
       "service": "Cloud Run",
-      "monthly_cost_usd": 150.50,
-      "evidence": "billing export analysis",
-      "confidence": 0.95
+      "gcp_service_type": "google_cloud_run_service",
+      "monthly_cost": 450.00,
+      "top_skus": [
+        {
+          "sku": "Cloud Run - CPU Allocation Time",
+          "monthly_cost": 320.00,
+          "usage_amount": 1500,
+          "usage_unit": "vCPU-seconds"
+        }
+      ],
+      "usage_pattern": "consistent"
     }
-  ]
+  ],
+  "ai_signals": [
+    {
+      "pattern": "3.1",
+      "service_description": "Vertex AI",
+      "monthly_cost": 200.00,
+      "confidence": 0.98
+    }
+  ],
+  "ai_detection": {
+    "has_ai_workload": false,
+    "confidence": 0,
+    "ai_monthly_spend": 0.00
+  }
 }
 ```
+
+**Schema reference:** See `references/shared/output-schema.md` > Phase 1: DISCOVER > billing-profile.json
+
+After generating the output file, update `$MIGRATION_DIR/.phase-status.json`: record `billing-profile.json` in outputs.
+
+---
 
 ## Scope Boundary
 

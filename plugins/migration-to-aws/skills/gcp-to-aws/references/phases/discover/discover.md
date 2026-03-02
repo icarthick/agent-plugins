@@ -7,7 +7,7 @@ Lightweight orchestrator that delegates to domain-specific discoverers. Each sub
 
 - **discover-iac.md** → `gcp-resource-inventory.json` + `gcp-resource-clusters.json` (if Terraform found)
 - **discover-app-code.md** → `ai-workload-profile.json` (if source code with AI signals found)
-- **discover-billing.md** → `billing_resources.json` (if billing data found)
+- **discover-billing.md** → `billing-profile.json` (if billing data found)
 
 Multiple artifacts can be produced in a single run — they are not mutually exclusive.
 
@@ -73,7 +73,7 @@ After all sub-discoveries complete, check what artifacts were produced in `$MIGR
    - `gcp-resource-inventory.json` — IaC discovery succeeded
    - `gcp-resource-clusters.json` — IaC discovery produced clusters
    - `ai-workload-profile.json` — App code discovery detected AI workloads
-   - `billing_resources.json` — Billing data parsed
+   - `billing-profile.json` — Billing data parsed
 2. **If NO artifacts were produced**: STOP and output: "No GCP sources detected. Provide at least one source type (Terraform files, application code, or billing exports) and try again."
 3. Record produced artifacts in `.phase-status.json` → `discovery_outputs`.
 
@@ -96,7 +96,7 @@ After all sub-discoveries complete, check what artifacts were produced in `$MIGR
 1. `gcp-resource-inventory.json` — from discover-iac.md
 2. `gcp-resource-clusters.json` — from discover-iac.md
 3. `ai-workload-profile.json` — from discover-app-code.md
-4. `billing_resources.json` — from discover-billing.md
+4. `billing-profile.json` — from discover-billing.md
 
 **No other files should be created:**
 

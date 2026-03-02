@@ -79,10 +79,10 @@ Scan source code files and dependency manifests for AI-relevant patterns. For ea
 | Pattern                       | What to look for                                                                                                                                          | Confidence |
 | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
 | 2.1 Google AI Platform SDK    | Imports: `google.cloud.aiplatform` (Python), `@google-cloud/aiplatform` (JS), `cloud.google.com/go/aiplatform` (Go), `com.google.cloud.aiplatform` (Java) | 95%        |
-| 2.2 BigQuery ML SDK           | `google.cloud.bigquery` + ML operations; SQL containing `CREATE MODEL` or `ML.*`                                                                         | 85%        |
-| 2.3 LLM SDKs                 | Imports: `google.generativeai`, `anthropic`, `openai`, other LLM SDKs                                                                                    | 98%        |
+| 2.2 BigQuery ML SDK           | `google.cloud.bigquery` + ML operations; SQL containing `CREATE MODEL` or `ML.*`                                                                          | 85%        |
+| 2.3 LLM SDKs                  | Imports: `google.generativeai`, `anthropic`, `openai`, other LLM SDKs                                                                                     | 98%        |
 | 2.4 Document/Vision/Speech AI | Imports: `google.cloud.documentai*`, `google.cloud.vision*`, `google.cloud.speech*`, `google.cloud.translate*`, `google.cloud.dialogflow*`                | 90%        |
-| 2.5 Embeddings & RAG         | `langchain` + `VertexAIEmbeddings`; `llama_index` + Vertex AI; vector database usage with embeddings                                                     | 85%        |
+| 2.5 Embeddings & RAG          | `langchain` + `VertexAIEmbeddings`; `llama_index` + Vertex AI; vector database usage with embeddings                                                      | 85%        |
 
 Also check dependency manifests for AI/ML SDK dependencies:
 
