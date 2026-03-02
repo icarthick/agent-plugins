@@ -246,7 +246,7 @@ After generating output files, update `$MIGRATION_DIR/.phase-status.json`: set `
 
 ## Design Phase Integration
 
-The Design phase (`references/phases/design.md`) uses both outputs:
+The Design phase (`references/phases/design/design.md`) uses both outputs:
 
 1. **From gcp-resource-clusters.json:**
    - `creation_order` — evaluates clusters depth-first (foundational first)

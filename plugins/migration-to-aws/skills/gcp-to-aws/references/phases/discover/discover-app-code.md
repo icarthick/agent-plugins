@@ -270,7 +270,7 @@ After generating the output file, update `$MIGRATION_DIR/.phase-status.json`: se
 
 ## Design Phase Integration
 
-The Design phase (`references/phases/design.md`) uses `ai-workload-profile.json`:
+The Design phase (`references/phases/design/design.md`) uses `ai-workload-profile.json`:
 
 1. **`models`** — Determines which Bedrock models to recommend via the model selection decision tree
 2. **`integration.capabilities_summary`** — Validates Bedrock feature parity (e.g., if `function_calling` is `true`, selected Bedrock model must support tool use)
