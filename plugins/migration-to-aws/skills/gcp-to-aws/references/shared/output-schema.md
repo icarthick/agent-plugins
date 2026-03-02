@@ -189,7 +189,15 @@ AWS services mapped from GCP resources, clustered by affinity.
             "region": "us-east-1"
           },
           "confidence": "inferred",
-          "rationale": "Compute mapping; always-on; Fargate for simplicity"
+          "rationale": "Compute mapping; always-on; Fargate for simplicity",
+          "rubric_applied": [
+            "Eliminators: PASS",
+            "Operational Model: Managed Fargate",
+            "User Preference: Cost (q2)",
+            "Feature Parity: Full (always-on compute)",
+            "Cluster Context: Standalone compute tier",
+            "Simplicity: Fargate (managed, no EC2)"
+          ]
         }
       ]
     }
