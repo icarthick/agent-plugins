@@ -211,7 +211,7 @@ Monthly operating costs, one-time migration costs, and ROI analysis.
 {
   "pricing_source": {
     "status": "live|fallback",
-    "message": "Using live AWS pricing API" | "Using cached rates from 2026-02-24 (±15-25% accuracy due to API unavailability)",
+    "message": "Using live AWS pricing API|Using cached rates from 2026-02-24 (±15-25% accuracy due to API unavailability)",
     "fallback_staleness": {
       "last_updated": "2026-02-24",
       "days_old": 3,
