@@ -128,7 +128,7 @@ Clustered resources by affinity and deployment order.
         {
           "from": "google_compute_instance.web",
           "to": "google_compute_network.vpc",
-          "relationship_type": "network_membership"
+          "relationship_type": "network_path"
         }
       ]
     },

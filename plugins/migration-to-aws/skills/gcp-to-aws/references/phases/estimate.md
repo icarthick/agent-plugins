@@ -175,15 +175,16 @@ Write `estimation-report.md`:
 
 ## One-Time Migration Costs
 - Dev: 150 hours @ $150/hr = $22,500
-- Data transfer: $10,000
-- **Total: $32,500**
+- Data transfer: 500 GB @ $0.02/GB = $10
+- Training: $5,000
+- **Total: $27,510**
 
 ## ROI Analysis
 - Assumed GCP cost: $4,500/month
 - AWS Balanced: $3,500/month
 - **Savings: $1,000/month**
-- **Payback: 32.5 months**
-- **5-year savings: $28,500**
+- **Payback: 27.5 months**
+- **5-year savings: $32,490**
 ```
 
 ## Step 6: Update Phase Status
