@@ -115,7 +115,7 @@ Guides developers through adding maps, places search, geocoding, routing, and ot
 
 ## migration-to-aws
 
-Helps you systematically migrate GCP infrastructure to AWS through resource discovery, architecture mapping, cost analysis, and infrastructure-as-code generation. Analyzes Terraform configurations, billing data, and application code to recommend AWS equivalents and generate deployable IaC.
+Helps you systematically migrate GCP infrastructure to AWS through Terraform resource discovery, architecture mapping, cost estimation, and execution planning.
 
 ### Workflow
 

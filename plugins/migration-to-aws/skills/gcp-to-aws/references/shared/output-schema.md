@@ -2,6 +2,8 @@
 
 Complete JSON schemas for all phase outputs and state files.
 
+**Convention**: Values shown as `X|Y` in examples indicate allowed alternatives — use exactly one value per field, not the literal pipe character.
+
 ## .phase-status.json
 
 Current phase tracking and status.

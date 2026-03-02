@@ -133,18 +133,4 @@
 
 ## Output: clarified.json
 
-```json
-{
-  "mode": "A|B|C|D",
-  "answers": {
-    "q1_timeline": "6-12 months",
-    "q2_primary_concern": "cost",
-    "q3_team_experience": "novice",
-    "q4_traffic_profile": "predictable",
-    "q5_database_requirements": "structured",
-    "q6_cost_sensitivity": "moderate",
-    "q7_multi_cloud": "no",
-    "q8_compliance": "none"
-  }
-}
-```
+See `references/shared/output-schema.md` for the `clarified.json` schema.
