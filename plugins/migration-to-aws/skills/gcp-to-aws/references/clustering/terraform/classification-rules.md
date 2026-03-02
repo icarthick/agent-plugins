@@ -36,7 +36,7 @@ Match resource type against secondary classification table. Each match assigns a
 
 ### Network Path (`network_path`)
 
-- `google_compute_network` — Virtual network (VPC)
+- `google_compute_network` — Virtual network (VPC). Although SECONDARY, this resource anchors the networking cluster (see clustering-algorithm.md Rule 1)
 - `google_vpc_access_connector` — VPC connector for serverless
 - `google_compute_subnetwork` — Subnet
 - `google_compute_firewall` — Firewall rule
