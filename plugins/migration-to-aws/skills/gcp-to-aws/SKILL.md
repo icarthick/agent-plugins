@@ -166,7 +166,54 @@ gcp-to-aws/
 │       └── pricing-fallback.json               # Cached AWS pricing (±15-25%)
 ```
 
----
+| Condition                                   | Action                                                                                                                       |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| No `.tf` files found                        | Stop. Output: "No Terraform files detected. Please provide `.tf` files with your GCP resources and try again."               |
+| `.phase-status.json` missing phase gate     | Stop. Output: "Cannot enter Phase X: Phase Y-1 not completed. Start from Phase Y or resume Phase Y-1."                       |
+| awspricing unavailable after 3 attempts     | Display user warning about ±15-25% accuracy. Use `pricing-fallback.json`. Add `pricing_source: fallback` to estimation.json. |
+| User does not answer all Q1-8               | Offer Mode C (defaults) or Mode D (free text). Phase 2 completes either way.                                                 |
+| `aws-design.json` missing required clusters | Stop Phase 4. Output: "Re-run Phase 3 to generate missing cluster designs."                                                  |
+
+## Defaults
+
+- **IaC output**: None (v1.0 produces design, cost estimates, and execution plans — no IaC code generation)
+- **Region**: `us-east-1` (unless user specifies, or GCP region → AWS region mapping suggests otherwise)
+- **Sizing**: Development tier (e.g., `db.t4g.micro` for databases, 0.5 CPU for Fargate)
+- **Migration mode**: Full infrastructure path (no AI-only subset path in v1.0)
+- **Cost currency**: USD
+- **Timeline assumption**: 8-12 weeks total
+
+## Workflow Execution
+
+When invoked, the agent **MUST follow this exact sequence**:
+
+1. **Load phase status**: Read `.phase-status.json` from `.migration/*/`.
+   - If missing: Initialize for Phase 1 (Discover)
+   - If exists: Determine current phase based on phase field and status value
+
+2. **Determine phase to execute**:
+   - If status is `in-progress`: Resume that phase (read corresponding reference file)
+   - If status is `completed`: Advance to next phase (read next reference file)
+   - Phase mapping for advancement:
+     - discover (completed) → Execute clarify (read `references/phases/clarify.md`)
+     - clarify (completed) → Execute design (read `references/phases/design.md`)
+     - design (completed) → Execute estimate (read `references/phases/estimate.md`)
+     - estimate (completed) → Execute execute (read `references/phases/execute.md`)
+     - execute (completed) → Migration complete
+
+3. **Read phase reference**: Load the full reference file for the target phase.
+
+4. **Execute ALL steps in order**: Follow every numbered step in the reference file. **Do not skip, optimize, or deviate.**
+
+5. **Validate outputs**: Confirm all required output files exist with correct schema before proceeding.
+
+6. **Update phase status**: Each phase reference file specifies the final `.phase-status.json` update (records the phase that just completed).
+
+7. **Display summary**: Show user what was accomplished, highlight next phase, or confirm migration completion.
+
+**Critical constraint**: Agent must strictly adhere to the reference file's workflow. If unable to complete a step, stop and report the exact step that failed.
+
+User can invoke the skill again to resume from last completed phase.
 
 ## Scope Notes
 

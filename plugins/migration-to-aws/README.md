@@ -52,6 +52,13 @@ The plugin uses state files (`.migration/[MMDD-HHMM]/`) to track migration progr
 - `estimation.json` - Cost analysis
 - `execution.json` - Timeline and risks
 
+## Installation
+
+```bash
+/plugin marketplace add awslabs/agent-plugins
+/plugin install migration-to-aws@agent-plugins-for-aws
+```
+
 ## Development
 
 To test locally:

@@ -59,7 +59,6 @@
         "cloud-migration",
         "terraform",
         "fargate",
-        "cdk",
         "rds",
         "eks"
       ],

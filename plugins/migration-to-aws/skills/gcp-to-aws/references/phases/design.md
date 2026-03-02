@@ -117,7 +117,15 @@ For each mapped AWS service, verify:
             "region": "us-east-1"
           },
           "confidence": "deterministic",
-          "rationale": "1:1 compute mapping with Cold Start considerations"
+          "rationale": "1:1 compute mapping with Cold Start considerations",
+          "rubric_applied": [
+            "Eliminators: PASS",
+            "Operational Model: Managed Fargate",
+            "User Preference: Speed (q2)",
+            "Feature Parity: Full (always-on compute)",
+            "Cluster Context: Standalone compute tier",
+            "Simplicity: Fargate (managed, no EC2)"
+          ]
         }
       ]
     }
@@ -136,7 +144,7 @@ For each mapped AWS service, verify:
 ## Overview
 Mapped X GCP resources to Y AWS services across Z clusters.
 
-## Cluster: web-app-us-central1
+## Cluster: compute_instance_us-central1_001
 ### Compute
 - google_compute_instance.web → Fargate (0.5 CPU, 1 GB memory)
   Confidence: deterministic

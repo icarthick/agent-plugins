@@ -2,6 +2,8 @@
 
 Complete JSON schemas for all phase outputs and state files.
 
+**Convention**: Values shown as `X|Y` in examples indicate allowed alternatives — use exactly one value per field, not the literal pipe character.
+
 ## .phase-status.json
 
 Hierarchical phase tracking with per-phase metadata. This is the SINGLE source of truth for the `.phase-status.json` schema. All steering files reference this definition.
@@ -342,7 +344,7 @@ AWS services mapped from GCP resources, clustered by affinity.
 {
   "validation_status": {
     "status": "completed|skipped",
-    "message": "All services validated for regional availability and feature parity" | "Validation unavailable (awsknowledge MCP unreachable)"
+    "message": "All services validated for regional availability and feature parity|Validation unavailable (awsknowledge MCP unreachable)"
   },
   "clusters": [
     {
@@ -360,7 +362,15 @@ AWS services mapped from GCP resources, clustered by affinity.
             "region": "us-east-1"
           },
           "confidence": "inferred",
-          "rationale": "Compute mapping; always-on; Fargate for simplicity"
+          "rationale": "Compute mapping; always-on; Fargate for simplicity",
+          "rubric_applied": [
+            "Eliminators: PASS",
+            "Operational Model: Managed Fargate",
+            "User Preference: Cost (q2)",
+            "Feature Parity: Full (always-on compute)",
+            "Cluster Context: Standalone compute tier",
+            "Simplicity: Fargate (managed, no EC2)"
+          ]
         }
       ]
     }
@@ -382,7 +392,7 @@ Monthly operating costs, one-time migration costs, and ROI analysis.
 {
   "pricing_source": {
     "status": "live|fallback",
-    "message": "Using live AWS pricing API" | "Using cached rates from 2026-02-24 (±15-25% accuracy due to API unavailability)",
+    "message": "Using live AWS pricing API|Using cached rates from 2026-02-24 (±15-25% accuracy due to API unavailability)",
     "fallback_staleness": {
       "last_updated": "2026-02-24",
       "days_old": 3,

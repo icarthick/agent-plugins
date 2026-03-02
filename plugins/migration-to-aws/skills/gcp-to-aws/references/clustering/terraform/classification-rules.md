@@ -64,6 +64,7 @@ Match resource type against secondary classification table. Each match assigns a
 
 ### Network Path (`network_path`)
 
+- `google_compute_network` — Virtual network (VPC). Although SECONDARY, this resource anchors the networking cluster (see clustering-algorithm.md Rule 1)
 - `google_vpc_access_connector` — VPC connector for serverless
 - `google_compute_subnetwork` — Subnet
 - `google_compute_firewall` — Firewall rule
@@ -122,6 +123,6 @@ For SECONDARY resources, populate `serves[]` array (list of PRIMARY resources it
 2. Include direct references: `field = resource_type.name.id` patterns
 3. Include transitive chains: if referenced resource is also SECONDARY, trace to PRIMARY
 
-**Example**: `google_compute_firewall` → `google_compute_network.id` → PRIMARY
+**Example**: `google_compute_firewall` → references `google_compute_network` (SECONDARY) → serves `google_compute_instance.web` (PRIMARY)
 
-**Serves array**: Points back to PRIMARY workloads affected by this firewall rule.
+**Serves array**: Points back to PRIMARY workloads affected by this firewall rule. Trace through SECONDARY resources until a PRIMARY is reached.
