@@ -1,191 +1,76 @@
-# Phase 3: Design AWS Architecture
+# Phase 3: Design AWS Architecture (Orchestrator)
 
-## Step 0: Validate Inputs
+**Execute ALL steps in order. Do not skip or optimize.**
 
-Read `preferences.json`. If missing: **STOP**. Output: "Phase 2 (Clarify) not completed. Run Phase 2 first."
+## Prerequisites
 
-Read `gcp-resource-clusters.json`.
+Read `$MIGRATION_DIR/preferences.json`. If missing: **STOP**. Output: "Phase 2 (Clarify) not completed. Run Phase 2 first."
 
-## Step 1: Order Clusters
+Check which discovery artifacts exist in `$MIGRATION_DIR/`:
 
-Sort clusters by `creation_order_depth` (lowest first, representing foundational infrastructure).
+- `gcp-resource-inventory.json` (IaC discovery ran)
+- `gcp-resource-clusters.json` (IaC discovery ran)
+- `billing-profile.json` (billing discovery ran)
+- `ai-workload-profile.json` (AI workloads detected)
 
-## Step 2: Two-Pass Mapping per Cluster
+If **none** of these artifacts exist: **STOP**. Output: "No discovery artifacts found. Run Phase 1 (Discover) first."
 
-For each cluster:
+## Routing Rules
 
-### Pass 1: Fast-Path Lookup
+### Infrastructure Design (IaC-based)
 
-For each PRIMARY resource in the cluster:
+IF `gcp-resource-inventory.json` AND `gcp-resource-clusters.json` both exist:
 
-1. Extract GCP type (e.g., `google_sql_database_instance`)
-2. Look up in `design-refs/fast-path.md` → Direct Mappings table
-3. If found (deterministic 1:1 match): assign AWS service with confidence = `deterministic`
-4. If not found: proceed to Pass 2
+→ Load `design-infra.md`
 
-### Pass 2: Rubric-Based Selection
+Produces: `aws-design.json`, `aws-design-report.md`
 
-For resources not covered by fast-path:
+### Billing-Only Design (fallback)
 
-1. Determine service category (via `design-refs/index.md`):
-   - `google_compute_instance` → compute
-   - `google_cloudfunctions_function` → compute
-   - `google_sql_database_instance` → database
-   - `google_storage_bucket` → storage
-   - `google_compute_network` → networking
-   - etc.
+IF `billing-profile.json` exists AND `gcp-resource-inventory.json` does **NOT** exist:
 
-   **Catch-all for unknown types**: If resource type not found in `index.md`:
-   - Check resource name pattern (e.g., "scheduler" → orchestration, "log" → monitoring, "metric" → monitoring)
-   - If pattern match: use that category
-   - If no pattern match: **STOP**. Output: "Unknown GCP resource type: [type]. Not in fast-path.md or index.md. Cannot auto-map. Please file an issue with this resource type."
+→ Load `design-billing.md`
 
-2. Load rubric from corresponding `design-refs/*.md` file (e.g., `compute.md`, `database.md`)
+Produces: `aws-design-billing.json`, `aws-design-billing-report.md`
 
-3. Evaluate 6 criteria (1-sentence each):
-   - **Eliminators**: Feature incompatibility (hard blocker)
-   - **Operational Model**: Managed vs self-hosted fit
-   - **User Preference**: From `preferences.json` design_constraints
-   - **Feature Parity**: GCP feature → AWS feature availability
-   - **Cluster Context**: Affinity with other resources in this cluster
-   - **Simplicity**: Prefer fewer resources / less config
+### AI Workload Design
 
-4. Select best-fit AWS service. Confidence = `inferred`
+IF `ai-workload-profile.json` exists:
 
-## Step 3: Handle Secondary Resources
+→ Load `design-ai.md`
 
-For each SECONDARY resource:
+Produces: `aws-design-ai.json`, `aws-design-ai-report.md`
 
-1. Use `design-refs/index.md` for category
-2. Apply fast-path (most secondaries have deterministic mappings)
-3. If rubric needed: apply same 6-criteria approach
+### Mutual Exclusion
 
-## Step 3.5: Validate AWS Architecture (using awsknowledge)
+- **design-infra** and **design-billing** never both run (billing-only is the fallback when no IaC exists).
+- **design-ai** runs independently alongside either design-infra or design-billing (if AI artifacts exist).
 
-**Validation checks** (if awsknowledge available):
+## Phase Completion
 
-For each mapped AWS service, verify:
-
-1. **Regional Availability**: Is the service available in the target region (e.g., `us-east-1`)?
-   - Use awsknowledge to check regional support
-   - If unavailable: add warning, suggest fallback region
-
-2. **Feature Parity**: Do required features exist in AWS service?
-   - Match GCP features from `preferences.json` design_constraints
-   - Check AWS feature availability via awsknowledge
-   - If feature missing: add warning, suggest alternative service
-
-3. **Service Compatibility**: Are there known issues or constraints?
-   - Check best practices and gotchas via awsknowledge
-   - Add to warnings if applicable
-
-**If awsknowledge unavailable:**
-
-- Set `validation_status: "skipped"` in output
-- Add note to report: "Architecture validation unavailable (non-critical)"
-- Continue with design (validation is informational, not blocking)
-
-**If validation succeeds:**
-
-- Set `validation_status: "completed"` in output
-- List validated services in report
-
-## Step 4: Write Design Output
-
-**File 1: `aws-design.json`**
-
-```json
-{
-  "clusters": [
-    {
-      "cluster_id": "compute_instance_us-central1_001",
-      "gcp_region": "us-central1",
-      "aws_region": "us-east-1",
-      "resources": [
-        {
-          "gcp_address": "google_compute_instance.web",
-          "gcp_type": "google_compute_instance",
-          "gcp_config": {
-            "machine_type": "n2-standard-2",
-            "zone": "us-central1-a",
-            "boot_disk_size_gb": 100
-          },
-          "aws_service": "Fargate",
-          "aws_config": {
-            "cpu": "0.5",
-            "memory": "1024",
-            "region": "us-east-1"
-          },
-          "confidence": "deterministic",
-          "rationale": "1:1 compute mapping with Cold Start considerations",
-          "rubric_applied": [
-            "Eliminators: PASS",
-            "Operational Model: Managed Fargate",
-            "User Preference: Speed (q2)",
-            "Feature Parity: Full (always-on compute)",
-            "Cluster Context: Standalone compute tier",
-            "Simplicity: Fargate (managed, no EC2)"
-          ]
-        }
-      ]
-    }
-  ],
-  "warnings": [
-    "service X not fully supported in us-east-1; fallback to us-west-2"
-  ]
-}
-```
-
-**File 2: `aws-design-report.md`**
-
-```
-# AWS Architecture Design Report
-
-## Overview
-Mapped X GCP resources to Y AWS services across Z clusters.
-
-## Cluster: compute_instance_us-central1_001
-### Compute
-- google_compute_instance.web → Fargate (0.5 CPU, 1 GB memory)
-  Confidence: deterministic
-  Rationale: Direct compute mapping, Cold Start not applicable (always-on)
-
-[repeat per resource]
-
-## Warnings
-- Service X: falling back to region Y due to regional unavailability
-```
-
-## Output Validation Checklist
-
-### aws-design.json
-
-- `clusters` array is non-empty
-- Every cluster has `cluster_id` matching a cluster from `gcp-resource-clusters.json`
-- Every cluster has `gcp_region` and `aws_region`
-- Every resource has `gcp_address`, `gcp_type`, `gcp_config`, `aws_service`, `aws_config`
-- All `confidence` values are either `"deterministic"` or `"inferred"`
-- All `rationale` fields are non-empty
-- Every resource from every evaluated cluster appears in the output
-- No duplicate `gcp_address` values across clusters
-- Output is valid JSON
-
-### aws-design-report.md
-
-- Overview section lists total resources, services, and clusters
-- Every cluster has a section with per-resource mappings
-- Warnings section present (even if empty)
-
-## Step 5: Update Phase Status
-
-Update `$MIGRATION_DIR/.phase-status.json`:
+After all applicable sub-designs finish, update `$MIGRATION_DIR/.phase-status.json`:
 
 - Set `phases.design.status` to `"completed"`
 - Set `phases.design.timestamp` to current ISO 8601 timestamp
-- Set `phases.design.outputs` to `["aws-design.json", "aws-design-report.md"]`
+- Set `phases.design.outputs` to the combined list of output files produced (e.g., `["aws-design.json", "aws-design-report.md"]` or `["aws-design-billing.json", "aws-design-billing-report.md", "aws-design-ai.json", "aws-design-ai-report.md"]`)
 - Update `last_updated` to current timestamp
 
 Output to user: "AWS Architecture designed. Proceeding to Phase 4: Estimate Costs."
+
+## Reference Files
+
+Sub-design files may reference rubrics in `design-refs/`:
+
+- `design-refs/index.md` — GCP type → rubric file lookup
+- `design-refs/fast-path.md` — Deterministic 1:1 GCP→AWS mappings
+- `design-refs/compute.md` — Compute service rubric
+- `design-refs/database.md` — Database service rubric
+- `design-refs/storage.md` — Storage service rubric
+- `design-refs/networking.md` — Networking service rubric
+- `design-refs/messaging.md` — Messaging service rubric
+- `design-refs/ai.md` — AI/ML service rubric
+
+Output schemas are defined in `shared/output-schema.md`.
 
 ## Scope Boundary
 

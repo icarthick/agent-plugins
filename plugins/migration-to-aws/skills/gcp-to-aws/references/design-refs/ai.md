@@ -2,8 +2,6 @@
 
 **Applies to:** Vertex AI, Cloud Vision API, Cloud ML Engine
 
-**Note:** v1.0 focuses on infrastructure migration. AI model serving/retraining is deferred to v1.1+.
-
 ## Signals (Decision Criteria)
 
 ### Vertex AI (Endpoints / Models)
@@ -29,7 +27,7 @@ Apply in order:
 1. **Eliminators**: Does GCP config require AWS-unsupported features? If yes: use alternative
 2. **Operational Model**: Managed (SageMaker) vs Custom (EC2 + training)?
    - Prefer managed
-3. **User Preference**: From `preferences.json`: `design_constraints.cost_sensitivity` (+ `ai_constraints` when Category F is implemented in v1.1)?
+3. **User Preference**: From `preferences.json`: `design_constraints.cost_sensitivity` + `ai_constraints` (if present)
    - If cost-sensitive → check SageMaker Spot + Autopilot
 4. **Feature Parity**: Does GCP config need model type unavailable in AWS?
    - Example: TensorFlow 2.x → SageMaker (supported)
@@ -83,10 +81,3 @@ Apply in order:
   "rationale": "Vertex AI custom model → SageMaker Endpoint (PyTorch supported)"
 }
 ```
-
-## Deferred to v1.1+
-
-- Model retraining pipeline setup (training job automation)
-- Hyperparameter tuning (SageMaker Hyperparameter Tuning Job)
-- Multi-instance distributed training
-- Model registry and versioning (SageMaker Model Registry)

@@ -9,7 +9,7 @@ description: "Migrate workloads from Google Cloud Platform to AWS. Triggers on: 
 
 - **Re-platform by default**: Select AWS services that match GCP workload types (e.g., Cloud Run → Fargate, Cloud SQL → RDS).
 - **Dev sizing unless specified**: Default to development-tier capacity (e.g., db.t4g.micro, single AZ). Upgrade only on user direction.
-- **Infrastructure-first approach**: v1.0 migrates Terraform-defined infrastructure only. App code scanning and billing import are v1.1+.
+- **Multi-signal approach**: Design phase adapts based on available inputs — Terraform IaC for infrastructure, billing data for service mapping, and app code for AI workload detection.
 
 ---
 
@@ -107,13 +107,13 @@ The `.migration/` directory is automatically protected by a `.gitignore` file cr
 
 ## Phase Summary Table
 
-| Phase        | Inputs                                                      | Outputs                                                                                   | Reference                                |
-| ------------ | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------- |
-| **Discover** | `.tf` files                                                 | `gcp-resource-inventory.json`, `gcp-resource-clusters.json`, `.phase-status.json` updated | `references/phases/discover/discover.md` |
-| **Clarify**  | `gcp-resource-inventory.json`, `gcp-resource-clusters.json` | `preferences.json`, `.phase-status.json` updated                                          | `references/phases/clarify.md`           |
-| **Design**   | `gcp-resource-inventory.json`, `preferences.json`           | `aws-design.json`, `aws-design-report.md`, `.phase-status.json` updated                   | `references/phases/design.md`            |
-| **Estimate** | `aws-design.json`, `preferences.json`                       | `estimation.json`, `estimation-report.md`, `.phase-status.json` updated                   | `references/phases/estimate.md`          |
-| **Execute**  | `aws-design.json`, `preferences.json`                       | `execution.json`, `execution-timeline.md`, `.phase-status.json` updated                   | `references/phases/execute.md`           |
+| Phase        | Inputs                                                      | Outputs                                                                                                                                                                              | Reference                                |
+| ------------ | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- |
+| **Discover** | `.tf` files                                                 | `gcp-resource-inventory.json`, `gcp-resource-clusters.json`, `.phase-status.json` updated                                                                                            | `references/phases/discover/discover.md` |
+| **Clarify**  | `gcp-resource-inventory.json`, `gcp-resource-clusters.json` | `preferences.json`, `.phase-status.json` updated                                                                                                                                     | `references/phases/clarify.md`           |
+| **Design**   | `preferences.json` + discovery artifacts                    | `aws-design.json` + `aws-design-report.md` (infra), `aws-design-ai.json` + `aws-design-ai-report.md` (AI), `aws-design-billing.json` + `aws-design-billing-report.md` (billing-only) | `references/phases/design.md`            |
+| **Estimate** | `aws-design.json`, `preferences.json`                       | `estimation.json`, `estimation-report.md`, `.phase-status.json` updated                                                                                                              | `references/phases/estimate.md`          |
+| **Execute**  | `aws-design.json`, `preferences.json`                       | `execution.json`, `execution-timeline.md`, `.phase-status.json` updated                                                                                                              | `references/phases/execute.md`           |
 
 ---
 
@@ -141,7 +141,10 @@ gcp-to-aws/
 │   │   │   ├── discover-app-code.md            # App code discovery
 │   │   │   └── discover-billing.md             # Billing data discovery
 │   │   ├── clarify.md                          # Phase 2: Clarify requirements
-│   │   ├── design.md                           # Phase 3: Design AWS architecture
+│   │   ├── design.md                           # Phase 3: Design orchestrator
+│   │   ├── design-infra.md                     # Infrastructure design (IaC-based)
+│   │   ├── design-ai.md                        # AI workload design (Bedrock)
+│   │   ├── design-billing.md                   # Billing-only design (fallback)
 │   │   ├── estimate.md                         # Phase 4: Cost estimation
 │   │   └── execute.md                          # Phase 5: Execution planning
 │   │
@@ -179,7 +182,7 @@ gcp-to-aws/
 - **IaC output**: None (v1.0 produces design, cost estimates, and execution plans — no IaC code generation)
 - **Region**: `us-east-1` (unless user specifies, or GCP region → AWS region mapping suggests otherwise)
 - **Sizing**: Development tier (e.g., `db.t4g.micro` for databases, 0.5 CPU for Fargate)
-- **Migration mode**: Full infrastructure path (no AI-only subset path in v1.0)
+- **Migration mode**: Adapts based on available inputs (infrastructure, AI, or billing-only)
 - **Cost currency**: USD
 - **Timeline assumption**: 8-12 weeks total
 
@@ -219,15 +222,10 @@ User can invoke the skill again to resume from last completed phase.
 
 **v1.0 includes:**
 
-- Terraform infrastructure discovery (no app code scanning)
+- Terraform infrastructure discovery
+- App code scanning (AI workload detection)
+- Billing data import from GCP
 - User requirement clarification (adaptive questions by category)
-- Structured Design (cluster-based mapping from Terraform)
+- Multi-path Design (infrastructure, AI workloads, billing-only fallback)
 - AWS cost estimation (from pricing API or fallback)
 - Execution timeline and risk assessment
-
-**Deferred to v1.1+:**
-
-- App code scanning (runtime detection of compute workload types)
-- AI-only fast-track path in Clarify/Design
-- Billing data import from GCP
-- Flat Design path (for non-Terraform codebases)
