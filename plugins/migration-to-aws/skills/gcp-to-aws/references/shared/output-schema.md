@@ -171,7 +171,7 @@ AWS services mapped from GCP resources, clustered by affinity.
 {
   "validation_status": {
     "status": "completed|skipped",
-    "message": "All services validated for regional availability and feature parity" | "Validation unavailable (awsknowledge MCP unreachable)"
++    "message": "All services validated for regional availability and feature parity|Validation unavailable (awsknowledge MCP unreachable)"
   },
   "clusters": [
     {
