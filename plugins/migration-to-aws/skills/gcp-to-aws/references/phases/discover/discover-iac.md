@@ -79,6 +79,8 @@ Extracts and clusters GCP resources from Terraform files. Produces final invento
 - `classification` (PRIMARY or SECONDARY)
 - `secondary_role` (for secondaries only; one of: identity, access_control, network_path, configuration, encryption, orchestration)
 - `cluster_id` (assigned cluster)
+- `config` (resource configuration object: machine_type, database_version, region, etc.)
+- `dependencies` (list of Terraform addresses this resource depends on)
 - `depth` (topological depth, integer ≥ 0)
 - `serves` (for secondaries only; list of resources this secondary supports)
 
@@ -90,10 +92,16 @@ Extracts and clusters GCP resources from Terraform files. Produces final invento
 **CRITICAL field names (use EXACTLY these):**
 
 - `cluster_id` (matches resources' cluster_id)
+- `name` (human-readable cluster name)
+- `type` (cluster category: compute, database, network, storage, etc.)
+- `description` (brief description of cluster contents)
 - `primary_resources` (array of addresses)
 - `secondary_resources` (array of addresses)
 - `creation_order_depth` (matches resource depths)
 - `gcp_region` (GCP region for this cluster)
+- `network` (cluster_id of the network cluster this cluster belongs to, or null)
+- `must_migrate_together` (boolean: true if resources must move together)
+- `dependencies` (array of cluster_ids this cluster depends on)
 - `edges` (array of {from, to, relationship_type})
 
 ### 6c: Validate Both Files Exist

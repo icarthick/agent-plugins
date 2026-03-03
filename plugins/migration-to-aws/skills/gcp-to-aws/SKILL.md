@@ -117,7 +117,7 @@ If `.phase-status.json` exists:
 
 - **IaC output**: None (v1.0 produces design, cost estimates, and execution plans — no IaC code generation)
 - **Region**: `us-east-1` (unless user specifies, or GCP region → AWS region mapping suggests otherwise)
-- **Sizing**: Development tier (e.g., `db.t4g.micro` for databases, 0.5 CPU for Fargate)
+- **Sizing**: Development tier (e.g., Aurora Serverless v2 0.5 ACU for databases, 0.5 CPU for Fargate)
 - **Migration mode**: Full infrastructure path (no AI-only subset path in v1.0)
 - **Cost currency**: USD
 - **Timeline assumption**: 8-12 weeks total

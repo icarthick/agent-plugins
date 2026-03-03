@@ -9,7 +9,7 @@
 | GCP Service            | AWS        | Blocker                                                                    |
 | ---------------------- | ---------- | -------------------------------------------------------------------------- |
 | Firestore              | DynamoDB   | ACID transactions spanning >100 items required → use RDS (DynamoDB limit: 100 items/transaction) |
-| BigQuery               | Redshift   | <1 second query latency required → use Athena + Glue (OLAP, not analytics) |
+| BigQuery               | Redshift   | OLTP-level latency (<100ms) required → use DynamoDB (point lookups) or Aurora (SQL OLTP); Redshift is OLAP |
 | Cloud SQL (PostgreSQL) | RDS Aurora | PostGIS extension → supported (Aurora supports PostGIS)                    |
 
 ## Signals (Decision Criteria)
@@ -32,6 +32,12 @@
 - **Data warehouse / OLAP analytics** → Redshift
 - **Ad-hoc SQL queries** → Athena (serverless SQL; cheaper for infrequent queries)
 - **ML models in warehouse** → Redshift ML (or SageMaker) vs BigQuery ML
+
+### Memorystore (Redis)
+
+- **In-memory cache** → ElastiCache Redis (fast-path, 1:1 mapping)
+- **Cluster mode enabled** → ElastiCache Redis with cluster mode
+- **High availability required** → ElastiCache Redis Multi-AZ with auto-failover
 
 ## 6-Criteria Rubric
 
@@ -81,12 +87,6 @@ Apply in order:
 - Criterion 3 (User Preference): If q6=`cost_sensitive` → Athena (pay per query, no idle cost)
 - → **AWS: Athena (Glue catalog, parquet format in S3)**
 - Confidence: `inferred`
-
-### Memorystore (Redis)
-
-- **In-memory cache** → ElastiCache Redis (fast-path, 1:1 mapping)
-- **Cluster mode enabled** → ElastiCache Redis with cluster mode
-- **High availability required** → ElastiCache Redis Multi-AZ with auto-failover
 
 ## Output Schema
 

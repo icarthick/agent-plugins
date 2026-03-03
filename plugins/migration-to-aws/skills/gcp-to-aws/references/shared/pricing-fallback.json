@@ -18,10 +18,14 @@
       "DynamoDB (on-demand)",
       "S3 Standard",
       "S3 Intelligent-Tiering",
-      "Bedrock Claude (all models)",
-      "Bedrock Llama (all models)",
-      "Bedrock Mistral (all models)",
-      "Bedrock Nova (all models)"
+      "ElastiCache Redis (t3, r6g families)",
+      "SQS (Standard and FIFO)",
+      "SNS (Standard and FIFO)",
+      "EventBridge",
+      "Bedrock Claude (Sonnet 4, Haiku 3.5, Opus 4)",
+      "Bedrock Llama (4 Maverick, 4 Scout)",
+      "Bedrock Mistral (Large)",
+      "Bedrock Nova (Pro, Lite, Micro)"
     ]
   },
   "compute": {
@@ -247,10 +251,11 @@
       "get_request_per_1000": 0.0004,
       "data_transfer_out_per_gb": 0.09,
       "example_1tb_1m_gets_100k_puts": {
-        "storage_monthly": 23.04,
+        "storage_monthly": 23.55,
         "get_requests": 0.4,
         "put_requests": 0.5,
-        "total_monthly": 23.94
+        "total_monthly": 24.45,
+        "note": "1024 GB × $0.023 = $23.55; 1M GETs × $0.0004/1K = $0.40; 100K PUTs × $0.005/1K = $0.50"
       }
     },
     "s3_standard_ia": {
@@ -303,6 +308,138 @@
       "note": "For outbound internet access from private subnets"
     }
   },
+  "ai": {
+    "bedrock_claude": {
+      "description": "Amazon Bedrock - Claude models",
+      "pricing_model": "pay-per-token (input + output)",
+      "note": "On-demand pricing, us-east-1",
+      "models": {
+        "claude_sonnet_4": {
+          "input_per_1k_tokens": 0.003,
+          "output_per_1k_tokens": 0.015
+        },
+        "claude_haiku_3_5": {
+          "input_per_1k_tokens": 0.0008,
+          "output_per_1k_tokens": 0.004
+        },
+        "claude_opus_4": {
+          "input_per_1k_tokens": 0.015,
+          "output_per_1k_tokens": 0.075
+        }
+      }
+    },
+    "bedrock_llama": {
+      "description": "Amazon Bedrock - Llama models",
+      "pricing_model": "pay-per-token (input + output)",
+      "note": "On-demand pricing, us-east-1",
+      "models": {
+        "llama_4_maverick": {
+          "input_per_1k_tokens": 0.0002,
+          "output_per_1k_tokens": 0.00088
+        },
+        "llama_4_scout": {
+          "input_per_1k_tokens": 0.00017,
+          "output_per_1k_tokens": 0.00068
+        }
+      }
+    },
+    "bedrock_mistral": {
+      "description": "Amazon Bedrock - Mistral models",
+      "pricing_model": "pay-per-token (input + output)",
+      "note": "On-demand pricing, us-east-1",
+      "models": {
+        "mistral_large": {
+          "input_per_1k_tokens": 0.002,
+          "output_per_1k_tokens": 0.006
+        }
+      }
+    },
+    "bedrock_nova": {
+      "description": "Amazon Bedrock - Amazon Nova models",
+      "pricing_model": "pay-per-token (input + output)",
+      "note": "On-demand pricing, us-east-1",
+      "models": {
+        "nova_pro": {
+          "input_per_1k_tokens": 0.0008,
+          "output_per_1k_tokens": 0.0032
+        },
+        "nova_lite": {
+          "input_per_1k_tokens": 0.00006,
+          "output_per_1k_tokens": 0.00024
+        },
+        "nova_micro": {
+          "input_per_1k_tokens": 0.000035,
+          "output_per_1k_tokens": 0.00014
+        }
+      }
+    }
+  },
+  "messaging": {
+    "sqs": {
+      "description": "Amazon SQS - Message queue",
+      "pricing_model": "pay-per-request",
+      "note": "Standard queue pricing, us-east-1",
+      "price_per_million_requests": 0.40,
+      "fifo_price_per_million_requests": 0.50,
+      "free_tier_requests_per_month": 1000000,
+      "example_10m_requests": {
+        "standard_monthly": 4.00,
+        "fifo_monthly": 5.00,
+        "note": "10M requests × $0.40/M = $4.00 (standard); 10M × $0.50/M = $5.00 (FIFO)"
+      }
+    },
+    "sns": {
+      "description": "Amazon SNS - Pub/sub notifications",
+      "pricing_model": "pay-per-publish + delivery",
+      "note": "Standard topic pricing, us-east-1",
+      "price_per_million_publishes": 0.50,
+      "fifo_price_per_million_publishes": 0.50,
+      "sqs_delivery_per_million": 0.00,
+      "http_delivery_per_million": 0.60,
+      "free_tier_publishes_per_month": 1000000,
+      "example_10m_publishes_sqs_delivery": {
+        "publish_monthly": 5.00,
+        "delivery_monthly": 0.00,
+        "total_monthly": 5.00,
+        "note": "10M publishes × $0.50/M = $5.00; SQS delivery is free"
+      }
+    },
+    "eventbridge": {
+      "description": "Amazon EventBridge - Event bus",
+      "pricing_model": "pay-per-event",
+      "note": "Default event bus pricing, us-east-1",
+      "price_per_million_events": 1.00,
+      "example_10m_events": {
+        "monthly": 10.00,
+        "note": "10M events × $1.00/M = $10.00"
+      }
+    }
+  },
+  "cache": {
+    "elasticache_redis": {
+      "description": "Amazon ElastiCache for Redis",
+      "pricing_model": "pay-per-hour (on-demand)",
+      "note": "Single-AZ pricing (on-demand, us-east-1). For Multi-AZ, approximately double.",
+      "node_types": {
+        "cache.t3.micro": {
+          "hourly_price": 0.017,
+          "monthly_price": 12.41
+        },
+        "cache.t3.small": {
+          "hourly_price": 0.034,
+          "monthly_price": 24.82
+        },
+        "cache.t3.medium": {
+          "hourly_price": 0.068,
+          "monthly_price": 49.64
+        },
+        "cache.r6g.large": {
+          "hourly_price": 0.214,
+          "monthly_price": 156.22
+        }
+      }
+    }
+  },
   "cost_calculation_examples": {
     "simple_web_app": {
       "description": "Simple web app: ALB + Fargate container + RDS database",
@@ -312,7 +449,7 @@
         "rds_mysql_t3_medium": 24.81,
         "s3_100gb": 2.3
       },
-      "total_monthly": 113.69,
+      "total_monthly": 115.59,
       "note": "Excludes data transfer, backups, monitoring"
     },
     "ai_chatbot": {
@@ -324,7 +461,7 @@
         "nat_gateway": 32.85
       },
       "total_monthly": 295.65,
-      "note": "Estimated for 1M input + 500K output tokens + 1M reads/month"
+      "note": "Estimated for 1M input + 500K output tokens + 1B reads/month"
     },
     "large_database": {
       "description": "Large database: Aurora PostgreSQL + backups",
@@ -343,7 +480,7 @@
   "gcp_aws_equivalence": {
     "cloud_run": {
       "aws_options": ["Fargate (serverless)", "Lambda (if stateless)", "ECS on EC2 (if persistent)"],
-      "recommended": "Fargate if < 1GB memory, Lambda if stateless, ECS if high volume"
+      "recommended": "Fargate if always-on or HTTP, Lambda if stateless event-driven < 15min, ECS on EC2 if high volume or custom AMI needed"
     },
     "cloud_sql_mysql": {
       "aws_options": ["RDS MySQL", "Aurora MySQL"],

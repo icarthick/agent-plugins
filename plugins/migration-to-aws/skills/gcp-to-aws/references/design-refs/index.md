@@ -67,5 +67,5 @@
 
 1. Extract GCP resource type from Terraform
 2. Find in table above
-3. If Fast-Path column has value: use direct mapping (deterministic)
-4. Otherwise: load Reference File and apply 6-criteria rubric
+3. If resource found in `fast-path.md` Direct Mappings table: use that mapping (confidence = deterministic)
+4. Otherwise: load Reference File listed above and apply 6-criteria rubric (confidence = inferred)
