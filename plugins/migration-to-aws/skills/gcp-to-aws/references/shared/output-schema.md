@@ -36,7 +36,7 @@ Hierarchical phase tracking with per-phase metadata. This is the SINGLE source o
     },
     "design": { "status": "in_progress", "timestamp": null, "outputs": [] },
     "estimate": { "status": "pending", "timestamp": null, "outputs": [] },
-    "execute": { "status": "pending", "timestamp": null, "outputs": [] }
+    "generate": { "status": "pending", "timestamp": null, "outputs": [] }
   }
 }
 ```
@@ -1120,42 +1120,290 @@ Billing-only cost analysis with wider confidence ranges (±30-40%) due to missin
 
 ---
 
-## execution.json (Phase 5 output)
+## generation-infra.json (Phase 5 output)
 
-Timeline, risk assessment, and rollback procedures.
+Infrastructure migration plan with timeline, risk assessment, success metrics, rollback procedures, team roles, go/no-go criteria, and post-migration monitoring plan.
 
 ```json
 {
-  "timeline_weeks": 12,
-  "critical_path": [
-    "VPC setup (Week 1)",
-    "PoC deployment (Week 3-5)",
-    "Data migration (Week 9-10)",
-    "DNS cutover (Week 11)"
-  ],
+  "phase": "generate",
+  "generation_source": "infrastructure",
+  "timestamp": "2026-02-26T14:30:00Z",
+  "migration_plan": {
+    "total_weeks": 12,
+    "phases": [
+      {
+        "name": "Setup",
+        "weeks": "1-2",
+        "clusters_targeted": [],
+        "key_activities": ["AWS account setup", "VPC provisioning", "IAM configuration"],
+        "dependencies": [],
+        "go_no_go_criteria": "VPC online, IAM configured, connectivity verified"
+      }
+    ],
+    "services": [
+      {
+        "gcp_service": "Cloud Run",
+        "aws_service": "Fargate",
+        "migration_week": 5,
+        "cluster_id": "compute_cloudrun_us-central1_001",
+        "estimated_effort_hours": 40,
+        "data_migration_required": false
+      }
+    ],
+    "critical_path": [
+      "VPC setup (Week 1)",
+      "PoC deployment (Week 3-4)",
+      "Database replication (Week 8-9)",
+      "DNS cutover (Week 10-11)"
+    ],
+    "dependencies": [
+      {
+        "from_cluster": "networking_vpc_us-central1_001",
+        "to_cluster": "compute_cloudrun_us-central1_001",
+        "type": "must_precede"
+      }
+    ]
+  },
   "risks": [
     {
       "category": "data_loss",
       "probability": "low",
       "impact": "critical",
-      "mitigation": "Dual-write replication for 2 weeks; full backup before cutover"
-    },
-    {
-      "category": "performance_regression",
-      "probability": "medium",
-      "impact": "high",
-      "mitigation": "PoC testing (Week 3-5); load testing (Week 6)"
-    },
-    {
-      "category": "team_capacity",
-      "probability": "medium",
-      "impact": "medium",
-      "mitigation": "Allocate 2 FTE engineers; external support if needed"
+      "mitigation": "Dual-write for 2 weeks; full backup before cutover; checksum validation",
+      "phase_affected": "Data Migration"
     }
   ],
-  "rollback_window": "Reversible until DNS cutover (Week 11); manual after",
-  "gcp_teardown_week": 14,
-  "timestamp": "2026-02-26T14:30:00Z"
+  "success_metrics": {
+    "per_service": [
+      {
+        "service": "Fargate",
+        "availability_target": "99.9%",
+        "latency_target": "within 10% of GCP baseline",
+        "cost_target": "within 15% of estimation"
+      }
+    ],
+    "overall": {
+      "data_integrity": "100%",
+      "timeline_variance": "within 2 weeks",
+      "rollback_rto": "< 1 hour"
+    }
+  },
+  "rollback_procedures": {
+    "trigger_conditions": [
+      "Data integrity failure",
+      "Performance regression > 20%",
+      "Error rate > 1% sustained 15 min",
+      "Cost overrun > 50%"
+    ],
+    "pre_cutover_rto": "< 1 hour",
+    "post_cutover_rto": "2-4 hours",
+    "rollback_window": "Reversible until 48 hours post-DNS cutover"
+  },
+  "team_roles": {
+    "minimum_fte": 2,
+    "recommended_fte": 3,
+    "duration_weeks": 12,
+    "roles": ["Migration Lead", "Infrastructure Engineer", "Database Engineer"]
+  },
+  "go_no_go_criteria": [
+    {
+      "gate": "G1",
+      "transition": "Setup to PoC",
+      "criteria": "VPC online, IAM configured, connectivity verified"
+    }
+  ],
+  "post_migration": {
+    "monitoring_duration_days": 30,
+    "gcp_teardown_week": 14,
+    "optimization_start_week": 15
+  },
+  "recommendation": {
+    "approach": "Phased cluster-by-cluster migration",
+    "confidence": "high",
+    "key_risks": ["Data migration complexity", "Performance validation"],
+    "estimated_total_effort_hours": 480
+  }
+}
+```
+
+---
+
+## generation-ai.json (Phase 5 output)
+
+AI migration plan with fast-track timeline, step-by-step SDK migration guide, rollback plan, monitoring, production readiness checklist, and success criteria.
+
+```json
+{
+  "phase": "generate",
+  "generation_source": "ai",
+  "timestamp": "2026-02-26T14:30:00Z",
+  "migration_plan": {
+    "total_weeks": 2,
+    "approach": "fast_track",
+    "phases": [
+      {
+        "name": "Setup and Adapter Development",
+        "week": 1,
+        "key_activities": [
+          "Enable Bedrock model access",
+          "Create IAM role",
+          "Develop provider adapter",
+          "Implement feature flag"
+        ]
+      }
+    ],
+    "models_to_migrate": [
+      {
+        "gcp_model_id": "gemini-pro",
+        "bedrock_model_id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
+        "capabilities": ["text_generation", "streaming"],
+        "migration_complexity": "medium"
+      }
+    ]
+  },
+  "step_by_step_guide": {
+    "languages": ["python"],
+    "primary_pattern": "direct_sdk",
+    "files_to_modify": [
+      {
+        "file": "src/ai/client.py",
+        "change_type": "sdk_swap",
+        "complexity": "medium"
+      }
+    ],
+    "dependency_changes": {
+      "remove": ["google-cloud-aiplatform"],
+      "add": ["boto3"]
+    }
+  },
+  "rollback_plan": {
+    "mechanism": "feature_flag",
+    "flag_name": "AI_PROVIDER",
+    "default_value": "vertex_ai",
+    "rollback_time": "instant (env var change)",
+    "triggers": [
+      "Quality below 90% threshold",
+      "P95 latency > 2x baseline",
+      "Error rate > 1% for 5 min"
+    ]
+  },
+  "monitoring": {
+    "dashboards": [
+      "Request volume",
+      "Latency comparison",
+      "Error rates",
+      "Token usage",
+      "Cost tracking"
+    ],
+    "alerting_rules": [
+      {
+        "severity": "critical",
+        "condition": "Error rate > 5% for 2 min",
+        "action": "Page on-call, auto-rollback"
+      }
+    ]
+  },
+  "production_readiness_checklist": [
+    "Bedrock model access enabled",
+    "IAM role configured",
+    "Provider adapter tested in staging",
+    "A/B comparison completed (>= 100 prompts)",
+    "Quality >= 90% of Vertex AI",
+    "Monitoring and alerting active",
+    "Rollback procedure tested"
+  ],
+  "success_criteria": {
+    "quality": {
+      "response_quality": ">= 90% of Vertex AI baseline",
+      "capability_coverage": "100%"
+    },
+    "latency": {
+      "p50": "within 1.5x of Vertex AI",
+      "p95": "within 2x of Vertex AI"
+    },
+    "cost": {
+      "monthly": "within 20% of estimation-ai.json projection",
+      "per_request": "within 30% of Vertex AI"
+    }
+  },
+  "recommendation": {
+    "approach": "Fast-track migration with feature flag rollback",
+    "confidence": "high",
+    "key_risks": ["Model quality differences", "Prompt tuning needed"],
+    "estimated_total_effort_hours": 80
+  }
+}
+```
+
+---
+
+## generation-billing.json (Phase 5 output)
+
+Conservative billing-only migration plan with extended discovery, relaxed thresholds, and IaC discovery recommendation.
+
+```json
+{
+  "phase": "generate",
+  "generation_source": "billing_only",
+  "confidence": "low",
+  "timestamp": "2026-02-26T14:30:00Z",
+  "migration_plan": {
+    "total_weeks": 15,
+    "approach": "conservative_with_discovery",
+    "phases": [
+      {
+        "name": "Discovery Refinement",
+        "weeks": "1-4",
+        "key_activities": [
+          "Manual infrastructure audit",
+          "Dependency mapping",
+          "Configuration documentation",
+          "Design refinement"
+        ],
+        "note": "Extended discovery to compensate for missing IaC data"
+      }
+    ],
+    "services": [
+      {
+        "gcp_service": "Cloud Run",
+        "aws_service": "Fargate",
+        "monthly_cost_gcp": 450.00,
+        "estimated_cost_aws_mid": 450.00,
+        "confidence": "billing_inferred",
+        "unknowns": ["instance sizing", "scaling config"]
+      }
+    ]
+  },
+  "risks": [
+    {
+      "category": "incorrect_sizing",
+      "probability": "high",
+      "impact": "high",
+      "mitigation": "Extended discovery phase; right-size after parallel run",
+      "phase_affected": "Discovery Refinement"
+    }
+  ],
+  "success_metrics": {
+    "performance_threshold": "within 20% of GCP baseline",
+    "monitoring_period_hours": 48,
+    "stability_period_days": 45,
+    "cost_variance_threshold": "within 40% of mid estimate",
+    "data_integrity": "100%",
+    "availability_target": "99%"
+  },
+  "recommendation": {
+    "approach": "Conservative migration with extended discovery",
+    "confidence": "low",
+    "iac_discovery_offered": true,
+    "note": "For tighter estimates and a shorter timeline, provide Terraform files and re-run discovery.",
+    "key_risks": [
+      "Configuration uncertainty",
+      "Missing dependency information",
+      "Cost variance due to unknown sizing"
+    ],
+    "estimated_total_effort_hours": 720
+  }
 }
 ```
 

@@ -41,8 +41,8 @@ This is the execution controller. After completing each phase, consult this tabl
 | `discover_done` | always    | Load `references/phases/clarify.md`           |
 | `clarify_done`  | always    | Load `references/phases/design/design.md`     |
 | `design_done`   | always    | Load `references/phases/estimate/estimate.md` |
-| `estimate_done` | always    | Load `references/phases/execute.md`           |
-| `execute_done`  | always    | Migration planning complete                   |
+| `estimate_done` | always    | Load `references/phases/generate/generate.md` |
+| `generate_done` | always    | Migration planning complete                   |
 
 **How to determine current state:** Read `$MIGRATION_DIR/.phase-status.json` → check `phases` object → find the last phase with `status: "completed"`.
 
@@ -56,7 +56,7 @@ When reading `$MIGRATION_DIR/.phase-status.json`, validate before proceeding:
 
 1. **Multiple sessions**: If multiple directories exist under `.migration/`, STOP. Output: "Multiple migration sessions detected. Pick one to continue: [list]"
 2. **Invalid JSON**: If `.phase-status.json` fails to parse, STOP. Output: "State file corrupted (invalid JSON). Delete the file and restart the current phase."
-3. **Unrecognized phase**: If `phases` object contains a phase not in {discover, clarify, design, estimate, execute}, STOP. Output: "Unrecognized phase: [value]. Valid phases: discover, clarify, design, estimate, execute."
+3. **Unrecognized phase**: If `phases` object contains a phase not in {discover, clarify, design, estimate, generate}, STOP. Output: "Unrecognized phase: [value]. Valid phases: discover, clarify, design, estimate, generate."
 4. **Unrecognized status**: If any `phases.*.status` is not in {pending, in_progress, completed}, STOP. Output: "Unrecognized status: [value]. Valid values: pending, in_progress, completed."
 
 ---
@@ -94,7 +94,7 @@ Migration state lives in `$MIGRATION_DIR` (`.migration/[MMDD-HHMM]/`), created b
     },
     "design": { "status": "in_progress", "timestamp": null, "outputs": [] },
     "estimate": { "status": "pending", "timestamp": null, "outputs": [] },
-    "execute": { "status": "pending", "timestamp": null, "outputs": [] }
+    "generate": { "status": "pending", "timestamp": null, "outputs": [] }
   }
 }
 ```
@@ -107,13 +107,13 @@ The `.migration/` directory is automatically protected by a `.gitignore` file cr
 
 ## Phase Summary Table
 
-| Phase        | Inputs                                                                                     | Outputs                                                                                                                                                                              | Reference                                |
-| ------------ | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- |
-| **Discover** | `.tf` files                                                                                | `gcp-resource-inventory.json`, `gcp-resource-clusters.json`, `.phase-status.json` updated                                                                                            | `references/phases/discover/discover.md` |
-| **Clarify**  | `gcp-resource-inventory.json`, `gcp-resource-clusters.json`                                | `preferences.json`, `.phase-status.json` updated                                                                                                                                     | `references/phases/clarify.md`           |
-| **Design**   | `preferences.json` + discovery artifacts                                                   | `aws-design.json` + `aws-design-report.md` (infra), `aws-design-ai.json` + `aws-design-ai-report.md` (AI), `aws-design-billing.json` + `aws-design-billing-report.md` (billing-only) | `references/phases/design/design.md`     |
-| **Estimate** | `aws-design.json` or `aws-design-billing.json` or `aws-design-ai.json`, `preferences.json` | `estimation-infra.json` or `estimation-ai.json` or `estimation-billing.json` + reports, `.phase-status.json` updated                                                                 | `references/phases/estimate/estimate.md` |
-| **Execute**  | `aws-design.json`, `preferences.json`                                                      | `execution.json`, `execution-timeline.md`, `.phase-status.json` updated                                                                                                              | `references/phases/execute.md`           |
+| Phase        | Inputs                                                                                                                                                                   | Outputs                                                                                                                                                                                   | Reference                                |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| **Discover** | `.tf` files                                                                                                                                                              | `gcp-resource-inventory.json`, `gcp-resource-clusters.json`, `.phase-status.json` updated                                                                                                 | `references/phases/discover/discover.md` |
+| **Clarify**  | `gcp-resource-inventory.json`, `gcp-resource-clusters.json`                                                                                                              | `preferences.json`, `.phase-status.json` updated                                                                                                                                          | `references/phases/clarify.md`           |
+| **Design**   | `preferences.json` + discovery artifacts                                                                                                                                 | `aws-design.json` + `aws-design-report.md` (infra), `aws-design-ai.json` + `aws-design-ai-report.md` (AI), `aws-design-billing.json` + `aws-design-billing-report.md` (billing-only)      | `references/phases/design/design.md`     |
+| **Estimate** | `aws-design.json` or `aws-design-billing.json` or `aws-design-ai.json`, `preferences.json`                                                                               | `estimation-infra.json` or `estimation-ai.json` or `estimation-billing.json` + reports, `.phase-status.json` updated                                                                      | `references/phases/estimate/estimate.md` |
+| **Generate** | `estimation-infra.json` or `estimation-ai.json` or `estimation-billing.json`, `aws-design.json` or `aws-design-billing.json` or `aws-design-ai.json`, `preferences.json` | `generation-infra.json` or `generation-ai.json` or `generation-billing.json` + `terraform/`, `scripts/`, `ai-migration/`, `MIGRATION_GUIDE.md`, `README.md`, `.phase-status.json` updated | `references/phases/generate/generate.md` |
 
 ---
 
@@ -151,7 +151,15 @@ gcp-to-aws/
 │   │   │   ├── estimate-infra.md               # Infrastructure cost analysis
 │   │   │   ├── estimate-ai.md                  # AI workload cost analysis
 │   │   │   └── estimate-billing.md             # Billing-only cost analysis
-│   │   └── execute.md                          # Phase 5: Execution planning
+│   │   └── generate/
+│   │       ├── generate.md                     # Phase 5: Generate orchestrator
+│   │       ├── generate-infra.md               # Infrastructure migration plan
+│   │       ├── generate-ai.md                  # AI migration plan
+│   │       ├── generate-billing.md             # Billing-only migration plan
+│   │       ├── generate-artifacts-infra.md     # Terraform + migration scripts
+│   │       ├── generate-artifacts-ai.md        # Provider adapter + test harness
+│   │       ├── generate-artifacts-billing.md   # Skeleton Terraform
+│   │       └── generate-artifacts-docs.md      # MIGRATION_GUIDE.md + README.md
 │   │
 │   ├── design-refs/
 │   │   ├── index.md                            # Lookup table: GCP type → design-ref file
@@ -184,7 +192,7 @@ gcp-to-aws/
 
 ## Defaults
 
-- **IaC output**: None (v1.0 produces design, cost estimates, and execution plans — no IaC code generation)
+- **IaC output**: Terraform configurations, migration scripts, AI migration code, and documentation
 - **Region**: `us-east-1` (unless user specifies, or GCP region → AWS region mapping suggests otherwise)
 - **Sizing**: Development tier (e.g., `db.t4g.micro` for databases, 0.5 CPU for Fargate)
 - **Migration mode**: Adapts based on available inputs (infrastructure, AI, or billing-only)
@@ -206,8 +214,8 @@ When invoked, the agent **MUST follow this exact sequence**:
      - discover (completed) → Execute clarify (read `references/phases/clarify.md`)
      - clarify (completed) → Execute design (read `references/phases/design/design.md`)
      - design (completed) → Execute estimate (read `references/phases/estimate/estimate.md`)
-     - estimate (completed) → Execute execute (read `references/phases/execute.md`)
-     - execute (completed) → Migration complete
+     - estimate (completed) → Execute generate (read `references/phases/generate/generate.md`)
+     - generate (completed) → Migration complete
 
 3. **Read phase reference**: Load the full reference file for the target phase.
 
@@ -233,4 +241,4 @@ User can invoke the skill again to resume from last completed phase.
 - User requirement clarification (adaptive questions by category)
 - Multi-path Design (infrastructure, AI workloads, billing-only fallback)
 - AWS cost estimation (from pricing API or fallback)
-- Execution timeline and risk assessment
+- Migration artifact generation (Terraform, scripts, AI adapters, documentation)

@@ -10,7 +10,7 @@ This plugin guides you through migrating GCP infrastructure to AWS by:
 2. **Clarify** - Answer 8 questions about your migration requirements
 3. **Design** - Map GCP services to equivalent AWS services
 4. **Estimate** - Calculate monthly costs and ROI
-5. **Execute** - Plan your migration timeline and rollback procedures
+5. **Generate** - Generate Terraform, migration scripts, AI adapters, and documentation
 
 ## Usage
 
@@ -24,8 +24,7 @@ Invoke the skill with migration-related phrases:
 ## Scope (v1.0)
 
 - **Supports**: Terraform-based GCP infrastructure
-- **Generates**: AWS architecture design, cost estimates, execution timeline
-- **Does not include** (v1.1+): App code scanning, billing data import, CDK code generation
+- **Generates**: AWS architecture design, cost estimates, Terraform configurations, migration scripts, AI migration code, and documentation
 
 ## MCP Servers
 
@@ -49,8 +48,12 @@ The plugin uses state files (`.migration/[MMDD-HHMM]/`) to track migration progr
 - `gcp-resource-inventory.json` - Discovered GCP resources
 - `clarified.json` - User requirements
 - `aws-design.json` - Mapped AWS services
-- `estimation.json` - Cost analysis
-- `execution.json` - Timeline and risks
+- `estimation-infra.json` / `estimation-ai.json` / `estimation-billing.json` - Cost analysis
+- `generation-infra.json` / `generation-ai.json` / `generation-billing.json` - Migration plans
+- `terraform/` - Generated Terraform configurations
+- `scripts/` - Migration scripts
+- `ai-migration/` - AI provider adapter and test harness
+- `MIGRATION_GUIDE.md` - Step-by-step migration guide
 
 ## Installation
 
