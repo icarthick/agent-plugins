@@ -20,6 +20,7 @@
 | Firestore (instance)   | `google_firestore_database`    | `database.md`  | DynamoDB              |
 | Firestore (document)   | `google_firestore_document`    | `database.md`  | DynamoDB              |
 | BigQuery               | `google_bigquery_dataset`      | `database.md`  | Redshift or Athena    |
+| Memorystore (Redis)    | `google_redis_instance`        | `database.md`  | ElastiCache Redis     |
 
 ## Storage Services
 

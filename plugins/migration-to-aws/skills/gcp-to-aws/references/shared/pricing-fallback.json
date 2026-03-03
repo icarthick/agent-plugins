@@ -36,8 +36,9 @@
       },
       "example_cost_512mb_1sec_1m_requests": {
         "request_cost": 0.20,
-        "compute_cost": 0.083,
-        "total_monthly": 0.283
+        "compute_cost": 8.33,
+        "total_monthly": 8.53,
+        "note": "1M requests × $0.0000002 = $0.20; 1M × 0.5 GB × 1s = 500K GB-sec × $0.0000166667 = $8.33"
       }
     },
     "fargate": {

@@ -2,9 +2,10 @@
 
 ## Step 0: Validate Inputs
 
-Read `clarified.json`. If missing: **STOP**. Output: "Phase 2 (Clarify) not completed. Run Phase 2 first."
-
-Read `gcp-resource-clusters.json`.
+1. Read `clarified.json` from `$MIGRATION_DIR`. If missing: **STOP**. Output: "Phase 2 (Clarify) not completed. Run Phase 2 first."
+2. Read `gcp-resource-clusters.json` from `$MIGRATION_DIR`. If missing: **STOP**. Output: "Missing gcp-resource-clusters.json. Re-run Phase 1."
+3. Read `gcp-resource-inventory.json` from `$MIGRATION_DIR`. If missing: **STOP**. Output: "Missing gcp-resource-inventory.json. Re-run Phase 1."
+   - This file provides per-resource `config` (machine_type, database_version, etc.) needed by design rubric eliminators and feature parity checks.
 
 ## Step 1: Order Clusters
 
@@ -96,6 +97,10 @@ For each mapped AWS service, verify:
 
 ```json
 {
+  "validation_status": {
+    "status": "completed|skipped",
+    "message": "All services validated|Validation unavailable (awsknowledge MCP unreachable)"
+  },
   "clusters": [
     {
       "cluster_id": "compute_instance_us-central1_001",
@@ -132,7 +137,8 @@ For each mapped AWS service, verify:
   ],
   "warnings": [
     "service X not fully supported in us-east-1; fallback to us-west-2"
-  ]
+  ],
+  "timestamp": "2026-02-26T14:30:00Z"
 }
 ```
 

@@ -2,7 +2,9 @@
 
 ## Step 0: Validate Design Output
 
-Before pricing queries, validate `aws-design.json`:
+Before pricing queries, validate inputs:
+
+**0a. Validate `aws-design.json`:**
 
 1. **File exists**: If missing, **STOP**. Output: "Phase 3 (Design) not completed. Run Phase 3 first."
 2. **Valid JSON**: If parse fails, **STOP**. Output: "Design file corrupted (invalid JSON). Re-run Phase 3."
@@ -11,6 +13,11 @@ Before pricing queries, validate `aws-design.json`:
    - Each cluster has `resources` array: If missing, **STOP**. Output: "Cluster [id] missing resources. Re-run Phase 3."
    - Each resource has `aws_service` field: If missing, **STOP**. Output: "Resource [address] missing aws_service. Re-run Phase 3."
    - Each resource has `aws_config` field: If missing, **STOP**. Output: "Resource [address] missing aws_config. Re-run Phase 3."
+
+**0b. Validate `clarified.json`:**
+
+1. **File exists**: If missing, **STOP**. Output: "Phase 2 (Clarify) not completed. Run Phase 2 first."
+2. **Valid JSON**: If parse fails, **STOP**. Output: "Clarified file corrupted (invalid JSON). Re-run Phase 2."
 
 If all validations pass, proceed to Step 1.
 
@@ -123,10 +130,26 @@ Add to assumptions: "GCP monthly cost: [SOURCE - actual, user estimate, or defau
 
 ## Step 5: Write Estimation Output
 
-Write `estimation.json`:
+Write `estimation.json` (schema must match `references/shared/output-schema.md`):
 
 ```json
 {
+  "pricing_source": {
+    "status": "live|fallback",
+    "message": "Using live AWS pricing API|Using cached rates from [date] (±15-25% accuracy)",
+    "fallback_staleness": {
+      "last_updated": "2026-02-24",
+      "days_old": 3,
+      "is_stale": false,
+      "staleness_warning": null
+    },
+    "services_by_source": {
+      "live": ["Fargate", "RDS Aurora", "S3", "ALB"],
+      "fallback": [],
+      "estimated": []
+    },
+    "services_with_missing_fallback": []
+  },
   "monthly_costs": {
     "premium": { "total": 5000, "breakdown": {"Fargate": 1200, "RDS": 2500, ...} },
     "balanced": { "total": 3500, "breakdown": {"Fargate": 800, "RDS": 1800, ...} },
@@ -151,7 +174,8 @@ Write `estimation.json`:
     "No Spot instances (Balanced tier)",
     "Region: us-east-1",
     "GCP monthly cost: user estimate"
-  ]
+  ],
+  "timestamp": "2026-02-26T14:30:00Z"
 }
 ```
 

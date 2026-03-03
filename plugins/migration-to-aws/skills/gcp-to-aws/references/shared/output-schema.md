@@ -208,6 +208,11 @@ AWS services mapped from GCP resources, clustered by affinity.
         {
           "gcp_address": "google_compute_instance.web",
           "gcp_type": "google_compute_instance",
+          "gcp_config": {
+            "machine_type": "n2-standard-2",
+            "zone": "us-central1-a",
+            "boot_disk_size_gb": 100
+          },
           "aws_service": "Fargate",
           "aws_config": {
             "cpu": "0.5",

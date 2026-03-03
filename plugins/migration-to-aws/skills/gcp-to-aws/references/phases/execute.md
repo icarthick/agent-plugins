@@ -132,7 +132,8 @@ Write `execution.json`:
     }
   ],
   "rollback_window": "Reversible until DNS cutover (Week 11)",
-  "gcp_teardown": "Week 14 (2 weeks after cutover)"
+  "gcp_teardown_week": 14,
+  "timestamp": "2026-02-26T14:30:00Z"
 }
 ```
 

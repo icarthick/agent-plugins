@@ -8,7 +8,7 @@
 
 | GCP Service | AWS | Blocker                                                  |
 | ----------- | --- | -------------------------------------------------------- |
-| Pub/Sub     | SNS | Exactly-once delivery required → SQS FIFO (not SNS)      |
+| Pub/Sub     | SNS | Exactly-once delivery required → SNS FIFO + SQS FIFO (SNS FIFO supports exactly-once via deduplication) |
 | Pub/Sub     | SQS | Multiple subscribers per topic → SNS (not SQS)           |
 | Cloud Tasks | SQS | Scheduled/delayed task execution → EventBridge + SNS/SQS |
 
@@ -56,8 +56,8 @@ Apply in order:
 
 - GCP: `google_pubsub_topic` + `google_pubsub_subscription` (exactly_once_delivery=true)
 - Signals: Exactly-once delivery required
-- Criterion 1 (Eliminators): FAIL on SNS (eventual consistency) → **use SQS FIFO**
-- → **AWS: SQS FIFO Queue (deduplication enabled)**
+- Criterion 1 (Eliminators): Exactly-once required → **use SNS FIFO + SQS FIFO**
+- → **AWS: SNS FIFO Topic + SQS FIFO Queue (deduplication enabled)**
 - Confidence: `inferred`
 
 ### Example 3: Cloud Tasks Queue (scheduled)
