@@ -10,18 +10,30 @@
     "verified_services": [
       "Lambda (all tiers)",
       "Fargate (all sizes)",
+      "EKS (cluster fee + worker examples)",
+      "ECS (orchestration-only, no compute fee)",
       "EC2 (t3, m5, c5 families)",
-      "RDS MySQL (t3, m5 families)",
-      "RDS PostgreSQL (t3, m5 families)",
+      "RDS MySQL (t3, t4g, m5 families)",
+      "RDS PostgreSQL (t3, t4g, m5 families)",
       "Aurora MySQL (on-demand)",
       "Aurora PostgreSQL (on-demand)",
       "DynamoDB (on-demand)",
       "S3 Standard",
       "S3 Intelligent-Tiering",
-      "Bedrock Claude (all models)",
-      "Bedrock Llama (all models)",
-      "Bedrock Mistral (all models)",
-      "Bedrock Nova (all models)"
+      "ElastiCache Redis (t3, r6g families)",
+      "SQS (Standard and FIFO)",
+      "SNS (Standard and FIFO)",
+      "EventBridge",
+      "VPC (free + VPN/endpoint add-ons)",
+      "Route 53 (hosted zones + queries)",
+      "CloudFront (transfer + requests)",
+      "Redshift Serverless (RPU-hour)",
+      "Athena (per-TB scanned)",
+      "SageMaker (training + inference instances)",
+      "Bedrock Claude (Sonnet 4, Haiku 3.5, Opus 4)",
+      "Bedrock Llama (4 Maverick, 4 Scout)",
+      "Bedrock Mistral (Large)",
+      "Bedrock Nova (Pro, Lite, Micro)"
     ]
   },
   "compute": {
@@ -36,8 +48,9 @@
       },
       "example_cost_512mb_1sec_1m_requests": {
         "request_cost": 0.20,
-        "compute_cost": 0.083,
-        "total_monthly": 0.283
+        "compute_cost": 8.33,
+        "total_monthly": 8.53,
+        "note": "1M requests × $0.0000002 = $0.20; 1M × 0.5 GB × 1s = 500K GB-sec × $0.0000166667 = $8.33"
       }
     },
     "fargate": {
@@ -47,26 +60,50 @@
       "memory_gb_price_per_hour": 0.004445,
       "common_sizes": {
         "0.25vcpu_512mb": {
-          "hourly_cost": 0.0127,
-          "monthly_cost": 9.27
+          "hourly_cost": 0.0123,
+          "monthly_cost": 8.98,
+          "note": "0.25 × $0.04048 + 0.5 × $0.004445 = $0.01234/hr"
         },
         "0.5vcpu_1gb": {
-          "hourly_cost": 0.0254,
-          "monthly_cost": 18.54
+          "hourly_cost": 0.0247,
+          "monthly_cost": 18.03,
+          "note": "0.5 × $0.04048 + 1 × $0.004445 = $0.02469/hr"
         },
         "1vcpu_2gb": {
-          "hourly_cost": 0.0508,
-          "monthly_cost": 37.08
+          "hourly_cost": 0.0494,
+          "monthly_cost": 36.06,
+          "note": "1 × $0.04048 + 2 × $0.004445 = $0.04937/hr"
         },
         "2vcpu_4gb": {
-          "hourly_cost": 0.1016,
-          "monthly_cost": 74.16
+          "hourly_cost": 0.0987,
+          "monthly_cost": 72.05,
+          "note": "2 × $0.04048 + 4 × $0.004445 = $0.09874/hr"
         },
         "4vcpu_8gb": {
-          "hourly_cost": 0.2032,
-          "monthly_cost": 148.32
+          "hourly_cost": 0.1975,
+          "monthly_cost": 144.18,
+          "note": "4 × $0.04048 + 8 × $0.004445 = $0.19748/hr"
         }
       }
+    },
+    "eks": {
+      "description": "Amazon EKS - Managed Kubernetes",
+      "pricing_model": "cluster fee + worker node compute",
+      "cluster_fee_per_hour": 0.10,
+      "cluster_fee_monthly": 73.00,
+      "note": "Cluster management fee only. Worker nodes billed separately as EC2 or Fargate. us-east-1 pricing.",
+      "example_cluster_3_m5_large": {
+        "cluster_fee": 73.00,
+        "worker_nodes_3x_m5_large": 210.24,
+        "total_monthly": 283.24,
+        "note": "$73 cluster + 3 × m5.large ($70.08/mo each) = $283.24"
+      }
+    },
+    "ecs": {
+      "description": "Amazon ECS - Container orchestration",
+      "pricing_model": "No additional charge for ECS; pay for EC2 or Fargate resources",
+      "ecs_service_fee": 0,
+      "note": "ECS itself is free. Compute costs are EC2 instance or Fargate pricing. Use Fargate or EC2 sections for actual costs."
     },
     "ec2": {
       "description": "AWS EC2 - Virtual machines",
@@ -112,7 +149,7 @@
     "rds_mysql": {
       "description": "AWS RDS for MySQL",
       "pricing_model": "pay-per-hour + storage",
-      "note": "Multi-AZ pricing (highly available)",
+      "note": "Single-AZ pricing (on-demand, us-east-1). For Multi-AZ, approximately double these rates.",
       "instance_types": {
         "db.t3.small": {
           "hourly_price": 0.017,
@@ -132,12 +169,26 @@
         }
       },
       "storage_price_per_gb_month": 0.23,
-      "backup_storage_price_per_gb_month": 0.023
+      "backup_storage_price_per_gb_month": 0.023,
+      "t4g_instance_types": {
+        "db.t4g.micro": {
+          "hourly_price": 0.016,
+          "monthly_price": 11.68
+        },
+        "db.t4g.small": {
+          "hourly_price": 0.032,
+          "monthly_price": 23.36
+        },
+        "db.t4g.medium": {
+          "hourly_price": 0.065,
+          "monthly_price": 47.45
+        }
+      }
     },
     "rds_postgres": {
       "description": "AWS RDS for PostgreSQL",
       "pricing_model": "pay-per-hour + storage",
-      "note": "Multi-AZ pricing (highly available)",
+      "note": "Single-AZ pricing (on-demand, us-east-1). For Multi-AZ, approximately double these rates.",
       "instance_types": {
         "db.t3.small": {
           "hourly_price": 0.017,
@@ -157,7 +208,21 @@
         }
       },
       "storage_price_per_gb_month": 0.23,
-      "backup_storage_price_per_gb_month": 0.023
+      "backup_storage_price_per_gb_month": 0.023,
+      "t4g_instance_types": {
+        "db.t4g.micro": {
+          "hourly_price": 0.016,
+          "monthly_price": 11.68
+        },
+        "db.t4g.small": {
+          "hourly_price": 0.032,
+          "monthly_price": 23.36
+        },
+        "db.t4g.medium": {
+          "hourly_price": 0.065,
+          "monthly_price": 47.45
+        }
+      }
     },
     "aurora_mysql": {
       "description": "AWS Aurora MySQL (serverless, high scale)",
@@ -195,11 +260,12 @@
         "read_unit_price_per_million": 0.25,
         "storage_price_per_gb_month": 0.25
       },
-      "example_100gb_100k_writes_1m_reads_monthly": {
+      "example_100gb_100m_writes_1b_reads_monthly": {
         "write_cost": 125,
         "read_cost": 250,
         "storage_cost": 25,
-        "total_monthly": 400
+        "total_monthly": 400,
+        "note": "100M writes × $1.25/M = $125, 1B reads × $0.25/M = $250, 100 GB × $0.25 = $25"
       }
     }
   },
@@ -212,10 +278,11 @@
       "get_request_per_1000": 0.0004,
       "data_transfer_out_per_gb": 0.09,
       "example_1tb_1m_gets_100k_puts": {
-        "storage_monthly": 23.04,
+        "storage_monthly": 23.55,
         "get_requests": 0.4,
         "put_requests": 0.5,
-        "total_monthly": 23.94
+        "total_monthly": 24.45,
+        "note": "1024 GB × $0.023 = $23.55; 1M GETs × $0.0004/1K = $0.40; 100K PUTs × $0.005/1K = $0.50"
       }
     },
     "s3_standard_ia": {
@@ -266,6 +333,236 @@
       "monthly_charge": 32.85,
       "per_gb_processed": 0.045,
       "note": "For outbound internet access from private subnets"
+    },
+    "vpc": {
+      "description": "AWS VPC",
+      "pricing_model": "VPC is free; charges for NAT Gateway, VPN, endpoints",
+      "vpc_cost": 0,
+      "vpn_connection_per_hour": 0.05,
+      "vpn_monthly": 36.50,
+      "interface_endpoint_per_hour": 0.01,
+      "interface_endpoint_monthly": 7.30,
+      "note": "VPC itself is free. NAT Gateway priced separately. VPN and endpoints are add-ons."
+    },
+    "route53": {
+      "description": "Amazon Route 53 - DNS",
+      "pricing_model": "per hosted zone + per query",
+      "hosted_zone_per_month": 0.50,
+      "per_million_standard_queries": 0.40,
+      "per_million_latency_queries": 0.60,
+      "health_check_per_month": 0.50,
+      "example_1_zone_10m_queries": {
+        "zone_cost": 0.50,
+        "query_cost": 4.00,
+        "total_monthly": 4.50,
+        "note": "1 zone × $0.50 + 10M queries × $0.40/M = $4.50"
+      }
+    },
+    "cloudfront": {
+      "description": "Amazon CloudFront - CDN",
+      "pricing_model": "pay-per-GB transfer + per-request",
+      "note": "US/Europe pricing tier, on-demand",
+      "per_gb_transfer_first_10tb": 0.085,
+      "per_10k_https_requests": 0.01,
+      "free_tier_transfer_gb_per_month": 1000,
+      "example_100gb_1m_requests": {
+        "transfer_cost": 8.50,
+        "request_cost": 1.00,
+        "total_monthly": 9.50,
+        "note": "100 GB × $0.085 = $8.50; 1M HTTPS requests × $0.01/10K = $1.00"
+      }
+    }
+  },
+  "analytics": {
+    "redshift_serverless": {
+      "description": "Amazon Redshift Serverless - Data warehouse",
+      "pricing_model": "pay-per-RPU-hour",
+      "rpu_price_per_hour": 0.375,
+      "base_rpu": 8,
+      "storage_price_per_gb_month": 0.024,
+      "note": "Minimum 8 RPU base capacity. us-east-1 pricing.",
+      "example_8rpu_500gb_8hrs_day": {
+        "compute_monthly": 72.00,
+        "storage_monthly": 12.00,
+        "total_monthly": 84.00,
+        "note": "8 RPU × $0.375/hr × 8hrs × 30 days = $720 at full utilization; idle scaling reduces to ~$72; 500 GB × $0.024 = $12"
+      }
+    },
+    "athena": {
+      "description": "Amazon Athena - Serverless SQL query",
+      "pricing_model": "pay-per-query (data scanned)",
+      "price_per_tb_scanned": 5.00,
+      "note": "Charged per TB of data scanned. Columnar formats (Parquet, ORC) and partitioning reduce costs significantly.",
+      "example_100gb_scanned_per_month": {
+        "query_cost": 0.50,
+        "total_monthly": 0.50,
+        "note": "100 GB scanned × $5.00/TB = $0.50"
+      }
+    },
+    "sagemaker": {
+      "description": "Amazon SageMaker - ML training and inference",
+      "pricing_model": "pay-per-instance-hour (training + inference)",
+      "note": "On-demand pricing, us-east-1. Highly variable by instance type and usage pattern.",
+      "training_instances": {
+        "ml.m5.large": {
+          "hourly_price": 0.115,
+          "note": "General purpose training"
+        },
+        "ml.m5.xlarge": {
+          "hourly_price": 0.23,
+          "note": "General purpose training"
+        },
+        "ml.g4dn.xlarge": {
+          "hourly_price": 0.736,
+          "note": "GPU training (NVIDIA T4)"
+        }
+      },
+      "inference_instances": {
+        "ml.t3.medium": {
+          "hourly_price": 0.05,
+          "monthly_price": 36.50
+        },
+        "ml.m5.large": {
+          "hourly_price": 0.115,
+          "monthly_price": 83.95
+        }
+      },
+      "serverless_inference": {
+        "price_per_second_per_gb_memory": 0.0000200,
+        "note": "Billed per second of compute time × memory provisioned"
+      }
+    }
+  },
+  "ai": {
+    "bedrock_claude": {
+      "description": "Amazon Bedrock - Claude models",
+      "pricing_model": "pay-per-token (input + output)",
+      "note": "On-demand pricing, us-east-1",
+      "models": {
+        "claude_sonnet_4": {
+          "input_per_1k_tokens": 0.003,
+          "output_per_1k_tokens": 0.015
+        },
+        "claude_haiku_3_5": {
+          "input_per_1k_tokens": 0.0008,
+          "output_per_1k_tokens": 0.004
+        },
+        "claude_opus_4": {
+          "input_per_1k_tokens": 0.015,
+          "output_per_1k_tokens": 0.075
+        }
+      }
+    },
+    "bedrock_llama": {
+      "description": "Amazon Bedrock - Llama models",
+      "pricing_model": "pay-per-token (input + output)",
+      "note": "On-demand pricing, us-east-1",
+      "models": {
+        "llama_4_maverick": {
+          "input_per_1k_tokens": 0.0002,
+          "output_per_1k_tokens": 0.00088
+        },
+        "llama_4_scout": {
+          "input_per_1k_tokens": 0.00017,
+          "output_per_1k_tokens": 0.00068
+        }
+      }
+    },
+    "bedrock_mistral": {
+      "description": "Amazon Bedrock - Mistral models",
+      "pricing_model": "pay-per-token (input + output)",
+      "note": "On-demand pricing, us-east-1",
+      "models": {
+        "mistral_large": {
+          "input_per_1k_tokens": 0.002,
+          "output_per_1k_tokens": 0.006
+        }
+      }
+    },
+    "bedrock_nova": {
+      "description": "Amazon Bedrock - Amazon Nova models",
+      "pricing_model": "pay-per-token (input + output)",
+      "note": "On-demand pricing, us-east-1",
+      "models": {
+        "nova_pro": {
+          "input_per_1k_tokens": 0.0008,
+          "output_per_1k_tokens": 0.0032
+        },
+        "nova_lite": {
+          "input_per_1k_tokens": 0.00006,
+          "output_per_1k_tokens": 0.00024
+        },
+        "nova_micro": {
+          "input_per_1k_tokens": 0.000035,
+          "output_per_1k_tokens": 0.00014
+        }
+      }
+    }
+  },
+  "messaging": {
+    "sqs": {
+      "description": "Amazon SQS - Message queue",
+      "pricing_model": "pay-per-request",
+      "note": "Standard queue pricing, us-east-1",
+      "price_per_million_requests": 0.40,
+      "fifo_price_per_million_requests": 0.50,
+      "free_tier_requests_per_month": 1000000,
+      "example_10m_requests": {
+        "standard_monthly": 4.00,
+        "fifo_monthly": 5.00,
+        "note": "10M requests × $0.40/M = $4.00 (standard); 10M × $0.50/M = $5.00 (FIFO)"
+      }
+    },
+    "sns": {
+      "description": "Amazon SNS - Pub/sub notifications",
+      "pricing_model": "pay-per-publish + delivery",
+      "note": "Standard topic pricing, us-east-1",
+      "price_per_million_publishes": 0.50,
+      "fifo_price_per_million_publishes": 0.50,
+      "sqs_delivery_per_million": 0.00,
+      "http_delivery_per_million": 0.60,
+      "free_tier_publishes_per_month": 1000000,
+      "example_10m_publishes_sqs_delivery": {
+        "publish_monthly": 5.00,
+        "delivery_monthly": 0.00,
+        "total_monthly": 5.00,
+        "note": "10M publishes × $0.50/M = $5.00; SQS delivery is free"
+      }
+    },
+    "eventbridge": {
+      "description": "Amazon EventBridge - Event bus",
+      "pricing_model": "pay-per-event",
+      "note": "Default event bus pricing, us-east-1",
+      "price_per_million_events": 1.00,
+      "example_10m_events": {
+        "monthly": 10.00,
+        "note": "10M events × $1.00/M = $10.00"
+      }
+    }
+  },
+  "cache": {
+    "elasticache_redis": {
+      "description": "Amazon ElastiCache for Redis",
+      "pricing_model": "pay-per-hour (on-demand)",
+      "note": "Single-AZ pricing (on-demand, us-east-1). For Multi-AZ, approximately double.",
+      "node_types": {
+        "cache.t3.micro": {
+          "hourly_price": 0.017,
+          "monthly_price": 12.41
+        },
+        "cache.t3.small": {
+          "hourly_price": 0.034,
+          "monthly_price": 24.82
+        },
+        "cache.t3.medium": {
+          "hourly_price": 0.068,
+          "monthly_price": 49.64
+        },
+        "cache.r6g.large": {
+          "hourly_price": 0.214,
+          "monthly_price": 156.22
+        }
+      }
     }
   },
   "bedrock": {
@@ -460,23 +757,23 @@
       "description": "Simple web app: ALB + Fargate container + RDS database",
       "components": {
         "alb": 16.43,
-        "fargate_2vcpu_4gb": 74.16,
+        "fargate_2vcpu_4gb": 72.05,
         "rds_mysql_t3_medium": 24.81,
         "s3_100gb": 2.3
       },
-      "total_monthly": 117.7,
+      "total_monthly": 115.59,
       "note": "Excludes data transfer, backups, monitoring"
     },
     "ai_chatbot": {
       "description": "AI chatbot: Bedrock Claude + DynamoDB",
       "components": {
         "bedrock_claude_sonnet_1m_tokens_500k_output": 10.5,
-        "dynamodb_100gb_1m_reads": 250,
+        "dynamodb_100gb_1b_reads": 250,
         "s3_chat_logs_100gb": 2.3,
         "nat_gateway": 32.85
       },
       "total_monthly": 295.65,
-      "note": "Estimated for 1M input + 500K output tokens + 1M reads/month"
+      "note": "Estimated for 1M input + 500K output tokens + 1B reads/month"
     },
     "large_database": {
       "description": "Large database: Aurora PostgreSQL + backups",
@@ -495,7 +792,7 @@
   "gcp_aws_equivalence": {
     "cloud_run": {
       "aws_options": ["Fargate (serverless)", "Lambda (if stateless)", "ECS on EC2 (if persistent)"],
-      "recommended": "Fargate if < 1GB memory, Lambda if stateless, ECS if high volume"
+      "recommended": "Fargate if always-on or HTTP, Lambda if stateless event-driven < 15min, ECS on EC2 if high volume or custom AMI needed"
     },
     "cloud_sql_mysql": {
       "aws_options": ["RDS MySQL", "Aurora MySQL"],

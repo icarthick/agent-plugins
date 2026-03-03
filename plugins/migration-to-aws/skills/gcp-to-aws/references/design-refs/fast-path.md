@@ -14,6 +14,7 @@
 | `google_compute_firewall`                   | Security Group        | Always     | 1:1 rule mapping; adjust CIDR if needed              |
 | `google_dns_managed_zone`                   | Route 53 Hosted Zone  | Always     | Preserve zone name and records                       |
 | `google_service_account`                    | IAM Role              | Always     | Map permissions directly; adjust service principals  |
+| `google_redis_instance`                     | ElastiCache Redis     | Always     | 1:1 mapping; preserve cluster mode and node type     |
 
 ## Skip Mappings Table
 

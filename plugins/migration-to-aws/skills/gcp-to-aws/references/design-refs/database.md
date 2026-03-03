@@ -1,6 +1,6 @@
 # Database Services Design Rubric
 
-**Applies to:** Cloud SQL, Firestore, BigQuery
+**Applies to:** Cloud SQL, Firestore, BigQuery, Memorystore (Redis)
 
 **Quick lookup (no rubric):** Check `fast-path.md` first (Cloud SQL PostgreSQL → RDS Aurora, Cloud SQL MySQL → RDS Aurora, etc.)
 
@@ -8,8 +8,8 @@
 
 | GCP Service            | AWS        | Blocker                                                                    |
 | ---------------------- | ---------- | -------------------------------------------------------------------------- |
-| Firestore              | DynamoDB   | Strongly consistent reads required → use RDS instead                       |
-| BigQuery               | Redshift   | <1 second query latency required → use Athena + Glue (OLAP, not analytics) |
+| Firestore              | DynamoDB   | ACID transactions spanning >100 items required → use RDS (DynamoDB limit: 100 items/transaction) |
+| BigQuery               | Redshift   | OLTP-level latency (<100ms) required → use DynamoDB (point lookups) or Aurora (SQL OLTP); Redshift is OLAP |
 | Cloud SQL (PostgreSQL) | RDS Aurora | PostGIS extension → supported (Aurora supports PostGIS)                    |
 
 ## Signals (Decision Criteria)
@@ -24,7 +24,7 @@
 ### Firestore
 
 - **Flexible schema** + **NoSQL** → DynamoDB
-- **Strong consistency required** → RDS Aurora (not Firestore-like)
+- **Strong consistency required** → DynamoDB supports strongly consistent reads via `ConsistentRead` parameter
 - **Real-time sync** + **offline support** → DynamoDB Streams + Amplify (app-level)
 
 ### BigQuery
@@ -32,6 +32,12 @@
 - **Data warehouse / OLAP analytics** → Redshift
 - **Ad-hoc SQL queries** → Athena (serverless SQL; cheaper for infrequent queries)
 - **ML models in warehouse** → Redshift ML (or SageMaker) vs BigQuery ML
+
+### Memorystore (Redis)
+
+- **In-memory cache** → ElastiCache Redis (fast-path, 1:1 mapping)
+- **Cluster mode enabled** → ElastiCache Redis with cluster mode
+- **High availability required** → ElastiCache Redis Multi-AZ with auto-failover
 
 ## 6-Criteria Rubric
 
