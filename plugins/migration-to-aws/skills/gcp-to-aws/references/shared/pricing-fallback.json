@@ -112,7 +112,7 @@
     "rds_mysql": {
       "description": "AWS RDS for MySQL",
       "pricing_model": "pay-per-hour + storage",
-      "note": "Multi-AZ pricing (highly available)",
+      "note": "Single-AZ pricing (on-demand, us-east-1). For Multi-AZ, approximately double these rates.",
       "instance_types": {
         "db.t3.small": {
           "hourly_price": 0.017,
@@ -137,7 +137,7 @@
     "rds_postgres": {
       "description": "AWS RDS for PostgreSQL",
       "pricing_model": "pay-per-hour + storage",
-      "note": "Multi-AZ pricing (highly available)",
+      "note": "Single-AZ pricing (on-demand, us-east-1). For Multi-AZ, approximately double these rates.",
       "instance_types": {
         "db.t3.small": {
           "hourly_price": 0.017,
@@ -195,11 +195,12 @@
         "read_unit_price_per_million": 0.25,
         "storage_price_per_gb_month": 0.25
       },
-      "example_100gb_100k_writes_1m_reads_monthly": {
+      "example_100gb_100m_writes_1b_reads_monthly": {
         "write_cost": 125,
         "read_cost": 250,
         "storage_cost": 25,
-        "total_monthly": 400
+        "total_monthly": 400,
+        "note": "100M writes × $1.25/M = $125, 1B reads × $0.25/M = $250, 100 GB × $0.25 = $25"
       }
     }
   },

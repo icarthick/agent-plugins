@@ -11,7 +11,8 @@ These resource types are always PRIMARY:
 - `google_compute_instance` — Virtual machine
 - `google_cloudfunctions_function` — Serverless function
 - `google_sql_database_instance` — Relational database
-- `google_firestore_database` — Document database
+- `google_firestore_database` — Document database (Firestore instance)
+- `google_firestore_document` — Document database (Firestore document resource)
 - `google_bigquery_dataset` — Data warehouse
 - `google_storage_bucket` — Object storage
 - `google_redis_instance` — In-memory cache
@@ -84,6 +85,6 @@ For SECONDARY resources, populate `serves[]` array (list of PRIMARY resources it
 2. Include direct references: `field = resource_type.name.id` patterns
 3. Include transitive chains: if referenced resource is also SECONDARY, trace to PRIMARY
 
-**Example**: `google_compute_firewall` → references `google_compute_network` (SECONDARY) → serves `google_compute_instance.web` (PRIMARY)
+**Example**: `google_compute_firewall` → references `google_compute_network` (PRIMARY, network cluster anchor). The firewall is a `network_path` SECONDARY that serves the network cluster. Its `serves[]` includes the PRIMARY `google_compute_network.vpc`.
 
-**Serves array**: Points back to PRIMARY workloads affected by this firewall rule. Trace through SECONDARY resources until a PRIMARY is reached.
+**Serves array**: Points to the PRIMARY resources this SECONDARY supports. For `network_path` secondaries, this is the `google_compute_network` PRIMARY that anchors the network cluster (see clustering-algorithm.md Rule 1).

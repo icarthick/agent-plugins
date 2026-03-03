@@ -17,7 +17,8 @@
 | Cloud SQL (PostgreSQL) | `google_sql_database_instance` | `database.md`  | RDS Aurora PostgreSQL |
 | Cloud SQL (MySQL)      | `google_sql_database_instance` | `database.md`  | RDS Aurora MySQL      |
 | Cloud SQL (SQL Server) | `google_sql_database_instance` | `database.md`  | RDS SQL Server        |
-| Firestore              | `google_firestore_document`    | `database.md`  | DynamoDB              |
+| Firestore (instance)   | `google_firestore_database`    | `database.md`  | DynamoDB              |
+| Firestore (document)   | `google_firestore_document`    | `database.md`  | DynamoDB              |
 | BigQuery               | `google_bigquery_dataset`      | `database.md`  | Redshift or Athena    |
 
 ## Storage Services

@@ -106,6 +106,9 @@ Clustered resources by affinity and deployment order.
   "clusters": [
     {
       "cluster_id": "network_vpc_us-central1_001",
+      "name": "VPC Network",
+      "type": "network",
+      "description": "Primary: compute_network.vpc, Secondary: firewall.web-allow-http",
       "gcp_region": "us-central1",
       "creation_order_depth": 0,
       "primary_resources": [
@@ -114,16 +117,25 @@ Clustered resources by affinity and deployment order.
       "secondary_resources": [
         "google_compute_firewall.web-allow-http"
       ],
+      "network": null,
+      "must_migrate_together": true,
+      "dependencies": [],
       "edges": []
     },
     {
       "cluster_id": "compute_instance_us-central1_001",
+      "name": "Compute Instance",
+      "type": "compute",
+      "description": "Primary: compute_instance.web",
       "gcp_region": "us-central1",
       "creation_order_depth": 1,
       "primary_resources": [
         "google_compute_instance.web"
       ],
       "secondary_resources": [],
+      "network": "network_vpc_us-central1_001",
+      "must_migrate_together": true,
+      "dependencies": ["network_vpc_us-central1_001"],
       "edges": [
         {
           "from": "google_compute_instance.web",
@@ -134,12 +146,18 @@ Clustered resources by affinity and deployment order.
     },
     {
       "cluster_id": "database_sql_us-central1_001",
+      "name": "Cloud SQL PostgreSQL",
+      "type": "database",
+      "description": "Primary: sql_database_instance.prod_postgres",
       "gcp_region": "us-central1",
       "creation_order_depth": 0,
       "primary_resources": [
         "google_sql_database_instance.prod_postgres"
       ],
       "secondary_resources": [],
+      "network": null,
+      "must_migrate_together": true,
+      "dependencies": [],
       "edges": []
     }
   ]
