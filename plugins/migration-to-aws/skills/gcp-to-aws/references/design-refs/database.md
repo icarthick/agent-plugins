@@ -6,11 +6,11 @@
 
 ## Eliminators (Hard Blockers)
 
-| GCP Service            | AWS        | Blocker                                                                    |
-| ---------------------- | ---------- | -------------------------------------------------------------------------- |
-| Firestore              | DynamoDB   | ACID transactions spanning >100 items required → use RDS (DynamoDB limit: 100 items/transaction) |
+| GCP Service            | AWS        | Blocker                                                                                                    |
+| ---------------------- | ---------- | ---------------------------------------------------------------------------------------------------------- |
+| Firestore              | DynamoDB   | ACID transactions spanning >100 items required → use RDS (DynamoDB limit: 100 items/transaction)           |
 | BigQuery               | Redshift   | OLTP-level latency (<100ms) required → use DynamoDB (point lookups) or Aurora (SQL OLTP); Redshift is OLAP |
-| Cloud SQL (PostgreSQL) | RDS Aurora | PostGIS extension → supported (Aurora supports PostGIS)                    |
+| Cloud SQL (PostgreSQL) | RDS Aurora | PostGIS extension → supported (Aurora supports PostGIS)                                                    |
 
 ## Signals (Decision Criteria)
 

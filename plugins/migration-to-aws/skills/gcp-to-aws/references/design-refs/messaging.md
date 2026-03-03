@@ -6,11 +6,11 @@
 
 ## Eliminators (Hard Blockers)
 
-| GCP Service | AWS | Blocker                                                  |
-| ----------- | --- | -------------------------------------------------------- |
+| GCP Service | AWS | Blocker                                                                                                 |
+| ----------- | --- | ------------------------------------------------------------------------------------------------------- |
 | Pub/Sub     | SNS | Exactly-once delivery required → SNS FIFO + SQS FIFO (SNS FIFO supports exactly-once via deduplication) |
-| Pub/Sub     | SQS | Multiple subscribers per topic → SNS (not SQS)           |
-| Cloud Tasks | SQS | Scheduled/delayed task execution → EventBridge + SNS/SQS |
+| Pub/Sub     | SQS | Multiple subscribers per topic → SNS (not SQS)                                                          |
+| Cloud Tasks | SQS | Scheduled/delayed task execution → EventBridge + SNS/SQS                                                |
 
 ## Signals (Decision Criteria)
 
