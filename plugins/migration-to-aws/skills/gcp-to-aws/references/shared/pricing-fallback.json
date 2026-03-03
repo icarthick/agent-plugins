@@ -10,6 +10,8 @@
     "verified_services": [
       "Lambda (all tiers)",
       "Fargate (all sizes)",
+      "EKS (cluster fee + worker examples)",
+      "ECS (orchestration-only, no compute fee)",
       "EC2 (t3, m5, c5 families)",
       "RDS MySQL (t3, t4g, m5 families)",
       "RDS PostgreSQL (t3, t4g, m5 families)",
@@ -22,6 +24,12 @@
       "SQS (Standard and FIFO)",
       "SNS (Standard and FIFO)",
       "EventBridge",
+      "VPC (free + VPN/endpoint add-ons)",
+      "Route 53 (hosted zones + queries)",
+      "CloudFront (transfer + requests)",
+      "Redshift Serverless (RPU-hour)",
+      "Athena (per-TB scanned)",
+      "SageMaker (training + inference instances)",
       "Bedrock Claude (Sonnet 4, Haiku 3.5, Opus 4)",
       "Bedrock Llama (4 Maverick, 4 Scout)",
       "Bedrock Mistral (Large)",
@@ -77,6 +85,25 @@
           "note": "4 × $0.04048 + 8 × $0.004445 = $0.19748/hr"
         }
       }
+    },
+    "eks": {
+      "description": "Amazon EKS - Managed Kubernetes",
+      "pricing_model": "cluster fee + worker node compute",
+      "cluster_fee_per_hour": 0.10,
+      "cluster_fee_monthly": 73.00,
+      "note": "Cluster management fee only. Worker nodes billed separately as EC2 or Fargate. us-east-1 pricing.",
+      "example_cluster_3_m5_large": {
+        "cluster_fee": 73.00,
+        "worker_nodes_3x_m5_large": 210.24,
+        "total_monthly": 283.24,
+        "note": "$73 cluster + 3 × m5.large ($70.08/mo each) = $283.24"
+      }
+    },
+    "ecs": {
+      "description": "Amazon ECS - Container orchestration",
+      "pricing_model": "No additional charge for ECS; pay for EC2 or Fargate resources",
+      "ecs_service_fee": 0,
+      "note": "ECS itself is free. Compute costs are EC2 instance or Fargate pricing. Use Fargate or EC2 sections for actual costs."
     },
     "ec2": {
       "description": "AWS EC2 - Virtual machines",
@@ -306,6 +333,104 @@
       "monthly_charge": 32.85,
       "per_gb_processed": 0.045,
       "note": "For outbound internet access from private subnets"
+    },
+    "vpc": {
+      "description": "AWS VPC",
+      "pricing_model": "VPC is free; charges for NAT Gateway, VPN, endpoints",
+      "vpc_cost": 0,
+      "vpn_connection_per_hour": 0.05,
+      "vpn_monthly": 36.50,
+      "interface_endpoint_per_hour": 0.01,
+      "interface_endpoint_monthly": 7.30,
+      "note": "VPC itself is free. NAT Gateway priced separately. VPN and endpoints are add-ons."
+    },
+    "route53": {
+      "description": "Amazon Route 53 - DNS",
+      "pricing_model": "per hosted zone + per query",
+      "hosted_zone_per_month": 0.50,
+      "per_million_standard_queries": 0.40,
+      "per_million_latency_queries": 0.60,
+      "health_check_per_month": 0.50,
+      "example_1_zone_10m_queries": {
+        "zone_cost": 0.50,
+        "query_cost": 4.00,
+        "total_monthly": 4.50,
+        "note": "1 zone × $0.50 + 10M queries × $0.40/M = $4.50"
+      }
+    },
+    "cloudfront": {
+      "description": "Amazon CloudFront - CDN",
+      "pricing_model": "pay-per-GB transfer + per-request",
+      "note": "US/Europe pricing tier, on-demand",
+      "per_gb_transfer_first_10tb": 0.085,
+      "per_10k_https_requests": 0.01,
+      "free_tier_transfer_gb_per_month": 1000,
+      "example_100gb_1m_requests": {
+        "transfer_cost": 8.50,
+        "request_cost": 1.00,
+        "total_monthly": 9.50,
+        "note": "100 GB × $0.085 = $8.50; 1M HTTPS requests × $0.01/10K = $1.00"
+      }
+    }
+  },
+  "analytics": {
+    "redshift_serverless": {
+      "description": "Amazon Redshift Serverless - Data warehouse",
+      "pricing_model": "pay-per-RPU-hour",
+      "rpu_price_per_hour": 0.375,
+      "base_rpu": 8,
+      "storage_price_per_gb_month": 0.024,
+      "note": "Minimum 8 RPU base capacity. us-east-1 pricing.",
+      "example_8rpu_500gb_8hrs_day": {
+        "compute_monthly": 72.00,
+        "storage_monthly": 12.00,
+        "total_monthly": 84.00,
+        "note": "8 RPU × $0.375/hr × 8hrs × 30 days = $720 at full utilization; idle scaling reduces to ~$72; 500 GB × $0.024 = $12"
+      }
+    },
+    "athena": {
+      "description": "Amazon Athena - Serverless SQL query",
+      "pricing_model": "pay-per-query (data scanned)",
+      "price_per_tb_scanned": 5.00,
+      "note": "Charged per TB of data scanned. Columnar formats (Parquet, ORC) and partitioning reduce costs significantly.",
+      "example_100gb_scanned_per_month": {
+        "query_cost": 0.50,
+        "total_monthly": 0.50,
+        "note": "100 GB scanned × $5.00/TB = $0.50"
+      }
+    },
+    "sagemaker": {
+      "description": "Amazon SageMaker - ML training and inference",
+      "pricing_model": "pay-per-instance-hour (training + inference)",
+      "note": "On-demand pricing, us-east-1. Highly variable by instance type and usage pattern.",
+      "training_instances": {
+        "ml.m5.large": {
+          "hourly_price": 0.115,
+          "note": "General purpose training"
+        },
+        "ml.m5.xlarge": {
+          "hourly_price": 0.23,
+          "note": "General purpose training"
+        },
+        "ml.g4dn.xlarge": {
+          "hourly_price": 0.736,
+          "note": "GPU training (NVIDIA T4)"
+        }
+      },
+      "inference_instances": {
+        "ml.t3.medium": {
+          "hourly_price": 0.05,
+          "monthly_price": 36.50
+        },
+        "ml.m5.large": {
+          "hourly_price": 0.115,
+          "monthly_price": 83.95
+        }
+      },
+      "serverless_inference": {
+        "price_per_second_per_gb_memory": 0.0000200,
+        "note": "Billed per second of compute time × memory provisioned"
+      }
     }
   },
   "ai": {

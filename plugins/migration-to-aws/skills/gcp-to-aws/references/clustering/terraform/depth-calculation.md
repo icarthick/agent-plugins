@@ -51,9 +51,13 @@ While queue not empty:
 If queue empties but unassigned resources remain:
 
 - **Cycle detected**: Some resources have circular dependencies
-- **Action**: Find lowest-confidence edge in cycle; remove it
-- **Restart** algorithm
-- **Log warning**: "Circular dependency detected and broken: {resources and edges}"
+- **Bounded retry** (max 3 attempts total):
+  1. Identify the cycle (trace unassigned resources' dependencies)
+  2. Find lowest-confidence edge in cycle (prefer `unknown_dependency` or LLM-inferred edges over deterministic edges)
+  3. **Only break inferred edges** (confidence < 1.0). If all edges in the cycle are deterministic (hardcoded classification), do NOT break — proceed to STOP.
+  4. Remove the selected edge and restart the algorithm
+  5. Log warning: "Circular dependency detected and broken (attempt N/3): {resources and edges removed}"
+- **If cycle persists after 3 attempts**: **STOP**. Output: "Unresolvable circular dependency between: [resource addresses]. All edges are deterministic. Manual review required — restructure Terraform dependencies or add `depends_on` overrides."
 
 ### Step 5: Assign Final Depths
 
@@ -94,10 +98,15 @@ function calculateDepth(resources) {
       if in_degree[D] == 0:
         queue.enqueue(D)
 
-  // Cycle check
+  // Cycle check (bounded: max 3 attempts)
   if any resource not assigned depth:
-    find_and_break_cycle()
-    return calculateDepth(resources)  // Retry
+    if attempt >= 3:
+      STOP("Unresolvable circular dependency. Manual review required.")
+    edge = find_lowest_confidence_edge_in_cycle()
+    if edge.confidence == 1.0:
+      STOP("Cycle contains only deterministic edges. Manual review required.")
+    remove(edge)
+    return calculateDepth(resources, attempt + 1)  // Retry
 
   return depth
 }

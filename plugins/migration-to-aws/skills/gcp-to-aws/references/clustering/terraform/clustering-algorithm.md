@@ -157,4 +157,4 @@ Given same Terraform input, algorithm produces same cluster structure every run:
 1. Rules applied in fixed order
 2. Sequence counters increment deterministically
 3. Naming reflects source state, not random IDs
-4. No LLM-based decisions (all heuristics deterministic)
+4. Deterministic for Priority 1 and Priority 2 resources. Priority 3 (LLM inference fallback in classification-rules.md and typed-edges-strategy.md) may produce non-deterministic results for unknown resource types

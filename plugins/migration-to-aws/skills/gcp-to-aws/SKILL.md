@@ -59,9 +59,12 @@ If `.phase-status.json` exists:
 
 1. **On skill invocation**: Check for `.migration/*/` directory
    - If none exist: Initialize Phase 1 (Discover), set status to `in-progress`
-   - If multiple exist: **STOP**. Output: "Multiple migration sessions detected in `.migration/`. Pick one to continue: [list]"
+   - If multiple exist: **STOP**. Output: "Multiple migration sessions detected in `.migration/`:" then for each directory, display its name and the contents of its `.phase-status.json` (phase + status). Output: "Pick one to continue: [list with phase info]"
    - If exists: Load `.phase-status.json` and validate:
+     - **If empty file (0 bytes)**: STOP. Output: "State file is empty. Delete `.migration/[MMDD-HHMM]/.phase-status.json` and restart."
      - **If invalid JSON**: STOP. Output: "State file corrupted (invalid JSON). Delete `.migration/[MMDD-HHMM]/.phase-status.json` and restart Phase [X]."
+     - **If missing required fields** (`phase`, `status`, `timestamp`, `version`): STOP. Output: "State file incomplete (missing [field]). Delete and restart."
+     - **If version != "1.0.0"**: STOP. Output: "Incompatible state file version: [version]. This skill requires version 1.0.0."
      - **If unrecognized phase value**: STOP. Output: "Unrecognized phase: [value]. Valid values: discover, clarify, design, estimate, execute."
      - **If status not in {in-progress, completed}**: STOP. Output: "Unrecognized status: [value]. Valid values: in-progress, completed."
      - **If valid**: Determine next action:

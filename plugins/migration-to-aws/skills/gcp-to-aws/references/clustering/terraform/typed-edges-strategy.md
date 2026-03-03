@@ -93,7 +93,7 @@ Store edge evidence:
 ```json
 {
   "target": "google_sql_database_instance.prod",
-  "edge_type": "data_dependency",
+  "relationship_type": "data_dependency",
   "evidence": {
     "field_path": "env.DATABASE_URL",
     "env_var_name": "DATABASE_URL",

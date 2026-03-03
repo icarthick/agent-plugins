@@ -30,9 +30,9 @@ Extracts and clusters GCP resources from Terraform files. Produces final invento
 
 1. Read `references/clustering/terraform/typed-edges-strategy.md` completely
 2. For EACH resource from Step 1, extract references from `raw_hcl`:
-   - Extract all `google_*\.[\w\.]+` patterns
+   - Extract all `google_\w+\.[\w\.]+` patterns (or the capturing form `(google_\w+)\.(\w+)\.(\w+)` — see typed-edges-strategy.md)
    - Classify edge type by field name/value context (see typed-edges-strategy.md)
-   - Store as `{from, to, edge_type, evidence}` in `typed_edges[]` array
+   - Store as `{from, to, relationship_type, evidence}` in `typed_edges[]` array
 3. For SECONDARY resources, populate `serves[]` array:
    - Trace outgoing references to PRIMARY resources
    - Trace incoming `depends_on` references from PRIMARY resources

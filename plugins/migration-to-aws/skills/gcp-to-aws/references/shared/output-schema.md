@@ -2,7 +2,7 @@
 
 Complete JSON schemas for all phase outputs and state files.
 
-**Convention**: Values shown as `X|Y` in examples indicate allowed alternatives — use exactly one value per field, not the literal pipe character.
+**Convention**: Values shown as `X|Y` in examples indicate allowed alternatives — use exactly one value per field, not the literal pipe character. These pipe-separated values are documentation shorthand only and must NOT appear in actual output JSON. Always select one concrete value.
 
 ## .phase-status.json
 
@@ -255,7 +255,7 @@ Monthly operating costs, one-time migration costs, and ROI analysis.
       "last_updated": "2026-02-24",
       "days_old": 3,
       "is_stale": false,
-      "staleness_warning": null
+      "staleness_warning": "null|⚠️ Cached pricing data is >60 days old; accuracy may be significantly degraded"
     },
     "services_by_source": {
       "live": ["Fargate", "RDS Aurora", "S3", "ALB"],

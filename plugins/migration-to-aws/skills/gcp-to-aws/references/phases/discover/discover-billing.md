@@ -29,6 +29,6 @@ This discoverer will import GCP billing data from CSV/JSON exports to identify a
 
 ## Integration with Unify Phase
 
-`unify-resources.md` will check for `billing_resources.json` and merge service evidence into final inventory.
+**Note**: `unify-resources.md` does not exist yet — it is a planned v1.1+ file that will check for `billing_resources.json` and merge service evidence into the final inventory produced by `discover-iac.md`.
 
-**Current Action**: Skip if v1.2 not available. `discover.md` will not call this discoverer in v1.0.
+**Current Action**: Skip in v1.0. `discover.md` will not call this discoverer until v1.2+ when both this file and `unify-resources.md` are implemented.

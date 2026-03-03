@@ -46,8 +46,9 @@ Attempt to reach awspricing with **up to 2 retries** (3 total attempts):
   2. **Check staleness**:
      - Read `metadata.last_updated` (e.g., "2026-02-24")
      - Calculate days since update: `today - last_updated`
-     - If > 90 days: Add to estimation report: "⚠️ Cached pricing data is >90 days old; accuracy may be significantly degraded"
-     - If ≤ 90 days: Add to estimation report: "Note: Using cached 2026 rates (±15-25% accuracy)"
+     - If > 60 days: Add to estimation report: "⚠️ Cached pricing data is >60 days old; accuracy may be significantly degraded"
+     - If 30-60 days: Add to estimation report: "⚠️ Cached pricing data is 30-60 days old; accuracy may be reduced"
+     - If ≤ 30 days: Add to estimation report: "Note: Using cached rates (±15-25% accuracy)"
   3. Log warning: "AWS pricing API unavailable; using cached rates from [last_updated]"
   4. **Display to user**: Add visible warning to estimation report with staleness notice
   5. **Pricing source**: Mark as `fallback` in estimation.json with note
@@ -114,7 +115,7 @@ Monthly GCP cost determination (in priority order):
 1. **From inventory**: If `gcp-resource-inventory.json` contains pricing data, sum all service costs
 2. **From clarified.json**: If user provided "current GCP monthly spend" in Phase 2 answers, use that value
 3. **From user prompt**: If neither available, ask user: "What is your current monthly GCP spend? (This is used for ROI; provide best estimate)"
-4. **Conservative default**: If user cannot provide, use: `AWS monthly balanced * 1.25` (assume 25% premium)
+4. **Cannot calculate**: If user cannot provide, set `roi.status: "cannot_calculate"` and `roi.message: "GCP monthly cost unavailable. Provide your current GCP spend to calculate ROI."` Skip payback and savings calculations.
 
 Then calculate:
 

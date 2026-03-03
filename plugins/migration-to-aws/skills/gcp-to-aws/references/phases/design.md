@@ -44,7 +44,7 @@ For resources not covered by fast-path:
    **Catch-all for unknown types**: If resource type not found in `index.md`:
    - Check resource name pattern (e.g., "scheduler" → orchestration, "log" → monitoring, "metric" → monitoring)
    - If pattern match: use that category
-   - If no pattern match: **STOP**. Output: "Unknown GCP resource type: [type]. Not in fast-path.md or index.md. Cannot auto-map. Please file an issue with this resource type."
+   - If no pattern match: Add to `warnings[]` with message: "Unknown GCP resource type: [type]. Not in fast-path.md or index.md. Skipped — file an issue to add support." Continue with remaining resources.
 
 2. Load rubric from corresponding `design-refs/*.md` file (e.g., `compute.md`, `database.md`)
 
@@ -88,7 +88,8 @@ For each mapped AWS service, verify:
 **If awsknowledge unavailable:**
 
 - Set `validation_status: "skipped"` in output
-- Add note to report: "Architecture validation unavailable (non-critical)"
+- **Display prominent warning to user**: "⚠️ WARNING: Architecture validation skipped (awsknowledge MCP unavailable). Regional availability, feature parity, and service constraints were NOT verified. Manually verify before proceeding."
+- Add same warning to `aws-design-report.md` header
 - Continue with design (validation is informational, not blocking)
 
 **If validation succeeds:**

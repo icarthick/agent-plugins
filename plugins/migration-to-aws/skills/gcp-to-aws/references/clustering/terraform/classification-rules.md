@@ -80,6 +80,13 @@ If resource type not in Priority 1 or 2, apply heuristic patterns:
 
 **Default**: If all heuristics fail: `SECONDARY` / `configuration` with confidence 0.5
 
+**Downstream flagging for low-confidence classifications**: Any resource classified with confidence ≤ 0.5 (including the default fallback) MUST be:
+
+1. Flagged in `gcp-resource-inventory.json` with `"confidence": 0.5` on the resource entry
+2. Added to a `low_confidence_resources[]` warning array in inventory metadata
+3. Reported to the user during Phase 1 completion: "⚠️ N resources were classified with low confidence and may need manual review: [list of addresses]"
+4. Passed through to Phase 3 (Design) where they appear in `warnings[]` as: "Low-confidence classification for [address] (classified as [role]). Verify AWS mapping is correct."
+
 ## Serves[] Population
 
 For SECONDARY resources, populate `serves[]` array (list of PRIMARY resources it supports):
