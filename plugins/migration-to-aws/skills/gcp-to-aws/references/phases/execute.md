@@ -198,8 +198,8 @@ Output to user:
 "✓ Migration plan complete. Summary:
 
 - Timeline: 12 weeks
-- AWS monthly cost: $3,500 (Balanced)
-- Payback period: 32.5 months
+- AWS monthly cost: $[balanced total from estimation.json] (Balanced)
+- Payback period: [payback_months from estimation.json] months
 - Rollback window: Through DNS cutover
 
 Files saved:

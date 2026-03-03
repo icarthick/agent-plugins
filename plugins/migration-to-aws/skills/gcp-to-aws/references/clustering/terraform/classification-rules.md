@@ -19,6 +19,9 @@ These resource types are always PRIMARY:
 - `google_pubsub_topic` — Message queue
 - `google_compute_network` — Virtual network (VPC). Anchors the networking cluster (see clustering-algorithm.md Rule 1)
 - `google_dns_managed_zone` — DNS zone
+- `google_app_engine_application` — App Engine application
+- `google_cloud_tasks_queue` — Task queue
+- `google_compute_forwarding_rule` — Load balancer forwarding rule
 - `module.*` — Terraform module (treated as primary container)
 
 **Action**: Mark as `PRIMARY`, classification done. No secondary_role.

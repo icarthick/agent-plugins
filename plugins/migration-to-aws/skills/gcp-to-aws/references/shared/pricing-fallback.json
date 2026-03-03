@@ -11,8 +11,8 @@
       "Lambda (all tiers)",
       "Fargate (all sizes)",
       "EC2 (t3, m5, c5 families)",
-      "RDS MySQL (t3, m5 families)",
-      "RDS PostgreSQL (t3, m5 families)",
+      "RDS MySQL (t3, t4g, m5 families)",
+      "RDS PostgreSQL (t3, t4g, m5 families)",
       "Aurora MySQL (on-demand)",
       "Aurora PostgreSQL (on-demand)",
       "DynamoDB (on-demand)",
@@ -48,24 +48,29 @@
       "memory_gb_price_per_hour": 0.004445,
       "common_sizes": {
         "0.25vcpu_512mb": {
-          "hourly_cost": 0.0127,
-          "monthly_cost": 9.27
+          "hourly_cost": 0.0123,
+          "monthly_cost": 8.98,
+          "note": "0.25 × $0.04048 + 0.5 × $0.004445 = $0.01234/hr"
         },
         "0.5vcpu_1gb": {
-          "hourly_cost": 0.0254,
-          "monthly_cost": 18.54
+          "hourly_cost": 0.0247,
+          "monthly_cost": 18.03,
+          "note": "0.5 × $0.04048 + 1 × $0.004445 = $0.02469/hr"
         },
         "1vcpu_2gb": {
-          "hourly_cost": 0.0508,
-          "monthly_cost": 37.08
+          "hourly_cost": 0.0494,
+          "monthly_cost": 36.06,
+          "note": "1 × $0.04048 + 2 × $0.004445 = $0.04937/hr"
         },
         "2vcpu_4gb": {
-          "hourly_cost": 0.1016,
-          "monthly_cost": 74.16
+          "hourly_cost": 0.0987,
+          "monthly_cost": 72.05,
+          "note": "2 × $0.04048 + 4 × $0.004445 = $0.09874/hr"
         },
         "4vcpu_8gb": {
-          "hourly_cost": 0.2032,
-          "monthly_cost": 148.32
+          "hourly_cost": 0.1975,
+          "monthly_cost": 144.18,
+          "note": "4 × $0.04048 + 8 × $0.004445 = $0.19748/hr"
         }
       }
     },
@@ -133,7 +138,21 @@
         }
       },
       "storage_price_per_gb_month": 0.23,
-      "backup_storage_price_per_gb_month": 0.023
+      "backup_storage_price_per_gb_month": 0.023,
+      "t4g_instance_types": {
+        "db.t4g.micro": {
+          "hourly_price": 0.016,
+          "monthly_price": 11.68
+        },
+        "db.t4g.small": {
+          "hourly_price": 0.032,
+          "monthly_price": 23.36
+        },
+        "db.t4g.medium": {
+          "hourly_price": 0.065,
+          "monthly_price": 47.45
+        }
+      }
     },
     "rds_postgres": {
       "description": "AWS RDS for PostgreSQL",
@@ -158,7 +177,21 @@
         }
       },
       "storage_price_per_gb_month": 0.23,
-      "backup_storage_price_per_gb_month": 0.023
+      "backup_storage_price_per_gb_month": 0.023,
+      "t4g_instance_types": {
+        "db.t4g.micro": {
+          "hourly_price": 0.016,
+          "monthly_price": 11.68
+        },
+        "db.t4g.small": {
+          "hourly_price": 0.032,
+          "monthly_price": 23.36
+        },
+        "db.t4g.medium": {
+          "hourly_price": 0.065,
+          "monthly_price": 47.45
+        }
+      }
     },
     "aurora_mysql": {
       "description": "AWS Aurora MySQL (serverless, high scale)",
@@ -275,18 +308,18 @@
       "description": "Simple web app: ALB + Fargate container + RDS database",
       "components": {
         "alb": 16.43,
-        "fargate_2vcpu_4gb": 74.16,
+        "fargate_2vcpu_4gb": 72.05,
         "rds_mysql_t3_medium": 24.81,
         "s3_100gb": 2.3
       },
-      "total_monthly": 117.7,
+      "total_monthly": 113.69,
       "note": "Excludes data transfer, backups, monitoring"
     },
     "ai_chatbot": {
       "description": "AI chatbot: Bedrock Claude + DynamoDB",
       "components": {
         "bedrock_claude_sonnet_1m_tokens_500k_output": 10.5,
-        "dynamodb_100gb_1m_reads": 250,
+        "dynamodb_100gb_1b_reads": 250,
         "s3_chat_logs_100gb": 2.3,
         "nat_gateway": 32.85
       },

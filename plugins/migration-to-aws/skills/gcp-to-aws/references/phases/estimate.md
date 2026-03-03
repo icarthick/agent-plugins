@@ -191,6 +191,7 @@ Write `estimation-report.md`:
 - RDS Aurora: $1,800
 - S3: $500
 - ALB: $200
+- NAT Gateway: $200
 - **Total: $3,500/month**
 
 ### Comparison Tiers

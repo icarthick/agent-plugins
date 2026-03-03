@@ -3,8 +3,13 @@
 ## Step 0: Validate Inputs
 
 1. Read `clarified.json` from `$MIGRATION_DIR`. If missing: **STOP**. Output: "Phase 2 (Clarify) not completed. Run Phase 2 first."
+   - If invalid JSON: **STOP**. Output: "clarified.json is corrupted (invalid JSON). Re-run Phase 2."
 2. Read `gcp-resource-clusters.json` from `$MIGRATION_DIR`. If missing: **STOP**. Output: "Missing gcp-resource-clusters.json. Re-run Phase 1."
+   - If invalid JSON: **STOP**. Output: "gcp-resource-clusters.json is corrupted (invalid JSON). Re-run Phase 1."
+   - If `clusters` array is empty: **STOP**. Output: "No clusters found. Re-run Phase 1."
 3. Read `gcp-resource-inventory.json` from `$MIGRATION_DIR`. If missing: **STOP**. Output: "Missing gcp-resource-inventory.json. Re-run Phase 1."
+   - If invalid JSON: **STOP**. Output: "gcp-resource-inventory.json is corrupted (invalid JSON). Re-run Phase 1."
+   - If `resources` array is empty: **STOP**. Output: "No resources found. Re-run Phase 1."
    - This file provides per-resource `config` (machine_type, database_version, etc.) needed by design rubric eliminators and feature parity checks.
 
 ## Step 1: Order Clusters
@@ -121,8 +126,8 @@ For each mapped AWS service, verify:
             "memory": "1024",
             "region": "us-east-1"
           },
-          "confidence": "deterministic",
-          "rationale": "1:1 compute mapping with Cold Start considerations",
+          "confidence": "inferred",
+          "rationale": "Compute mapping; always-on; Fargate for simplicity",
           "rubric_applied": [
             "Eliminators: PASS",
             "Operational Model: Managed Fargate",

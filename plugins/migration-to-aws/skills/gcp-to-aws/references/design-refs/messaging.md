@@ -18,7 +18,7 @@
 
 - **Multiple subscribers, broadcast** → SNS (pub/sub pattern)
 - **Single consumer, durability** → SQS (queue pattern)
-- **Exactly-once delivery** → SQS FIFO (vs SNS eventual consistency)
+- **Exactly-once delivery** → SNS FIFO + SQS FIFO (deduplication enabled)
 - **Real-time, low latency** → SNS (vs SQS polling delay)
 
 ### Cloud Tasks
