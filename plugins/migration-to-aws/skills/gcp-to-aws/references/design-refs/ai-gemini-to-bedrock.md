@@ -34,18 +34,18 @@ Gemini 3.1 Pro Preview (Feb 19, 2026) has shifted the landscape. Be honest with 
 
 ## Bedrock Model Portfolio
 
-| Model | Best For | Complexity | Speed | Context |
-|-------|----------|------------|-------|---------|
-| Claude Sonnet 4.6 | Agentic tasks, tool use | High | High | 200K |
-| Claude Opus 4.6 | Maximum reasoning | High | Medium | 200K |
-| Claude Haiku 4.5 | Simple + fast | Medium | High | 200K |
-| Llama 4 Maverick | Cost-effective + multimodal | Medium | High | 1M |
-| Llama 4 Scout | Ultra-long context, cheapest | Medium | Medium | 10M |
-| Nova Pro | AWS balanced | Medium | High | 300K |
-| Nova Lite | AWS fast | Medium | High | 300K |
-| Nova Micro | AWS fastest | Low | High | 128K |
-| Nova Premier | Most capable AWS-native | High | Medium | — |
-| Mistral Large 3 | EU/Multilingual | High | Medium | 256K |
+| Model             | Best For                     | Complexity | Speed  | Context |
+| ----------------- | ---------------------------- | ---------- | ------ | ------- |
+| Claude Sonnet 4.6 | Agentic tasks, tool use      | High       | High   | 200K    |
+| Claude Opus 4.6   | Maximum reasoning            | High       | Medium | 200K    |
+| Claude Haiku 4.5  | Simple + fast                | Medium     | High   | 200K    |
+| Llama 4 Maverick  | Cost-effective + multimodal  | Medium     | High   | 1M      |
+| Llama 4 Scout     | Ultra-long context, cheapest | Medium     | Medium | 10M     |
+| Nova Pro          | AWS balanced                 | Medium     | High   | 300K    |
+| Nova Lite         | AWS fast                     | Medium     | High   | 300K    |
+| Nova Micro        | AWS fastest                  | Low        | High   | 128K    |
+| Nova Premier      | Most capable AWS-native      | High       | Medium | —       |
+| Mistral Large 3   | EU/Multilingual              | High       | Medium | 256K    |
 
 ---
 
@@ -53,31 +53,31 @@ Gemini 3.1 Pro Preview (Feb 19, 2026) has shifted the landscape. Be honest with 
 
 ### Gemini Pro Tier
 
-| Gemini Model | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price | Winner |
-|-------------|----------------------|-------------------|---------------|--------|
-| Gemini 3.1 Pro Preview | $2.00 / $12.00 | Claude Sonnet 4.6 | $3.00 / $15.00 | Gemini 31% cheaper |
-| Gemini 3.1 Pro Preview | $2.00 / $12.00 | Claude Opus 4.6 | $5.00 / $25.00 | Gemini 119% cheaper |
-| Gemini 3 Pro | $0.50 / $3.00 | Llama 4 Maverick | $0.24 / $0.97 | Bedrock 63% cheaper |
-| Gemini 3 Pro | $0.50 / $3.00 | Llama 4 Scout | $0.17 / $0.66 | Bedrock 75% cheaper |
-| Gemini 3 Pro | $0.50 / $3.00 | Nova Pro | $0.80 / $3.20 | Gemini 20% cheaper |
-| Gemini 2.5 Pro | $1.25 / $10.00 | Claude Sonnet 4.6 | $3.00 / $15.00 | Gemini 68% cheaper |
-| Gemini 2.5 Pro | $1.25 / $10.00 | Nova Pro | $0.80 / $3.20 | Bedrock 62% cheaper |
+| Gemini Model           | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price  | Winner              |
+| ---------------------- | --------------------- | ------------------ | -------------- | ------------------- |
+| Gemini 3.1 Pro Preview | $2.00 / $12.00        | Claude Sonnet 4.6  | $3.00 / $15.00 | Gemini 31% cheaper  |
+| Gemini 3.1 Pro Preview | $2.00 / $12.00        | Claude Opus 4.6    | $5.00 / $25.00 | Gemini 119% cheaper |
+| Gemini 3 Pro           | $0.50 / $3.00         | Llama 4 Maverick   | $0.24 / $0.97  | Bedrock 63% cheaper |
+| Gemini 3 Pro           | $0.50 / $3.00         | Llama 4 Scout      | $0.17 / $0.66  | Bedrock 75% cheaper |
+| Gemini 3 Pro           | $0.50 / $3.00         | Nova Pro           | $0.80 / $3.20  | Gemini 20% cheaper  |
+| Gemini 2.5 Pro         | $1.25 / $10.00        | Claude Sonnet 4.6  | $3.00 / $15.00 | Gemini 68% cheaper  |
+| Gemini 2.5 Pro         | $1.25 / $10.00        | Nova Pro           | $0.80 / $3.20  | Bedrock 62% cheaper |
 
 ### Gemini Flash/Lite Tier
 
-| Gemini Model | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price | Winner |
-|-------------|----------------------|-------------------|---------------|--------|
-| Gemini 2.5 Flash | $0.30 / $2.50 | Nova Lite | $0.06 / $0.24 | Bedrock 88% cheaper |
-| Gemini 2.0 Flash | $0.10 / $0.40 | Nova Micro | $0.035 / $0.14 | Bedrock 64% cheaper |
-| Gemini Flash | $0.075 / $0.30 | Nova Micro | $0.035 / $0.14 | Bedrock 53% cheaper |
+| Gemini Model     | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price  | Winner              |
+| ---------------- | --------------------- | ------------------ | -------------- | ------------------- |
+| Gemini 2.5 Flash | $0.30 / $2.50         | Nova Lite          | $0.06 / $0.24  | Bedrock 88% cheaper |
+| Gemini 2.0 Flash | $0.10 / $0.40         | Nova Micro         | $0.035 / $0.14 | Bedrock 64% cheaper |
+| Gemini Flash     | $0.075 / $0.30        | Nova Micro         | $0.035 / $0.14 | Bedrock 53% cheaper |
 
 ### Legacy/Specialized
 
-| Gemini Model | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price | Winner |
-|-------------|----------------------|-------------------|---------------|--------|
-| text-bison / chat-bison | Legacy | Llama 4 Scout | $0.17 / $0.66 | Bedrock (better quality + cheaper) |
-| text-embedding-004 | $0.025 / N/A | Titan Embeddings V2 | $0.02 / N/A | Bedrock 20% cheaper |
-| imagen-* | Varies | Titan Image Generator | $0.008-$0.04/img | Varies |
+| Gemini Model            | Price (in/out per 1M) | Best Bedrock Match    | Bedrock Price    | Winner                             |
+| ----------------------- | --------------------- | --------------------- | ---------------- | ---------------------------------- |
+| text-bison / chat-bison | Legacy                | Llama 4 Scout         | $0.17 / $0.66    | Bedrock (better quality + cheaper) |
+| text-embedding-004      | $0.025 / N/A          | Titan Embeddings V2   | $0.02 / N/A      | Bedrock 20% cheaper                |
+| imagen-*                | Varies                | Titan Image Generator | $0.008-$0.04/img | Varies                             |
 
 ---
 
@@ -113,12 +113,12 @@ Gemini Flash → **Nova Micro** (<200ms, text-only, cheapest), **Haiku 4.5** (<4
 
 **Medium (1-10M tokens/day):** Present cost comparison at volume. At 5M input + 2.5M output/day:
 
-| Model | Monthly Cost |
-|-------|-------------|
-| Gemini 3 Pro | $300 |
-| Llama 4 Maverick | $109 (-64%) |
-| Llama 4 Scout | $75 (-75%) |
-| Nova Pro | $360 (+20%) |
+| Model             | Monthly Cost   |
+| ----------------- | -------------- |
+| Gemini 3 Pro      | $300           |
+| Llama 4 Maverick  | $109 (-64%)    |
+| Llama 4 Scout     | $75 (-75%)     |
+| Nova Pro          | $360 (+20%)    |
 | Claude Sonnet 4.6 | $1,575 (+425%) |
 
 **High (10-100M tokens/day):** Cost optimization critical. Recommend multi-model tiered approach. Llama 4 Maverick/Scout or Nova for output-heavy workloads.
@@ -133,15 +133,15 @@ Gemini Flash → **Nova Micro** (<200ms, text-only, cheapest), **Haiku 4.5** (<4
 
 ## Cost Comparison Table (150M input + 75M output per month)
 
-| Gemini Model | Monthly | Best Bedrock Match | Monthly | Difference |
-|-------------|---------|-------------------|---------|------------|
-| Gemini 3.1 Pro Preview ($2/$12) | $1,200 | Claude Sonnet 4.6 ($3/$15) | $1,575 | +31% |
-| Gemini 3.1 Pro Preview ($2/$12) | $1,200 | Claude Opus 4.6 ($5/$25) | $2,625 | +119% |
-| Gemini 3 Pro ($0.50/$3.00) | $300 | Llama 4 Maverick ($0.24/$0.97) | $109 | -63% |
-| Gemini 3 Pro ($0.50/$3.00) | $300 | Llama 4 Scout ($0.17/$0.66) | $75 | -75% |
-| Gemini 2.5 Pro ($1.25/$10) | $938 | Nova Pro ($0.80/$3.20) | $360 | -62% |
-| Gemini 2.5 Flash ($0.30/$2.50) | $233 | Nova Lite ($0.06/$0.24) | $27 | -88% |
-| Gemini 2.0 Flash ($0.10/$0.40) | $45 | Nova Micro ($0.035/$0.14) | $16 | -64% |
+| Gemini Model                    | Monthly | Best Bedrock Match             | Monthly | Difference |
+| ------------------------------- | ------- | ------------------------------ | ------- | ---------- |
+| Gemini 3.1 Pro Preview ($2/$12) | $1,200  | Claude Sonnet 4.6 ($3/$15)     | $1,575  | +31%       |
+| Gemini 3.1 Pro Preview ($2/$12) | $1,200  | Claude Opus 4.6 ($5/$25)       | $2,625  | +119%      |
+| Gemini 3 Pro ($0.50/$3.00)      | $300    | Llama 4 Maverick ($0.24/$0.97) | $109    | -63%       |
+| Gemini 3 Pro ($0.50/$3.00)      | $300    | Llama 4 Scout ($0.17/$0.66)    | $75     | -75%       |
+| Gemini 2.5 Pro ($1.25/$10)      | $938    | Nova Pro ($0.80/$3.20)         | $360    | -62%       |
+| Gemini 2.5 Flash ($0.30/$2.50)  | $233    | Nova Lite ($0.06/$0.24)        | $27     | -88%       |
+| Gemini 2.0 Flash ($0.10/$0.40)  | $45     | Nova Micro ($0.035/$0.14)      | $16     | -64%       |
 
 ---
 
@@ -155,15 +155,15 @@ Not available on other Bedrock models. This is a significant Claude advantage fo
 
 ## Feature Migration Notes
 
-| Gemini Feature | Bedrock Equivalent | Notes |
-|---------------|-------------------|-------|
-| Function calling | Claude tools (excellent), Mistral (good) | Minimal changes |
-| Structured output/JSON | Claude (excellent), Nova Pro (good) | Most models via prompt |
-| Streaming | All major models | Same SSE pattern |
-| Vision | Claude Sonnet/Haiku, Llama 3.2 90B | Multimodal parity |
-| Context caching | Claude prompt caching | 90% savings on cached portions |
-| Audio/video input | Nova Sonic (speech), Transcribe/Rekognition (preprocessing) | Different architecture |
-| Embeddings | Amazon Titan Embeddings ($0.02/1M, 1536 dims) | Must re-embed all docs |
+| Gemini Feature         | Bedrock Equivalent                                          | Notes                          |
+| ---------------------- | ----------------------------------------------------------- | ------------------------------ |
+| Function calling       | Claude tools (excellent), Mistral (good)                    | Minimal changes                |
+| Structured output/JSON | Claude (excellent), Nova Pro (good)                         | Most models via prompt         |
+| Streaming              | All major models                                            | Same SSE pattern               |
+| Vision                 | Claude Sonnet/Haiku, Llama 3.2 90B                          | Multimodal parity              |
+| Context caching        | Claude prompt caching                                       | 90% savings on cached portions |
+| Audio/video input      | Nova Sonic (speech), Transcribe/Rekognition (preprocessing) | Different architecture         |
+| Embeddings             | Amazon Titan Embeddings ($0.02/1M, 1536 dims)               | Must re-embed all docs         |
 
 ---
 

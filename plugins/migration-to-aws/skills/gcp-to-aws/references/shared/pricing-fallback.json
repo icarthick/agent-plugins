@@ -811,7 +811,11 @@
       "recommended": "Claude Sonnet for quality parity, Nova Pro for cost savings, Nova Lite for high-volume simple tasks. See ai-gemini-to-bedrock.md for honest pricing comparison."
     },
     "openai_api": {
-      "aws_options": ["Bedrock Claude Sonnet (quality)", "Bedrock Nova Pro (balanced)", "Bedrock Llama 4 Maverick (open-source)"],
+      "aws_options": [
+        "Bedrock Claude Sonnet (quality)",
+        "Bedrock Nova Pro (balanced)",
+        "Bedrock Llama 4 Maverick (open-source)"
+      ],
       "recommended": "Depends on current model. Legacy GPT-4/3.5 → strong migrate (70-97% savings). Mid-tier flagships → OpenAI may be cheaper. See ai-openai-to-bedrock.md."
     },
     "cloud_load_balancer_https": {

@@ -69,13 +69,13 @@ Record extracted values. Questions whose answers are fully determined by extract
 
 ### Category Definitions and Firing Rules
 
-| Category | Name               | Firing Rule                                                                                                         | Questions                                                                                              |
-| -------- | ------------------ | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| **A**    | Global/Strategic   | **Always fires**                                                                                                    | Q1 (location), Q2 (compliance), Q3 (GCP spend), Q4 (multi-cloud), Q5 (uptime), Q6 (maintenance window) |
-| **B**    | Configuration Gaps | Inventory exists with `metadata.source == "billing"` AND at least one resource has `config_confidence == "assumed"` | Cloud SQL HA, Cloud Run service count, Memorystore memory, Cloud Functions generation                  |
-| **C**    | Compute Model      | Compute resources present (Cloud Run, Cloud Functions, GKE, GCE)                                                    | Q7 (K8s sentiment), Q8 (WebSocket), Q9 (Cloud Run traffic), Q10 (Cloud Run spend)                      |
-| **D**    | Database Model     | Database resources present (Cloud SQL, Spanner, Memorystore)                                                        | Q11 (DB scale), Q12 (DB I/O)                                                                           |
-| **E**    | Migration Posture  | **Disabled by default** — requires explicit user opt-in                                                             | HA upgrades, right-sizing from billing utilization                                                     |
+| Category | Name               | Firing Rule                                                                                                         | Questions                                                                                                        |
+| -------- | ------------------ | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **A**    | Global/Strategic   | **Always fires**                                                                                                    | Q1 (location), Q2 (compliance), Q3 (GCP spend), Q4 (multi-cloud), Q5 (uptime), Q6 (maintenance window)           |
+| **B**    | Configuration Gaps | Inventory exists with `metadata.source == "billing"` AND at least one resource has `config_confidence == "assumed"` | Cloud SQL HA, Cloud Run service count, Memorystore memory, Cloud Functions generation                            |
+| **C**    | Compute Model      | Compute resources present (Cloud Run, Cloud Functions, GKE, GCE)                                                    | Q7 (K8s sentiment), Q8 (WebSocket), Q9 (Cloud Run traffic), Q10 (Cloud Run spend)                                |
+| **D**    | Database Model     | Database resources present (Cloud SQL, Spanner, Memorystore)                                                        | Q11 (DB scale), Q12 (DB I/O)                                                                                     |
+| **E**    | Migration Posture  | **Disabled by default** — requires explicit user opt-in                                                             | HA upgrades, right-sizing from billing utilization                                                               |
 | **F**    | AI/Bedrock         | `ai-workload-profile.json` exists                                                                                   | Q_GW (gateway), Q13 (AI priority), Q14 (token volume), Q15 (latency), Q16 (model preference), Q17 (capabilities) |
 
 **Apply firing rules:**
@@ -694,8 +694,8 @@ Wait for the user's response. Do NOT proceed to Design without a response or an 
 | Zero downtime required  | Q6 = No downtime                 | Blue/green + AWS DMS required            |
 | HIPAA compliance        | Q2 = HIPAA                       | BAA services only, specific regions      |
 | FedRAMP required        | Q2 = FedRAMP                     | GovCloud regions only                    |
-| Gateway AI user         | Q_GW = A/B/C/D (not direct)     | 1-3 day migration; skip full SDK rewrite |
-| Direct API AI user      | Q_GW = E (direct)               | Full SDK migration; 1-3 weeks            |
+| Gateway AI user         | Q_GW = A/B/C/D (not direct)      | 1-3 day migration; skip full SDK rewrite |
+| Direct API AI user      | Q_GW = E (direct)                | Full SDK migration; 1-3 weeks            |
 | Cost-sensitive AI       | Q13 = Cost + Q14 >= 100M         | Open-source models strongly preferred    |
 | Quality-critical AI     | Q13 = Quality + Q17 incl. tools  | Claude Opus or Sonnet required           |
 | High-volume batch AI    | Q14 >= 100M + Q15 = Batch        | Batch API with 50% discount, open-source |

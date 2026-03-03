@@ -80,7 +80,7 @@ Scan source code files and dependency manifests for AI-relevant patterns. For ea
 | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
 | 2.1 Google AI Platform SDK    | Imports: `google.cloud.aiplatform` (Python), `@google-cloud/aiplatform` (JS), `cloud.google.com/go/aiplatform` (Go), `com.google.cloud.aiplatform` (Java) | 95%        |
 | 2.2 BigQuery ML SDK           | `google.cloud.bigquery` + ML operations; SQL containing `CREATE MODEL` or `ML.*`                                                                          | 85%        |
-| 2.3 LLM SDKs (Gemini)         | Imports: `google.generativeai`, `vertexai.generative_models`, Gemini model strings (`gemini-pro`, `gemini-2.5-flash`, etc.)                                | 98%        |
+| 2.3 LLM SDKs (Gemini)         | Imports: `google.generativeai`, `vertexai.generative_models`, Gemini model strings (`gemini-pro`, `gemini-2.5-flash`, etc.)                               | 98%        |
 | 2.4 LLM SDKs (OpenAI)         | Imports: `openai`, `from openai import OpenAI`, `client.chat.completions.create()`, model strings (`gpt-4o`, `gpt-4.1`, `o3`, etc.)                       | 98%        |
 | 2.5 LLM SDKs (Other)          | Imports: `anthropic`, `cohere`, `mistralai`, other LLM provider SDKs                                                                                      | 98%        |
 | 2.6 Document/Vision/Speech AI | Imports: `google.cloud.documentai*`, `google.cloud.vision*`, `google.cloud.speech*`, `google.cloud.translate*`, `google.cloud.dialogflow*`                | 90%        |
@@ -220,19 +220,19 @@ Determine how the application integrates with AI services:
 
   Scan for these patterns and classify:
 
-  | Pattern | Gateway Type | Evidence |
-  | --- | --- | --- |
-  | `from litellm import completion` / `litellm` in dependencies | `llm_router` | LiteLLM — multi-provider router |
-  | `base_url` containing `openrouter.ai` | `llm_router` | OpenRouter — multi-provider router |
-  | `portkey` imports or `x-portkey-` headers | `llm_router` | Portkey — AI gateway |
-  | `helicone` imports or `x-helicone-` headers | `llm_router` | Helicone — AI gateway |
-  | Kong, Apigee, or custom API gateway routing to AI endpoints | `api_gateway` | API gateway proxying AI calls |
-  | `from vapi_python import Vapi` / Vapi SDK | `voice_platform` | Vapi — voice AI platform |
-  | `bland` SDK or Bland.ai API calls | `voice_platform` | Bland.ai — voice AI platform |
-  | `retell` SDK or Retell API calls | `voice_platform` | Retell — voice AI platform |
-  | `from langchain` with provider imports | `framework` | LangChain orchestration framework |
-  | `from llama_index` with provider imports | `framework` | LlamaIndex orchestration framework |
-  | Direct SDK calls only (no router/gateway/framework) | `direct` | Direct API integration |
+  | Pattern                                                      | Gateway Type     | Evidence                           |
+  | ------------------------------------------------------------ | ---------------- | ---------------------------------- |
+  | `from litellm import completion` / `litellm` in dependencies | `llm_router`     | LiteLLM — multi-provider router    |
+  | `base_url` containing `openrouter.ai`                        | `llm_router`     | OpenRouter — multi-provider router |
+  | `portkey` imports or `x-portkey-` headers                    | `llm_router`     | Portkey — AI gateway               |
+  | `helicone` imports or `x-helicone-` headers                  | `llm_router`     | Helicone — AI gateway              |
+  | Kong, Apigee, or custom API gateway routing to AI endpoints  | `api_gateway`    | API gateway proxying AI calls      |
+  | `from vapi_python import Vapi` / Vapi SDK                    | `voice_platform` | Vapi — voice AI platform           |
+  | `bland` SDK or Bland.ai API calls                            | `voice_platform` | Bland.ai — voice AI platform       |
+  | `retell` SDK or Retell API calls                             | `voice_platform` | Retell — voice AI platform         |
+  | `from langchain` with provider imports                       | `framework`      | LangChain orchestration framework  |
+  | `from llama_index` with provider imports                     | `framework`      | LlamaIndex orchestration framework |
+  | Direct SDK calls only (no router/gateway/framework)          | `direct`         | Direct API integration             |
 
   Set `gateway_type` to `null` if no AI signals were detected or detection is ambiguous.
 

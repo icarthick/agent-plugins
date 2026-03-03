@@ -23,52 +23,52 @@ All pricing should be verified via AWS Pricing MCP or `references/shared/pricing
 
 ### Flagship (GPT-5 Series)
 
-| OpenAI Model | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price | Winner |
-|-------------|----------------------|-------------------|---------------|--------|
-| GPT-5.2 | $1.75 / $14.00 | Claude Opus 4.6 | $5.00 / $25.00 | OpenAI 65% cheaper |
-| GPT-5.1 / GPT-5 | $1.25 / $10.00 | Claude Sonnet 4.6 | $3.00 / $15.00 | OpenAI 58% cheaper |
-| GPT-5 Mini | $0.25 / $2.00 | Nova Lite | $0.06 / $0.24 | Bedrock 88% cheaper |
-| GPT-5 Nano | $0.05 / $0.40 | Nova Micro | $0.035 / $0.14 | Bedrock 30-65% cheaper |
+| OpenAI Model    | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price  | Winner                 |
+| --------------- | --------------------- | ------------------ | -------------- | ---------------------- |
+| GPT-5.2         | $1.75 / $14.00        | Claude Opus 4.6    | $5.00 / $25.00 | OpenAI 65% cheaper     |
+| GPT-5.1 / GPT-5 | $1.25 / $10.00        | Claude Sonnet 4.6  | $3.00 / $15.00 | OpenAI 58% cheaper     |
+| GPT-5 Mini      | $0.25 / $2.00         | Nova Lite          | $0.06 / $0.24  | Bedrock 88% cheaper    |
+| GPT-5 Nano      | $0.05 / $0.40         | Nova Micro         | $0.035 / $0.14 | Bedrock 30-65% cheaper |
 
 ### Pro Models (Extended Reasoning)
 
-| OpenAI Model | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price | Winner |
-|-------------|----------------------|-------------------|---------------|--------|
-| GPT-5.2 Pro | $21.00 / $168.00 | Nova Premier | $2.40 / $9.60 | Bedrock 94% cheaper |
-| GPT-5 Pro | $15.00 / $120.00 | Nova Premier | $2.40 / $9.60 | Bedrock 92% cheaper |
+| OpenAI Model | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price | Winner              |
+| ------------ | --------------------- | ------------------ | ------------- | ------------------- |
+| GPT-5.2 Pro  | $21.00 / $168.00      | Nova Premier       | $2.40 / $9.60 | Bedrock 94% cheaper |
+| GPT-5 Pro    | $15.00 / $120.00      | Nova Premier       | $2.40 / $9.60 | Bedrock 92% cheaper |
 
 ### GPT-4.1 Series
 
-| OpenAI Model | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price | Winner |
-|-------------|----------------------|-------------------|---------------|--------|
-| GPT-4.1 | $2.00 / $8.00 | Claude Sonnet 4.6 | $3.00 / $15.00 | OpenAI 33% cheaper |
-| GPT-4.1 Mini | $0.40 / $1.60 | Nova Lite | $0.06 / $0.24 | Bedrock 85% cheaper |
-| GPT-4.1 Nano | $0.10 / $0.40 | Nova Micro | $0.035 / $0.14 | Bedrock 65% cheaper |
+| OpenAI Model | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price  | Winner              |
+| ------------ | --------------------- | ------------------ | -------------- | ------------------- |
+| GPT-4.1      | $2.00 / $8.00         | Claude Sonnet 4.6  | $3.00 / $15.00 | OpenAI 33% cheaper  |
+| GPT-4.1 Mini | $0.40 / $1.60         | Nova Lite          | $0.06 / $0.24  | Bedrock 85% cheaper |
+| GPT-4.1 Nano | $0.10 / $0.40         | Nova Micro         | $0.035 / $0.14 | Bedrock 65% cheaper |
 
 ### GPT-4o Series
 
-| OpenAI Model | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price | Winner |
-|-------------|----------------------|-------------------|---------------|--------|
-| GPT-4o | $2.50 / $10.00 | Claude Sonnet 4.6 | $3.00 / $15.00 | OpenAI 17% cheaper |
-| GPT-4o Mini | $0.15 / $0.60 | Nova Lite | $0.06 / $0.24 | Bedrock 60-88% cheaper |
+| OpenAI Model | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price  | Winner                 |
+| ------------ | --------------------- | ------------------ | -------------- | ---------------------- |
+| GPT-4o       | $2.50 / $10.00        | Claude Sonnet 4.6  | $3.00 / $15.00 | OpenAI 17% cheaper     |
+| GPT-4o Mini  | $0.15 / $0.60         | Nova Lite          | $0.06 / $0.24  | Bedrock 60-88% cheaper |
 
 ### Reasoning Models (o-series)
 
-| OpenAI Model | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price | Winner |
-|-------------|----------------------|-------------------|---------------|--------|
-| o1-pro | $150.00 / $600.00 | Nova Premier | $2.40 / $9.60 | Bedrock 98% cheaper |
-| o3-pro | $20.00 / $80.00 | Nova Premier | $2.40 / $9.60 | Bedrock 88% cheaper |
-| o1 | $15.00 / $60.00 | Nova Premier | $2.40 / $9.60 | Bedrock 84% cheaper |
-| o3 | $2.00 / $8.00 | Claude Sonnet 4.6 | $3.00 / $15.00 | OpenAI 33% cheaper |
-| o4-mini / o3-mini / o1-mini | $1.10 / $4.40 | Claude Sonnet 4.6 | $3.00 / $15.00 | OpenAI 63% cheaper |
+| OpenAI Model                | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price  | Winner              |
+| --------------------------- | --------------------- | ------------------ | -------------- | ------------------- |
+| o1-pro                      | $150.00 / $600.00     | Nova Premier       | $2.40 / $9.60  | Bedrock 98% cheaper |
+| o3-pro                      | $20.00 / $80.00       | Nova Premier       | $2.40 / $9.60  | Bedrock 88% cheaper |
+| o1                          | $15.00 / $60.00       | Nova Premier       | $2.40 / $9.60  | Bedrock 84% cheaper |
+| o3                          | $2.00 / $8.00         | Claude Sonnet 4.6  | $3.00 / $15.00 | OpenAI 33% cheaper  |
+| o4-mini / o3-mini / o1-mini | $1.10 / $4.40         | Claude Sonnet 4.6  | $3.00 / $15.00 | OpenAI 63% cheaper  |
 
 ### Legacy Models
 
-| OpenAI Model | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price | Winner |
-|-------------|----------------------|-------------------|---------------|--------|
-| GPT-4 Turbo | $10.00 / $30.00 | Claude Sonnet 4.6 | $3.00 / $15.00 | Bedrock 70-80% cheaper |
-| GPT-4 | $30.00 / $60.00 | Claude Sonnet 4.6 | $3.00 / $15.00 | Bedrock 90% cheaper |
-| GPT-3.5 Turbo | $0.50 / $1.50 | Llama 4 Maverick | $0.24 / $0.97 | Bedrock 35-52% cheaper + much better quality |
+| OpenAI Model  | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price  | Winner                                       |
+| ------------- | --------------------- | ------------------ | -------------- | -------------------------------------------- |
+| GPT-4 Turbo   | $10.00 / $30.00       | Claude Sonnet 4.6  | $3.00 / $15.00 | Bedrock 70-80% cheaper                       |
+| GPT-4         | $30.00 / $60.00       | Claude Sonnet 4.6  | $3.00 / $15.00 | Bedrock 90% cheaper                          |
+| GPT-3.5 Turbo | $0.50 / $1.50         | Llama 4 Maverick   | $0.24 / $0.97  | Bedrock 35-52% cheaper + much better quality |
 
 ---
 
@@ -95,18 +95,18 @@ All pricing should be verified via AWS Pricing MCP or `references/shared/pricing
 
 ## Feature Migration
 
-| OpenAI Feature | Bedrock Equivalent | Notes |
-|---------------|-------------------|-------|
-| Function calling | Claude tools (excellent, similar format) | Minimal changes |
-| Streaming | All major models | Verify gateway format |
-| Vision (GPT-4V) | Claude Sonnet/Haiku, Llama 3.2 90B | 70-95% cheaper |
-| Embeddings (ada-002) | Titan Embeddings ($0.02/1M, 1536 dims) | Must re-embed all docs |
-| DALL-E | Titan Image Generator ($0.008-$0.04/img) | 50-70% cheaper |
-| Whisper (STT) | Amazon Transcribe ($0.024/min) | 4x more expensive but more features |
-| TTS | Amazon Polly | Different pricing model |
-| Assistants API | Bedrock Agents (sessions, action groups, knowledge bases) | 2-4 week migration |
-| JSON mode | Claude (excellent), Nova Pro (good) | Most models via prompt |
-| Realtime API | No equivalent | Stay on OpenAI for this |
+| OpenAI Feature       | Bedrock Equivalent                                        | Notes                               |
+| -------------------- | --------------------------------------------------------- | ----------------------------------- |
+| Function calling     | Claude tools (excellent, similar format)                  | Minimal changes                     |
+| Streaming            | All major models                                          | Verify gateway format               |
+| Vision (GPT-4V)      | Claude Sonnet/Haiku, Llama 3.2 90B                        | 70-95% cheaper                      |
+| Embeddings (ada-002) | Titan Embeddings ($0.02/1M, 1536 dims)                    | Must re-embed all docs              |
+| DALL-E               | Titan Image Generator ($0.008-$0.04/img)                  | 50-70% cheaper                      |
+| Whisper (STT)        | Amazon Transcribe ($0.024/min)                            | 4x more expensive but more features |
+| TTS                  | Amazon Polly                                              | Different pricing model             |
+| Assistants API       | Bedrock Agents (sessions, action groups, knowledge bases) | 2-4 week migration                  |
+| JSON mode            | Claude (excellent), Nova Pro (good)                       | Most models via prompt              |
+| Realtime API         | No equivalent                                             | Stay on OpenAI for this             |
 
 ---
 

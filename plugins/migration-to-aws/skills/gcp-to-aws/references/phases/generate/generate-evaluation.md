@@ -245,18 +245,18 @@ The right sequence is: **eval on sample data → migrate with feature flag → A
 
 ## Quick Reference: Model IDs for Evaluation Jobs
 
-| Model | Bedrock Model ID |
-|-------|-----------------|
-| Claude Sonnet 4.6 | `anthropic.claude-sonnet-4-6` |
+| Model             | Bedrock Model ID                            |
+| ----------------- | ------------------------------------------- |
+| Claude Sonnet 4.6 | `anthropic.claude-sonnet-4-6`               |
 | Claude Sonnet 4.5 | `anthropic.claude-sonnet-4-5-20250929-v1:0` |
-| Claude Haiku 4.5 | `anthropic.claude-haiku-4-5-20251001-v1:0` |
-| Claude Opus 4.6 | `anthropic.claude-opus-4-6-v1` |
-| Llama 4 Maverick | `meta.llama4-maverick-17b-instruct-v1:0` |
-| Llama 4 Scout | `meta.llama4-scout-17b-instruct-v1:0` |
-| Nova Pro | `amazon.nova-pro-v1:0` |
-| Nova Lite | `amazon.nova-lite-v1:0` |
-| Nova Micro | `amazon.nova-micro-v1:0` |
-| Llama 3.3 70B | `meta.llama3-3-70b-instruct-v1:0` |
-| Mistral Large 3 | `mistral.mistral-large-3-675b-instruct` |
+| Claude Haiku 4.5  | `anthropic.claude-haiku-4-5-20251001-v1:0`  |
+| Claude Opus 4.6   | `anthropic.claude-opus-4-6-v1`              |
+| Llama 4 Maverick  | `meta.llama4-maverick-17b-instruct-v1:0`    |
+| Llama 4 Scout     | `meta.llama4-scout-17b-instruct-v1:0`       |
+| Nova Pro          | `amazon.nova-pro-v1:0`                      |
+| Nova Lite         | `amazon.nova-lite-v1:0`                     |
+| Nova Micro        | `amazon.nova-micro-v1:0`                    |
+| Llama 3.3 70B     | `meta.llama3-3-70b-instruct-v1:0`           |
+| Mistral Large 3   | `mistral.mistral-large-3-675b-instruct`     |
 
 **Note:** Some model IDs omit the version suffix — this matches the official AWS model catalog. **Always verify current model IDs** via the Bedrock console or AWS documentation — IDs can change with new versions. For CLI/SDK use, wrap the model ID in the full ARN: `arn:aws:bedrock:REGION::foundation-model/MODEL_ID`.

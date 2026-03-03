@@ -15,20 +15,20 @@ The parent `estimate.md` selects the pricing mode before loading this file. Use 
 
 If MCP is unavailable, use these rates (from `pricing-fallback.json`):
 
-| Model               | Model ID                              | Input (per 1M) | Output (per 1M) | Tier      |
-| ------------------- | ------------------------------------- | --------------- | ---------------- | --------- |
-| Claude Opus 4.6     | `anthropic.claude-opus-4-6-v1`        | $5.00           | $25.00           | Premium   |
-| Claude Sonnet 4.6   | `anthropic.claude-sonnet-4-6`         | $3.00           | $15.00           | Flagship  |
-| Claude Haiku 4.5    | `anthropic.claude-haiku-4-5-20251001-v1:0` | $1.00      | $5.00            | Fast      |
-| Llama 4 Maverick    | `meta.llama4-maverick-17b-instruct-v1:0` | $0.24        | $0.97            | Mid       |
-| Llama 4 Scout       | `meta.llama4-scout-17b-instruct-v1:0` | $0.17           | $0.66            | Efficient |
-| Llama 3.3 70B       | `meta.llama3-3-70b-instruct-v1:0`     | $0.72           | $0.72            | Mid       |
-| Nova Pro            | `amazon.nova-pro-v1:0`                | $0.80           | $3.20            | Mid       |
-| Nova Lite           | `amazon.nova-lite-v1:0`               | $0.06           | $0.24            | Fast      |
-| Nova Micro          | `amazon.nova-micro-v1:0`              | $0.035          | $0.14            | Budget    |
-| Nova Premier        | `amazon.nova-premier-v1:0`            | $2.40           | $9.60            | Reasoning |
-| Mistral Large 3     | `mistral.mistral-large-3-675b-instruct` | $2.00         | $6.00            | Flagship  |
-| Titan Embeddings v2 | `amazon.titan-embed-text-v2:0`        | $0.02           | N/A              | Embedding |
+| Model               | Model ID                                   | Input (per 1M) | Output (per 1M) | Tier      |
+| ------------------- | ------------------------------------------ | -------------- | --------------- | --------- |
+| Claude Opus 4.6     | `anthropic.claude-opus-4-6-v1`             | $5.00          | $25.00          | Premium   |
+| Claude Sonnet 4.6   | `anthropic.claude-sonnet-4-6`              | $3.00          | $15.00          | Flagship  |
+| Claude Haiku 4.5    | `anthropic.claude-haiku-4-5-20251001-v1:0` | $1.00          | $5.00           | Fast      |
+| Llama 4 Maverick    | `meta.llama4-maverick-17b-instruct-v1:0`   | $0.24          | $0.97           | Mid       |
+| Llama 4 Scout       | `meta.llama4-scout-17b-instruct-v1:0`      | $0.17          | $0.66           | Efficient |
+| Llama 3.3 70B       | `meta.llama3-3-70b-instruct-v1:0`          | $0.72          | $0.72           | Mid       |
+| Nova Pro            | `amazon.nova-pro-v1:0`                     | $0.80          | $3.20           | Mid       |
+| Nova Lite           | `amazon.nova-lite-v1:0`                    | $0.06          | $0.24           | Fast      |
+| Nova Micro          | `amazon.nova-micro-v1:0`                   | $0.035         | $0.14           | Budget    |
+| Nova Premier        | `amazon.nova-premier-v1:0`                 | $2.40          | $9.60           | Reasoning |
+| Mistral Large 3     | `mistral.mistral-large-3-675b-instruct`    | $2.00          | $6.00           | Flagship  |
+| Titan Embeddings v2 | `amazon.titan-embed-text-v2:0`             | $0.02          | N/A             | Embedding |
 
 ### Source Provider Pricing Reference
 
@@ -36,24 +36,24 @@ For migration cost comparison (from `pricing-fallback.json` → `source_provider
 
 **Gemini (Standard tier):**
 
-| Model                   | Input (per 1M) | Output (per 1M) |
-| ----------------------- | --------------- | ---------------- |
-| Gemini 3.1 Pro Preview  | $1.25           | $10.00           |
-| Gemini 2.5 Pro          | $1.25           | $10.00           |
-| Gemini 2.5 Flash        | $0.15           | $0.60            |
-| Gemini 2.0 Flash        | $0.10           | $0.40            |
-| Gemini 2.0 Flash Lite   | $0.075          | $0.30            |
+| Model                  | Input (per 1M) | Output (per 1M) |
+| ---------------------- | -------------- | --------------- |
+| Gemini 3.1 Pro Preview | $1.25          | $10.00          |
+| Gemini 2.5 Pro         | $1.25          | $10.00          |
+| Gemini 2.5 Flash       | $0.15          | $0.60           |
+| Gemini 2.0 Flash       | $0.10          | $0.40           |
+| Gemini 2.0 Flash Lite  | $0.075         | $0.30           |
 
 **OpenAI (Standard tier, selected models):**
 
-| Model     | Input (per 1M) | Output (per 1M) |
-| --------- | --------------- | ---------------- |
-| GPT-5.2   | $1.75           | $14.00           |
-| GPT-5.1   | $1.25           | $10.00           |
-| GPT-4.1   | $2.00           | $8.00            |
-| GPT-4o    | $2.50           | $10.00           |
-| o3        | $2.00           | $8.00            |
-| o4-mini   | $1.10           | $4.40            |
+| Model   | Input (per 1M) | Output (per 1M) |
+| ------- | -------------- | --------------- |
+| GPT-5.2 | $1.75          | $14.00          |
+| GPT-5.1 | $1.25          | $10.00          |
+| GPT-4.1 | $2.00          | $8.00           |
+| GPT-4o  | $2.50          | $10.00          |
+| o3      | $2.00          | $8.00           |
+| o4-mini | $1.10          | $4.40           |
 
 The formulas and methodology below are identical for both modes. The only difference is the price source.
 
@@ -170,6 +170,7 @@ Current GCP Billing   $[current]         --                     --              
 `(Bedrock monthly - Source provider monthly) / Source provider monthly × 100`
 
 If Bedrock is more expensive for the recommended model, flag this prominently:
+
 > **Note:** Bedrock is [X]% more expensive than [source provider] for [model]. See ROI analysis for justification.
 
 **Capabilities Match** — Check each model against `ai_constraints.ai_capabilities_required.value` from `preferences.json`. Mark "No" and list gaps if a required capability is missing (e.g., "No: missing function_calling").

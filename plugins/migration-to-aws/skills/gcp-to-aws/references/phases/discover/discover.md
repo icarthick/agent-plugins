@@ -46,7 +46,8 @@ Multiple artifacts can be produced in a single run — they are not mutually exc
        "clarify": { "status": "pending", "timestamp": null, "outputs": [] },
        "design": { "status": "pending", "timestamp": null, "outputs": [] },
        "estimate": { "status": "pending", "timestamp": null, "outputs": [] },
-       "execute": { "status": "pending", "timestamp": null, "outputs": [] }
+       "generate": { "status": "pending", "timestamp": null, "outputs": [] },
+       "feedback": { "status": "pending", "timestamp": null, "outputs": [] }
      }
    }
    ```
@@ -63,16 +64,19 @@ Scan the project directory for each input type. Only load sub-discovery files wh
 
 **2a. Check for Terraform files:**
 Glob for: `**/*.tf`, `**/*.tfvars`, `**/*.tfstate`, `**/.terraform.lock.hcl`
+
 - If found → Load `references/phases/discover/discover-iac.md`
 - If not found → Skip. Log: "No Terraform files found — skipping IaC discovery."
 
 **2b. Check for source code / dependency manifests:**
 Glob for: `**/*.py`, `**/*.js`, `**/*.ts`, `**/*.jsx`, `**/*.tsx`, `**/*.go`, `**/*.java`, `**/*.scala`, `**/*.kotlin`, `**/*.rust`, `**/requirements.txt`, `**/setup.py`, `**/pyproject.toml`, `**/Pipfile`, `**/package.json`, `**/go.mod`, `**/pom.xml`, `**/build.gradle`
+
 - If found → Load `references/phases/discover/discover-app-code.md`
 - If not found → Skip. Log: "No source code found — skipping app code discovery."
 
 **2c. Check for billing data:**
 Glob for: `**/*billing*.csv`, `**/*billing*.json`, `**/*cost*.csv`, `**/*cost*.json`, `**/*usage*.csv`, `**/*usage*.json`
+
 - If found → Load `references/phases/discover/discover-billing.md`
 - If not found → Skip. Log: "No billing files found — skipping billing discovery."
 

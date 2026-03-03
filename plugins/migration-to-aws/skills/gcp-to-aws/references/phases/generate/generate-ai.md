@@ -51,11 +51,11 @@ Gateway users can migrate by changing configuration, not code:
 - **Day 2:** Test in staging, validate quality and latency
 - **Day 3:** Gradual rollout (10% → 50% → 100%)
 
-| Gateway Type | Migration Action | Effort |
-| --- | --- | --- |
-| LLM Router (LiteLLM, OpenRouter) | Change model string to `bedrock/<model_id>` | 1 config line |
-| API Gateway (Kong, Apigee) | Add Bedrock upstream + SigV4 signing | 1-2 config files |
-| Voice Platform (Vapi, Bland.ai) | Check native Bedrock support, update dashboard | Dashboard config |
+| Gateway Type                      | Migration Action                                                            | Effort            |
+| --------------------------------- | --------------------------------------------------------------------------- | ----------------- |
+| LLM Router (LiteLLM, OpenRouter)  | Change model string to `bedrock/<model_id>`                                 | 1 config line     |
+| API Gateway (Kong, Apigee)        | Add Bedrock upstream + SigV4 signing                                        | 1-2 config files  |
+| Voice Platform (Vapi, Bland.ai)   | Check native Bedrock support, update dashboard                              | Dashboard config  |
 | Framework (LangChain, LlamaIndex) | Swap provider import (`ChatBedrock` instead of `ChatVertexAI`/`ChatOpenAI`) | 1-5 lines of code |
 
 #### Direct SDK Users (1-3 WEEKS) — `ai_gateway` = `direct`

@@ -85,17 +85,17 @@ The overall `honest_assessment` at the architecture level is the weakest assessm
 
 When writing the design report, include a comparison for each mapped model:
 
-| Dimension         | Source Provider                    | AWS Bedrock (Target)          |
-| ----------------- | --------------------------------- | ----------------------------- |
-| Model             | (detected model_id)               | (selected Bedrock model)      |
-| Provider          | (Gemini / OpenAI / etc.)          | (Anthropic / Amazon / Meta)   |
-| Max Context       | (source model limit)              | (Bedrock model limit)         |
-| Input Price/1M    | (from design-ref mapping table)   | (from design-ref mapping)     |
-| Output Price/1M   | (from design-ref mapping table)   | (from design-ref mapping)     |
-| Price Comparison  | (Winner column from design-ref)   | (percentage difference)       |
-| Streaming         | (yes/no from capabilities)        | (yes/no)                      |
-| Function Calling  | (yes/no from capabilities)        | (yes/no — tool use)           |
-| Assessment        | —                                 | (honest_assessment)           |
+| Dimension        | Source Provider                 | AWS Bedrock (Target)        |
+| ---------------- | ------------------------------- | --------------------------- |
+| Model            | (detected model_id)             | (selected Bedrock model)    |
+| Provider         | (Gemini / OpenAI / etc.)        | (Anthropic / Amazon / Meta) |
+| Max Context      | (source model limit)            | (Bedrock model limit)       |
+| Input Price/1M   | (from design-ref mapping table) | (from design-ref mapping)   |
+| Output Price/1M  | (from design-ref mapping table) | (from design-ref mapping)   |
+| Price Comparison | (Winner column from design-ref) | (percentage difference)     |
+| Streaming        | (yes/no from capabilities)      | (yes/no)                    |
+| Function Calling | (yes/no from capabilities)      | (yes/no — tool use)         |
+| Assessment       | —                               | (honest_assessment)         |
 
 ---
 
@@ -105,12 +105,12 @@ If `ai_constraints.ai_token_volume` is `"high"` (10-100M/day) or `"very_high"` (
 
 ### Tiering Strategy
 
-| Volume Tier | Strategy | Tiered Approach |
-| --- | --- | --- |
-| Low (<1M tokens/day) | Single best model for quality | No tiering needed |
-| Medium (1-10M/day) | Present cost comparison at volume | Optional tiering |
-| High (10-100M/day) | Multi-model tiered approach recommended | 3-tier routing |
-| Very high (>100M/day) | Mandatory tiering | 3-tier routing with strict percentages |
+| Volume Tier           | Strategy                                | Tiered Approach                        |
+| --------------------- | --------------------------------------- | -------------------------------------- |
+| Low (<1M tokens/day)  | Single best model for quality           | No tiering needed                      |
+| Medium (1-10M/day)    | Present cost comparison at volume       | Optional tiering                       |
+| High (10-100M/day)    | Multi-model tiered approach recommended | 3-tier routing                         |
+| Very high (>100M/day) | Mandatory tiering                       | 3-tier routing with strict percentages |
 
 ### Recommended Tier Split (High/Very High Volume)
 

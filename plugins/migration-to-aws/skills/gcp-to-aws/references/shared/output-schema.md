@@ -36,7 +36,8 @@ Hierarchical phase tracking with per-phase metadata. This is the SINGLE source o
     },
     "design": { "status": "in_progress", "timestamp": null, "outputs": [] },
     "estimate": { "status": "pending", "timestamp": null, "outputs": [] },
-    "generate": { "status": "pending", "timestamp": null, "outputs": [] }
+    "generate": { "status": "pending", "timestamp": null, "outputs": [] },
+    "feedback": { "status": "pending", "timestamp": null, "outputs": [] }
   }
 }
 ```
@@ -581,11 +582,11 @@ Adaptive migration preferences organized as design constraints. Each constraint 
 | `design_constraints.<key>.chosen_by`        | Provenance: `"user"` (explicitly answered), `"default"` (system default — includes "I don't know"), `"extracted"` (inferred from inventory), `"derived"` (computed from combination of answers) |
 | `ai_constraints`                            | _(v1.1)_ Present ONLY if Category F fired (AI discovery). Omit entirely otherwise                                                                                                               |
 | `ai_constraints.ai_priority`                | User's optimization priority: `"quality"`, `"speed"`, `"cost"`, `"balanced"`                                                                                                                    |
-| `ai_constraints.token_volume`               | Expected token volume: `"low"` (<1M/day), `"medium"` (1-10M), `"high"` (10-100M), `"very_high"` (>100M)                                                                                        |
+| `ai_constraints.token_volume`               | Expected token volume: `"low"` (<1M/day), `"medium"` (1-10M), `"high"` (10-100M), `"very_high"` (>100M)                                                                                         |
 | `ai_constraints.latency_requirement`        | Latency need: `"realtime"` (<500ms), `"near-realtime"` (<2s), `"batch"` (minutes OK)                                                                                                            |
 | `ai_constraints.model_preference`           | User's model preference: `"anthropic"`, `"meta"`, `"amazon"`, `"no-preference"`                                                                                                                 |
-| `ai_constraints.ai_capabilities`            | Capabilities needed (array): `"text_generation"`, `"streaming"`, `"function_calling"`, `"vision"`, `"embeddings"`, etc.                                                                          |
-| `ai_constraints.ai_gateway`                 | _(v1.2)_ Gateway/router type from detection or Q_GATEWAY: `"llm_router"`, `"api_gateway"`, `"voice_platform"`, `"framework"`, `"direct"`, or `null`                                              |
+| `ai_constraints.ai_capabilities`            | Capabilities needed (array): `"text_generation"`, `"streaming"`, `"function_calling"`, `"vision"`, `"embeddings"`, etc.                                                                         |
+| `ai_constraints.ai_gateway`                 | _(v1.2)_ Gateway/router type from detection or Q_GATEWAY: `"llm_router"`, `"api_gateway"`, `"voice_platform"`, `"framework"`, `"direct"`, or `null`                                             |
 
 ### Rules
 
@@ -1465,6 +1466,147 @@ Conservative billing-only migration plan with extended discovery, relaxed thresh
   }
 }
 ```
+
+---
+
+## feedback.json (Phase 6 output)
+
+User feedback responses and submission metadata. Written at the end of the optional Feedback phase.
+
+```json
+{
+  "timestamp": "2026-02-26T16:00:00Z",
+  "submitted": true,
+  "submission_id": "SurveySubmission-abc123",
+  "visitor_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "phases_completed_at_feedback": ["discover", "clarify", "design", "estimate", "generate"],
+  "answers": {
+    "q1_time_saved": "A",
+    "q2_mapping_accuracy": "B",
+    "q3_terraform_usability": "A",
+    "q4_cost_accuracy": "B",
+    "q5_weakest_phase": ["D", "E"]
+  },
+  "trace_included": true,
+  "auto_skipped": []
+}
+```
+
+**Field Definitions:**
+
+| Field                            | Type             | Description                                                     |
+| -------------------------------- | ---------------- | --------------------------------------------------------------- |
+| `timestamp`                      | ISO 8601         | When feedback was recorded                                      |
+| `submitted`                      | boolean          | Whether the Pulse API submission succeeded                      |
+| `submission_id`                  | string or null   | Pulse API submission ID (null if submission failed or declined) |
+| `visitor_id`                     | string           | Random UUID used as anonymous identifier                        |
+| `phases_completed_at_feedback`   | string[]         | Phases with `status: "completed"` at time of feedback           |
+| `answers.q1_time_saved`          | string or null   | A/B/C/D or null if skipped                                      |
+| `answers.q2_mapping_accuracy`    | string or null   | A/B/C/D or null if skipped or auto-skipped                      |
+| `answers.q3_terraform_usability` | string or null   | A/B/C/D or null if skipped or auto-skipped                      |
+| `answers.q4_cost_accuracy`       | string or null   | A/B/C/D or null if skipped or auto-skipped                      |
+| `answers.q5_weakest_phase`       | string[] or null | Array of selected letters or null if skipped                    |
+| `trace_included`                 | boolean          | Whether trace.json was successfully built and included          |
+| `auto_skipped`                   | string[]         | Question IDs auto-skipped because their phase was not completed |
+
+**Rules:**
+
+- `submitted` is `false` when: user declined submission, curl failed, or API returned non-200
+- `answers` are always recorded even if submission failed
+- `auto_skipped` contains question keys (e.g., `"q2_mapping_accuracy"`) for phases that did not complete
+
+---
+
+## trace.json (Phase 6 output)
+
+Anonymized telemetry trace built from migration artifacts. Never includes resource names, file paths, account IDs, IPs, variable values, or secrets.
+
+```json
+{
+  "migration_id": "0226-1430",
+  "phases_completed": ["discover", "clarify", "design", "estimate", "generate"],
+  "phase_durations_seconds": {
+    "discover": 60,
+    "clarify": 120,
+    "design": 180,
+    "estimate": 90,
+    "generate": 300
+  },
+  "discovery": {
+    "total_resources": 50,
+    "primary_resources": 12,
+    "secondary_resources": 38,
+    "resource_type_counts": { "google_cloud_run_service": 3, "google_sql_database_instance": 1 },
+    "has_ai_workload": false
+  },
+  "cluster_count": 6,
+  "ai_profile": {
+    "ai_source": "gemini",
+    "total_models_detected": 2,
+    "languages_found": ["python"],
+    "integration_pattern": "direct_sdk",
+    "gateway_type": "framework",
+    "capabilities_summary": { "text_generation": true, "streaming": true }
+  },
+  "billing": {
+    "total_monthly_spend": 2450.00,
+    "service_count": 8
+  },
+  "preferences": {
+    "questions_asked_count": 9,
+    "questions_defaulted_count": 1,
+    "questions_skipped_count": 2,
+    "category_e_enabled": false,
+    "constraint_values": { "target_region": "us-east-1", "compliance": ["hipaa"] }
+  },
+  "design_mappings": [
+    {
+      "gcp_type": "google_cloud_run_service",
+      "aws_service": "Fargate",
+      "confidence": "deterministic"
+    }
+  ],
+  "unmapped_count": 0,
+  "design_ai": {
+    "honest_assessment": "strong_migrate",
+    "bedrock_model_count": 2
+  },
+  "estimation_infra": {
+    "pricing_source": "live",
+    "accuracy_confidence": "+-5-10%",
+    "monthly_cost": 194
+  },
+  "generation_infra": {
+    "generation_source": "infrastructure",
+    "total_weeks": 12,
+    "risk_count": 3
+  },
+  "artifacts": {
+    "terraform_file_count": 5,
+    "scripts_file_count": 3,
+    "ai_migration_file_count": 0
+  }
+}
+```
+
+**Key Fields:**
+
+- `migration_id` — Run identifier (matches folder name)
+- `phases_completed` — Which phases ran to completion
+- `phase_durations_seconds` — Duration per phase (computed from timestamps)
+- `discovery.*` — Resource counts and types only (no names or addresses)
+- `cluster_count` — Number of resource clusters
+- `ai_profile` — AI workload summary (enum values and counts only)
+- `billing` — Aggregate spend and service count only
+- `preferences` — Question counts and constraint enum values only
+- `design_mappings` — GCP type to AWS service mappings (no resource names)
+- `estimation_*` — Pricing source and aggregate cost only
+- `generation_*` — Source, timeline, and risk count only
+- `artifacts` — File counts per directory only
+
+**Sections are omitted** when the corresponding artifact does not exist. A trace from a partial run (e.g., only Discover + Clarify completed) will only contain the sections for those phases.
+
+**Anonymization rules (hard exclusions):** No resource names, file paths, account IDs, IPs, variable values, or secrets.
 
 ---
 

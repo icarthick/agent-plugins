@@ -1,6 +1,6 @@
 ---
 name: gcp-to-aws
-description: "Migrate workloads from Google Cloud Platform to AWS. Triggers on: migrate from GCP, GCP to AWS, move off Google Cloud, migrate Terraform to AWS, migrate Cloud SQL to RDS, migrate GKE to EKS, migrate Cloud Run to Fargate, Google Cloud migration. Runs a 5-phase process: discover GCP resources from Terraform files, app code, or billing exports, clarify migration requirements, design AWS architecture, estimate costs, and plan execution."
+description: "Migrate workloads from Google Cloud Platform to AWS. Triggers on: migrate from GCP, GCP to AWS, move off Google Cloud, migrate Terraform to AWS, migrate Cloud SQL to RDS, migrate GKE to EKS, migrate Cloud Run to Fargate, Google Cloud migration. Runs a 6-phase process: discover GCP resources from Terraform files, app code, or billing exports, clarify migration requirements, design AWS architecture, estimate costs, plan execution, and collect optional feedback."
 ---
 
 # GCP-to-AWS Migration Skill
@@ -57,7 +57,7 @@ When reading `$MIGRATION_DIR/.phase-status.json`, validate before proceeding:
 
 1. **Multiple sessions**: If multiple directories exist under `.migration/`, STOP. Output: "Multiple migration sessions detected. Pick one to continue: [list]"
 2. **Invalid JSON**: If `.phase-status.json` fails to parse, STOP. Output: "State file corrupted (invalid JSON). Delete the file and restart the current phase."
-3. **Unrecognized phase**: If `phases` object contains a phase not in {discover, clarify, design, estimate, generate}, STOP. Output: "Unrecognized phase: [value]. Valid phases: discover, clarify, design, estimate, generate."
+3. **Unrecognized phase**: If `phases` object contains a phase not in {discover, clarify, design, estimate, generate, feedback}, STOP. Output: "Unrecognized phase: [value]. Valid phases: discover, clarify, design, estimate, generate, feedback."
 4. **Unrecognized status**: If any `phases.*.status` is not in {pending, in_progress, completed}, STOP. Output: "Unrecognized status: [value]. Valid values: pending, in_progress, completed."
 
 ---
@@ -95,7 +95,8 @@ Migration state lives in `$MIGRATION_DIR` (`.migration/[MMDD-HHMM]/`), created b
     },
     "design": { "status": "in_progress", "timestamp": null, "outputs": [] },
     "estimate": { "status": "pending", "timestamp": null, "outputs": [] },
-    "generate": { "status": "pending", "timestamp": null, "outputs": [] }
+    "generate": { "status": "pending", "timestamp": null, "outputs": [] },
+    "feedback": { "status": "pending", "timestamp": null, "outputs": [] }
   }
 }
 ```
@@ -110,11 +111,12 @@ The `.migration/` directory is automatically protected by a `.gitignore` file cr
 
 | Phase        | Inputs                                                                                                                                                                   | Outputs                                                                                                                                                                                   | Reference                                |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| **Discover** | `.tf` files, app source code, and/or billing exports (at least one required)                                                                                             | `gcp-resource-inventory.json`, `gcp-resource-clusters.json`, `ai-workload-profile.json`, `billing-profile.json`, `.phase-status.json` updated (outputs vary by input)                      | `references/phases/discover/discover.md` |
+| **Discover** | `.tf` files, app source code, and/or billing exports (at least one required)                                                                                             | `gcp-resource-inventory.json`, `gcp-resource-clusters.json`, `ai-workload-profile.json`, `billing-profile.json`, `.phase-status.json` updated (outputs vary by input)                     | `references/phases/discover/discover.md` |
 | **Clarify**  | Discovery artifacts (`gcp-resource-inventory.json`, `gcp-resource-clusters.json`, `ai-workload-profile.json`, `billing-profile.json` — whichever exist)                  | `preferences.json`, `.phase-status.json` updated                                                                                                                                          | `references/phases/clarify.md`           |
 | **Design**   | `preferences.json` + discovery artifacts                                                                                                                                 | `aws-design.json` + `aws-design-report.md` (infra), `aws-design-ai.json` + `aws-design-ai-report.md` (AI), `aws-design-billing.json` + `aws-design-billing-report.md` (billing-only)      | `references/phases/design/design.md`     |
 | **Estimate** | `aws-design.json` or `aws-design-billing.json` or `aws-design-ai.json`, `preferences.json`                                                                               | `estimation-infra.json` or `estimation-ai.json` or `estimation-billing.json` + reports, `.phase-status.json` updated                                                                      | `references/phases/estimate/estimate.md` |
 | **Generate** | `estimation-infra.json` or `estimation-ai.json` or `estimation-billing.json`, `aws-design.json` or `aws-design-billing.json` or `aws-design-ai.json`, `preferences.json` | `generation-infra.json` or `generation-ai.json` or `generation-billing.json` + `terraform/`, `scripts/`, `ai-migration/`, `MIGRATION_GUIDE.md`, `README.md`, `.phase-status.json` updated | `references/phases/generate/generate.md` |
+| **Feedback** | `.phase-status.json` (discover completed minimum), all existing migration artifacts                                                                                      | `feedback.json`, `trace.json`, `.phase-status.json` updated                                                                                                                               | `references/phases/feedback/feedback.md` |
 
 ---
 
@@ -152,15 +154,18 @@ gcp-to-aws/
 │   │   │   ├── estimate-infra.md               # Infrastructure cost analysis
 │   │   │   ├── estimate-ai.md                  # AI workload cost analysis
 │   │   │   └── estimate-billing.md             # Billing-only cost analysis
-│   │   └── generate/
-│   │       ├── generate.md                     # Phase 5: Generate orchestrator
-│   │       ├── generate-infra.md               # Infrastructure migration plan
-│   │       ├── generate-ai.md                  # AI migration plan
-│   │       ├── generate-billing.md             # Billing-only migration plan
-│   │       ├── generate-artifacts-infra.md     # Terraform + migration scripts
-│   │       ├── generate-artifacts-ai.md        # Provider adapter + test harness
-│   │       ├── generate-artifacts-billing.md   # Skeleton Terraform
-│   │       └── generate-artifacts-docs.md      # MIGRATION_GUIDE.md + README.md
+│   │   ├── generate/
+│   │   │   ├── generate.md                     # Phase 5: Generate orchestrator
+│   │   │   ├── generate-infra.md               # Infrastructure migration plan
+│   │   │   ├── generate-ai.md                  # AI migration plan
+│   │   │   ├── generate-billing.md             # Billing-only migration plan
+│   │   │   ├── generate-artifacts-infra.md     # Terraform + migration scripts
+│   │   │   ├── generate-artifacts-ai.md        # Provider adapter + test harness
+│   │   │   ├── generate-artifacts-billing.md   # Skeleton Terraform
+│   │   │   └── generate-artifacts-docs.md      # MIGRATION_GUIDE.md + README.md
+│   │   └── feedback/
+│   │       ├── feedback.md                     # Phase 6: Feedback orchestrator
+│   │       └── feedback-trace.md               # Anonymized trace builder
 │   │
 │   ├── design-refs/
 │   │   ├── index.md                            # Lookup table: GCP type → design-ref file
@@ -183,13 +188,13 @@ gcp-to-aws/
 │       └── pricing-fallback.json               # Cached AWS pricing (±15-25%)
 ```
 
-| Condition                                   | Action                                                                                                                       |
-| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Condition                                                     | Action                                                                                                                                           |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | No GCP sources found (no `.tf`, no app code, no billing data) | Stop. Output: "No GCP sources detected. Provide at least one source type (Terraform files, application code, or billing exports) and try again." |
-| `.phase-status.json` missing phase gate     | Stop. Output: "Cannot enter Phase X: Phase Y-1 not completed. Start from Phase Y or resume Phase Y-1."                       |
-| awspricing unavailable after 3 attempts     | Display user warning about ±15-25% accuracy. Use `pricing-fallback.json`. Add `pricing_source: fallback` to estimation.json. |
-| User does not answer all Q1-8               | Offer Mode C (defaults) or Mode D (free text). Phase 2 completes either way.                                                 |
-| `aws-design.json` missing required clusters | Stop Phase 4. Output: "Re-run Phase 3 to generate missing cluster designs."                                                  |
+| `.phase-status.json` missing phase gate                       | Stop. Output: "Cannot enter Phase X: Phase Y-1 not completed. Start from Phase Y or resume Phase Y-1."                                           |
+| awspricing unavailable after 3 attempts                       | Display user warning about ±15-25% accuracy. Use `pricing-fallback.json`. Add `pricing_source: fallback` to estimation.json.                     |
+| User does not answer all Q1-8                                 | Offer Mode C (defaults) or Mode D (free text). Phase 2 completes either way.                                                                     |
+| `aws-design.json` missing required clusters                   | Stop Phase 4. Output: "Re-run Phase 3 to generate missing cluster designs."                                                                      |
 
 ## Defaults
 
@@ -226,7 +231,25 @@ When invoked, the agent **MUST follow this exact sequence**:
 
 6. **Update phase status**: Each phase reference file specifies the final `.phase-status.json` update (records the phase that just completed).
 
-7. **Display summary**: Show user what was accomplished, highlight next phase, or confirm migration completion.
+7. **Feedback checkpoint**: After a phase completes, check if feedback should be offered. This runs **before** advancing to the next phase.
+
+   - **After Discover** (if `phases.feedback.status` is `"pending"`): Output to user:
+     "Would you like to share quick feedback (5 optional questions + anonymized usage data) to help improve this tool? Your data never includes resource names, file paths, or account IDs.
+     [N] Send feedback now
+     [L] Wait until after the Estimate phase"
+     - If user picks **N** → Load `references/phases/feedback/feedback.md`, execute it, then continue to Clarify.
+     - If user picks **L** → Continue to Clarify (feedback stays `"pending"`).
+
+   - **After Estimate** (if `phases.feedback.status` is `"pending"`): Output to user:
+     "Would you like to share quick feedback now? (5 optional questions + anonymized usage data)
+     [Y] Yes, share feedback
+     [N] No thanks, continue to Generate"
+     - If user picks **Y** → Load `references/phases/feedback/feedback.md`, execute it, then continue to Generate.
+     - If user picks **N** → Set `phases.feedback.status` to `"completed"`, `phases.feedback.timestamp` to current ISO 8601 timestamp, `phases.feedback.outputs` to `[]`, update `last_updated`. Continue to Generate.
+
+   - **After Generate**: No feedback offer. If `phases.feedback.status` is still `"pending"`, set it to `"completed"` with empty outputs (user had two chances and chose to defer/skip).
+
+8. **Display summary**: Show user what was accomplished, highlight next phase, or confirm migration completion.
 
 **Critical constraint**: Agent must strictly adhere to the reference file's workflow. If unable to complete a step, stop and report the exact step that failed.
 
@@ -243,3 +266,4 @@ User can invoke the skill again to resume from last completed phase.
 - Multi-path Design (infrastructure, AI workloads, billing-only fallback)
 - AWS cost estimation (from pricing API or fallback)
 - Migration artifact generation (Terraform, scripts, AI adapters, documentation)
+- Optional feedback collection with anonymized telemetry
