@@ -51,7 +51,8 @@ Lightweight orchestrator that detects available source types and delegates to do
    - **Validate schemas**: Confirm files contain all required fields
    - Proceed to Step 3
 2. **IF Terraform files NOT found**:
-   - Skip this step. Terraform is required for v1.0. If other sources available, defer to v1.1/v1.2 handling.
+   - **STOP.** Output: "No Terraform files found. v1.0 requires Terraform-defined infrastructure for discovery. Provide `.tf` files and try again."
+   - Note: App code and billing discovery are planned for v1.1/v1.2 but do not yet produce the `gcp-resource-inventory.json` and `gcp-resource-clusters.json` files that downstream phases require.
 
 ## Step 3: Update Phase Status
 

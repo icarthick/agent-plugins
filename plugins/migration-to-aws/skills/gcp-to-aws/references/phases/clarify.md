@@ -1,8 +1,17 @@
 # Phase 2: Clarify Requirements
 
+## Step 0: Validate Inputs
+
+1. Read `gcp-resource-inventory.json` from `$MIGRATION_DIR`. If missing: **STOP**. Output: "Missing gcp-resource-inventory.json. Complete Phase 1 (Discover) first."
+2. If invalid JSON: **STOP**. Output: "gcp-resource-inventory.json is corrupted (invalid JSON). Re-run Phase 1."
+3. If `resources` array is empty: **STOP**. Output: "gcp-resource-inventory.json contains no resources. Re-run Phase 1 with valid Terraform files."
+4. Read `gcp-resource-clusters.json` from `$MIGRATION_DIR`. If missing: **STOP**. Output: "Missing gcp-resource-clusters.json. Complete Phase 1 (Discover) first."
+5. If invalid JSON: **STOP**. Output: "gcp-resource-clusters.json is corrupted (invalid JSON). Re-run Phase 1."
+6. If `clusters` array is empty: **STOP**. Output: "gcp-resource-clusters.json contains no clusters. Re-run Phase 1 with valid Terraform files."
+
 ## Step 1: Load Inventory
 
-Read `gcp-resource-inventory.json` and `gcp-resource-clusters.json` from `.migration/*/`.
+Read `gcp-resource-inventory.json` and `gcp-resource-clusters.json` from `$MIGRATION_DIR` (already validated in Step 0).
 
 ## Step 2: Select Answering Mode
 

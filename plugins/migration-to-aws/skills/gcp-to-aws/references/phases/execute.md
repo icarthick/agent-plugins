@@ -2,7 +2,25 @@
 
 ## Step 1: Validate Design and Estimation
 
-Read `aws-design.json` and `estimation.json`. If either missing or incomplete: **STOP**. Output: "Prior phases incomplete. Complete Phase 3 (Design) and Phase 4 (Estimation) first."
+Validate both input files before proceeding:
+
+**1a. Validate `aws-design.json`:**
+
+1. If file missing: **STOP**. Output: "Missing aws-design.json. Complete Phase 3 (Design) first."
+2. If invalid JSON: **STOP**. Output: "aws-design.json is corrupted (invalid JSON). Re-run Phase 3."
+3. If `clusters` array is missing or empty: **STOP**. Output: "aws-design.json contains no clusters. Re-run Phase 3."
+4. Each cluster must have a non-empty `resources` array: If any cluster has no resources, **STOP**. Output: "Cluster [id] has no resources. Re-run Phase 3."
+5. Each resource must have `aws_service` and `aws_config` fields: If missing, **STOP**. Output: "Resource [address] missing required fields. Re-run Phase 3."
+
+**1b. Validate `estimation.json`:**
+
+1. If file missing: **STOP**. Output: "Missing estimation.json. Complete Phase 4 (Estimate) first."
+2. If invalid JSON: **STOP**. Output: "estimation.json is corrupted (invalid JSON). Re-run Phase 4."
+3. If `monthly_costs` is missing: **STOP**. Output: "estimation.json missing monthly_costs. Re-run Phase 4."
+4. If `monthly_costs.balanced.total` is 0 or missing: **STOP**. Output: "estimation.json has zero or missing balanced cost total. Re-run Phase 4."
+5. If `one_time_costs` is missing: **STOP**. Output: "estimation.json missing one_time_costs. Re-run Phase 4."
+
+If all validations pass, proceed to Step 2.
 
 ## Step 2: Build Execution Timeline
 
