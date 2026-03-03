@@ -1,6 +1,6 @@
 ---
 name: gcp-to-aws
-description: "Migrate workloads from Google Cloud Platform to AWS. Triggers on: migrate from GCP, GCP to AWS, move off Google Cloud, migrate Terraform to AWS, migrate Cloud SQL to RDS, migrate GKE to EKS, migrate Cloud Run to Fargate, Google Cloud migration. Runs a 5-phase process: discover GCP resources from Terraform files, clarify migration requirements, design AWS architecture, estimate costs, and plan execution."
+description: "Migrate workloads from Google Cloud Platform to AWS. Triggers on: migrate from GCP, GCP to AWS, move off Google Cloud, migrate Terraform to AWS, migrate Cloud SQL to RDS, migrate GKE to EKS, migrate Cloud Run to Fargate, Google Cloud migration. Runs a 5-phase process: discover GCP resources from Terraform files, app code, or billing exports, clarify migration requirements, design AWS architecture, estimate costs, and plan execution."
 ---
 
 # GCP-to-AWS Migration Skill
@@ -22,12 +22,13 @@ description: "Migrate workloads from Google Cloud Platform to AWS. Triggers on: 
 
 ## Prerequisites
 
-User must provide GCP infrastructure-as-code:
+User must provide at least one GCP source:
 
-- One or more `.tf` files (Terraform)
-- Optional: `.tfvars` or `.tfstate` files
+- **Terraform IaC**: `.tf` files (with optional `.tfvars`, `.tfstate`)
+- **Application code**: Source files with GCP SDK or AI framework imports
+- **Billing data**: GCP billing/cost/usage export files (CSV or JSON)
 
-If no Terraform files are found, stop immediately and ask user to provide them.
+If none of the above are found, stop and ask user to provide at least one source type.
 
 ---
 
@@ -109,8 +110,8 @@ The `.migration/` directory is automatically protected by a `.gitignore` file cr
 
 | Phase        | Inputs                                                                                                                                                                   | Outputs                                                                                                                                                                                   | Reference                                |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| **Discover** | `.tf` files                                                                                                                                                              | `gcp-resource-inventory.json`, `gcp-resource-clusters.json`, `.phase-status.json` updated                                                                                                 | `references/phases/discover/discover.md` |
-| **Clarify**  | `gcp-resource-inventory.json`, `gcp-resource-clusters.json`                                                                                                              | `preferences.json`, `.phase-status.json` updated                                                                                                                                          | `references/phases/clarify.md`           |
+| **Discover** | `.tf` files, app source code, and/or billing exports (at least one required)                                                                                             | `gcp-resource-inventory.json`, `gcp-resource-clusters.json`, `ai-workload-profile.json`, `billing-profile.json`, `.phase-status.json` updated (outputs vary by input)                      | `references/phases/discover/discover.md` |
+| **Clarify**  | Discovery artifacts (`gcp-resource-inventory.json`, `gcp-resource-clusters.json`, `ai-workload-profile.json`, `billing-profile.json` — whichever exist)                  | `preferences.json`, `.phase-status.json` updated                                                                                                                                          | `references/phases/clarify.md`           |
 | **Design**   | `preferences.json` + discovery artifacts                                                                                                                                 | `aws-design.json` + `aws-design-report.md` (infra), `aws-design-ai.json` + `aws-design-ai-report.md` (AI), `aws-design-billing.json` + `aws-design-billing-report.md` (billing-only)      | `references/phases/design/design.md`     |
 | **Estimate** | `aws-design.json` or `aws-design-billing.json` or `aws-design-ai.json`, `preferences.json`                                                                               | `estimation-infra.json` or `estimation-ai.json` or `estimation-billing.json` + reports, `.phase-status.json` updated                                                                      | `references/phases/estimate/estimate.md` |
 | **Generate** | `estimation-infra.json` or `estimation-ai.json` or `estimation-billing.json`, `aws-design.json` or `aws-design-billing.json` or `aws-design-ai.json`, `preferences.json` | `generation-infra.json` or `generation-ai.json` or `generation-billing.json` + `terraform/`, `scripts/`, `ai-migration/`, `MIGRATION_GUIDE.md`, `README.md`, `.phase-status.json` updated | `references/phases/generate/generate.md` |
@@ -184,7 +185,7 @@ gcp-to-aws/
 
 | Condition                                   | Action                                                                                                                       |
 | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| No `.tf` files found                        | Stop. Output: "No Terraform files detected. Please provide `.tf` files with your GCP resources and try again."               |
+| No GCP sources found (no `.tf`, no app code, no billing data) | Stop. Output: "No GCP sources detected. Provide at least one source type (Terraform files, application code, or billing exports) and try again." |
 | `.phase-status.json` missing phase gate     | Stop. Output: "Cannot enter Phase X: Phase Y-1 not completed. Start from Phase Y or resume Phase Y-1."                       |
 | awspricing unavailable after 3 attempts     | Display user warning about ±15-25% accuracy. Use `pricing-fallback.json`. Add `pricing_source: fallback` to estimation.json. |
 | User does not answer all Q1-8               | Offer Mode C (defaults) or Mode D (free text). Phase 2 completes either way.                                                 |
