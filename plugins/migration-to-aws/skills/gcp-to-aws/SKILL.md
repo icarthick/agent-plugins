@@ -40,7 +40,7 @@ This is the execution controller. After completing each phase, consult this tabl
 | `start`         | always    | Load `references/phases/discover/discover.md` |
 | `discover_done` | always    | Load `references/phases/clarify.md`           |
 | `clarify_done`  | always    | Load `references/phases/design/design.md`     |
-| `design_done`   | always    | Load `references/phases/estimate.md`          |
+| `design_done`   | always    | Load `references/phases/estimate/estimate.md` |
 | `estimate_done` | always    | Load `references/phases/execute.md`           |
 | `execute_done`  | always    | Migration planning complete                   |
 
@@ -107,13 +107,13 @@ The `.migration/` directory is automatically protected by a `.gitignore` file cr
 
 ## Phase Summary Table
 
-| Phase        | Inputs                                                      | Outputs                                                                                                                                                                              | Reference                                |
-| ------------ | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- |
-| **Discover** | `.tf` files                                                 | `gcp-resource-inventory.json`, `gcp-resource-clusters.json`, `.phase-status.json` updated                                                                                            | `references/phases/discover/discover.md` |
-| **Clarify**  | `gcp-resource-inventory.json`, `gcp-resource-clusters.json` | `preferences.json`, `.phase-status.json` updated                                                                                                                                     | `references/phases/clarify.md`           |
-| **Design**   | `preferences.json` + discovery artifacts                    | `aws-design.json` + `aws-design-report.md` (infra), `aws-design-ai.json` + `aws-design-ai-report.md` (AI), `aws-design-billing.json` + `aws-design-billing-report.md` (billing-only) | `references/phases/design/design.md`     |
-| **Estimate** | `aws-design.json`, `preferences.json`                       | `estimation.json`, `estimation-report.md`, `.phase-status.json` updated                                                                                                              | `references/phases/estimate.md`          |
-| **Execute**  | `aws-design.json`, `preferences.json`                       | `execution.json`, `execution-timeline.md`, `.phase-status.json` updated                                                                                                              | `references/phases/execute.md`           |
+| Phase        | Inputs                                                                                     | Outputs                                                                                                                                                                              | Reference                                |
+| ------------ | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- |
+| **Discover** | `.tf` files                                                                                | `gcp-resource-inventory.json`, `gcp-resource-clusters.json`, `.phase-status.json` updated                                                                                            | `references/phases/discover/discover.md` |
+| **Clarify**  | `gcp-resource-inventory.json`, `gcp-resource-clusters.json`                                | `preferences.json`, `.phase-status.json` updated                                                                                                                                     | `references/phases/clarify.md`           |
+| **Design**   | `preferences.json` + discovery artifacts                                                   | `aws-design.json` + `aws-design-report.md` (infra), `aws-design-ai.json` + `aws-design-ai-report.md` (AI), `aws-design-billing.json` + `aws-design-billing-report.md` (billing-only) | `references/phases/design/design.md`     |
+| **Estimate** | `aws-design.json` or `aws-design-billing.json` or `aws-design-ai.json`, `preferences.json` | `estimation-infra.json` or `estimation-ai.json` or `estimation-billing.json` + reports, `.phase-status.json` updated                                                                 | `references/phases/estimate/estimate.md` |
+| **Execute**  | `aws-design.json`, `preferences.json`                                                      | `execution.json`, `execution-timeline.md`, `.phase-status.json` updated                                                                                                              | `references/phases/execute.md`           |
 
 ---
 
@@ -146,7 +146,11 @@ gcp-to-aws/
 │   │   │   ├── design-infra.md                 # Infrastructure design (IaC-based)
 │   │   │   ├── design-ai.md                    # AI workload design (Bedrock)
 │   │   │   └── design-billing.md               # Billing-only design (fallback)
-│   │   ├── estimate.md                         # Phase 4: Cost estimation
+│   │   ├── estimate/
+│   │   │   ├── estimate.md                     # Phase 4: Estimate orchestrator
+│   │   │   ├── estimate-infra.md               # Infrastructure cost analysis
+│   │   │   ├── estimate-ai.md                  # AI workload cost analysis
+│   │   │   └── estimate-billing.md             # Billing-only cost analysis
 │   │   └── execute.md                          # Phase 5: Execution planning
 │   │
 │   ├── design-refs/
@@ -201,7 +205,7 @@ When invoked, the agent **MUST follow this exact sequence**:
    - Phase mapping for advancement:
      - discover (completed) → Execute clarify (read `references/phases/clarify.md`)
      - clarify (completed) → Execute design (read `references/phases/design/design.md`)
-     - design (completed) → Execute estimate (read `references/phases/estimate.md`)
+     - design (completed) → Execute estimate (read `references/phases/estimate/estimate.md`)
      - estimate (completed) → Execute execute (read `references/phases/execute.md`)
      - execute (completed) → Migration complete
 

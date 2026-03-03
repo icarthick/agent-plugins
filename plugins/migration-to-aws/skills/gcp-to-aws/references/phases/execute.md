@@ -2,7 +2,13 @@
 
 ## Step 1: Validate Design and Estimation
 
-Read `aws-design.json`, `estimation.json`, and `preferences.json`. If any missing or incomplete: **STOP**. Output: "Prior phases incomplete. Complete Phase 2 (Clarify), Phase 3 (Design), and Phase 4 (Estimation) first."
+Read whichever design and estimation files exist:
+
+- **Design**: `aws-design.json` (infrastructure) or `aws-design-billing.json` (billing-only)
+- **Estimation**: `estimation-infra.json`, `estimation-ai.json`, `estimation-billing.json` (read whichever exist)
+- **Preferences**: `preferences.json`
+
+If no design file AND no estimation file exists: **STOP**. Output: "Prior phases incomplete. Complete Phase 3 (Design) and Phase 4 (Estimation) first."
 
 ## Step 2: Build Execution Timeline
 
@@ -63,7 +69,7 @@ Create 8-12 week timeline with critical path based on cluster dependencies and d
 
 - Data integrity issues detected during validation
 - Performance regression >20% vs GCP baseline
-- Cost overruns >50% vs estimation
+- Cost overruns >50% vs estimation (from estimation-infra.json, estimation-ai.json, or estimation-billing.json)
 - Critical unforeseen AWS service limitations
 
 **Rollback steps (reversible up to DNS cutover):**
@@ -201,8 +207,8 @@ Output to user:
 
 Files saved:
 
-- aws-design.json
-- estimation.json
+- aws-design.json (or aws-design-billing.json)
+- estimation-infra.json, estimation-ai.json, and/or estimation-billing.json
 - execution.json
 
 Use this plan to guide your migration. All phases of the GCP-to-AWS migration analysis are complete."
