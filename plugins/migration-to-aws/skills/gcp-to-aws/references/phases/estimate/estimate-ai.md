@@ -13,17 +13,47 @@ The parent `estimate.md` selects the pricing mode before loading this file. Use 
 
 ### Cached Bedrock Pricing Fallback Table
 
-If MCP is unavailable, use these rates:
+If MCP is unavailable, use these rates (from `pricing-fallback.json`):
 
-| Model               | Input (per 1M tokens) | Output (per 1M tokens) |
-| ------------------- | --------------------- | ---------------------- |
-| Claude Opus         | $15.00                | $75.00                 |
-| Claude Sonnet       | $3.00                 | $15.00                 |
-| Claude Haiku        | $0.80                 | $4.00                  |
-| Llama 70B           | $0.60                 | $0.60                  |
-| Llama 8B            | $0.10                 | $0.10                  |
-| Nova Pro            | $0.80                 | $3.20                  |
-| Titan Embeddings v2 | $0.02                 | N/A                    |
+| Model               | Model ID                              | Input (per 1M) | Output (per 1M) | Tier      |
+| ------------------- | ------------------------------------- | --------------- | ---------------- | --------- |
+| Claude Opus 4.6     | `anthropic.claude-opus-4-6-v1`        | $5.00           | $25.00           | Premium   |
+| Claude Sonnet 4.6   | `anthropic.claude-sonnet-4-6`         | $3.00           | $15.00           | Flagship  |
+| Claude Haiku 4.5    | `anthropic.claude-haiku-4-5-20251001-v1:0` | $1.00      | $5.00            | Fast      |
+| Llama 4 Maverick    | `meta.llama4-maverick-17b-instruct-v1:0` | $0.24        | $0.97            | Mid       |
+| Llama 4 Scout       | `meta.llama4-scout-17b-instruct-v1:0` | $0.17           | $0.66            | Efficient |
+| Llama 3.3 70B       | `meta.llama3-3-70b-instruct-v1:0`     | $0.72           | $0.72            | Mid       |
+| Nova Pro            | `amazon.nova-pro-v1:0`                | $0.80           | $3.20            | Mid       |
+| Nova Lite           | `amazon.nova-lite-v1:0`               | $0.06           | $0.24            | Fast      |
+| Nova Micro          | `amazon.nova-micro-v1:0`              | $0.035          | $0.14            | Budget    |
+| Nova Premier        | `amazon.nova-premier-v1:0`            | $2.40           | $9.60            | Reasoning |
+| Mistral Large 3     | `mistral.mistral-large-3-675b-instruct` | $2.00         | $6.00            | Flagship  |
+| Titan Embeddings v2 | `amazon.titan-embed-text-v2:0`        | $0.02           | N/A              | Embedding |
+
+### Source Provider Pricing Reference
+
+For migration cost comparison (from `pricing-fallback.json` → `source_provider_pricing`):
+
+**Gemini (Standard tier):**
+
+| Model                   | Input (per 1M) | Output (per 1M) |
+| ----------------------- | --------------- | ---------------- |
+| Gemini 3.1 Pro Preview  | $1.25           | $10.00           |
+| Gemini 2.5 Pro          | $1.25           | $10.00           |
+| Gemini 2.5 Flash        | $0.15           | $0.60            |
+| Gemini 2.0 Flash        | $0.10           | $0.40            |
+| Gemini 2.0 Flash Lite   | $0.075          | $0.30            |
+
+**OpenAI (Standard tier, selected models):**
+
+| Model     | Input (per 1M) | Output (per 1M) |
+| --------- | --------------- | ---------------- |
+| GPT-5.2   | $1.75           | $14.00           |
+| GPT-5.1   | $1.25           | $10.00           |
+| GPT-4.1   | $2.00           | $8.00            |
+| GPT-4o    | $2.50           | $10.00           |
+| o3        | $2.00           | $8.00            |
+| o4-mini   | $1.10           | $4.40            |
 
 The formulas and methodology below are identical for both modes. The only difference is the price source.
 
@@ -44,7 +74,13 @@ Before starting, read these files from `$MIGRATION_DIR/`:
 
 **From `aws-design-ai.json`:**
 
-- `ai_architecture.bedrock_models[]` — Selected primary and backup models
+- `metadata.ai_source` — Source provider (gemini/openai/both/other)
+- `ai_architecture.honest_assessment` — Overall migration recommendation
+- `ai_architecture.tiered_strategy` — Multi-model tiering (if high volume)
+- `ai_architecture.bedrock_models[]` — Selected models with pricing comparison
+  - `source_provider_price` — Source provider pricing per 1M tokens
+  - `bedrock_price` — Bedrock pricing per 1M tokens
+  - `honest_assessment` — Per-model migration recommendation
 - `ai_architecture.capability_mapping` — Capability parity assessment
 
 ## Part 1: Establish Current GCP AI Costs
@@ -109,22 +145,32 @@ Monthly Cost = (Input tokens / 1M x Input rate per 1M) + (Output tokens / 1M x O
 
 ### Generate Comparison Table
 
-Calculate for all models and present as a comparison:
+Calculate for all models and present as a comparison. Include the source provider pricing from `aws-design-ai.json` → `bedrock_models[].source_provider_price` for direct comparison:
 
 ```
 Your token volume: [X]M input + [Y]M output per month
+Source provider: [from ai_source: Gemini/OpenAI/Both]
 
-Model               Monthly Cost    vs Current GCP    Quality    Capabilities Match
-------------------------------------------------------------------------------------
-Claude Opus         $[calc]         [+/-]$[diff]      Excellent  [Yes/No: list gaps]
-Claude Sonnet       $[calc]         [+/-]$[diff]      Very Good  [Yes/No: list gaps]
-Claude Haiku        $[calc]         [+/-]$[diff]      Good       [Yes/No: list gaps]
-Llama 70B           $[calc]         [+/-]$[diff]      Good       [Yes/No: list gaps]
-Llama 8B            $[calc]         [+/-]$[diff]      Fair       [Yes/No: list gaps]
-Nova Pro            $[calc]         [+/-]$[diff]      Good       [Yes/No: list gaps]
-------------------------------------------------------------------------------------
-Current (Vertex AI) $[current]      --                 --         --
+Model                 Bedrock Monthly    vs Source Provider    vs Current GCP    Quality    Capabilities
+---------------------------------------------------------------------------------------------------------
+Claude Sonnet 4.6     $[calc]            [+/-]$[diff] ([%])    [+/-]$[diff]     Very Good  [Yes/No]
+Claude Opus 4.6       $[calc]            [+/-]$[diff] ([%])    [+/-]$[diff]     Excellent  [Yes/No]
+Claude Haiku 4.5      $[calc]            [+/-]$[diff] ([%])    [+/-]$[diff]     Good       [Yes/No]
+Llama 4 Maverick      $[calc]            [+/-]$[diff] ([%])    [+/-]$[diff]     Good       [Yes/No]
+Llama 4 Scout         $[calc]            [+/-]$[diff] ([%])    [+/-]$[diff]     Fair       [Yes/No]
+Nova Pro              $[calc]            [+/-]$[diff] ([%])    [+/-]$[diff]     Good       [Yes/No]
+Nova Lite             $[calc]            [+/-]$[diff] ([%])    [+/-]$[diff]     Fair       [Yes/No]
+Nova Micro            $[calc]            [+/-]$[diff] ([%])    [+/-]$[diff]     Basic      [Yes/No]
+---------------------------------------------------------------------------------------------------------
+Source Provider       $[source_calc]     --                     --               --         --
+Current GCP Billing   $[current]         --                     --               --         --
 ```
+
+**"vs Source Provider"** — This is the key column for migration decisions. Calculate as:
+`(Bedrock monthly - Source provider monthly) / Source provider monthly × 100`
+
+If Bedrock is more expensive for the recommended model, flag this prominently:
+> **Note:** Bedrock is [X]% more expensive than [source provider] for [model]. See ROI analysis for justification.
 
 **Capabilities Match** — Check each model against `ai_constraints.ai_capabilities_required.value` from `preferences.json`. Mark "No" and list gaps if a required capability is missing (e.g., "No: missing function_calling").
 
@@ -215,18 +261,44 @@ If Bedrock is cheaper:
   Example: $5,000 / $50 savings per month = 100 months
 
 If Bedrock is more expensive:
-  No payback from cost alone -- justify with capability, quality, or strategic value
+  No payback from cost alone — justify with capability, quality, or strategic value
 ```
+
+### Honest Cost Assessment (When Migration Increases Cost)
+
+If the recommended Bedrock model is more expensive than the source provider, present this transparently:
+
+```
+COST IMPACT: Bedrock is [X]% more expensive for [model] compared to [source provider].
+
+At your volume ([X]M input + [Y]M output/month):
+  Source provider ([model]):  $[source_cost]/month
+  Bedrock ([model]):          $[bedrock_cost]/month
+  Additional cost:            $[diff]/month ($[annual_diff]/year)
+
+Migration is justified by:
+  ✓ [List applicable non-cost benefits from below]
+  ✓ [List applicable optimization opportunities that could close the gap]
+
+Migration is NOT justified if:
+  ✗ Cost is the only priority (ai_priority = "cost")
+  ✗ No broader AWS adoption planned
+  ✗ Current provider meets all quality and feature needs
+```
+
+Reference `aws-design-ai.json` → `ai_architecture.honest_assessment` for the design phase's recommendation. If `honest_assessment` is `"recommend_stay"`, present this prominently.
 
 ### Non-Cost Benefits
 
 Present these alongside the financial analysis:
 
-- **Model quality** — Claude/Llama may offer better reasoning, coding, or analysis than Gemini for specific use cases
-- **Model flexibility** — Bedrock offers multiple models; can switch without infrastructure changes
+- **Model quality** — Claude/Llama may offer better reasoning, coding, or analysis than source models for specific use cases
+- **Model flexibility** — Bedrock offers 30+ models from multiple providers; can switch without infrastructure changes
+- **Prompt caching** — Claude models support prompt caching (90% cost reduction on cached portions) — not available on Vertex AI or OpenAI Standard tier
 - **AWS ecosystem** — If planning broader AWS adoption, AI-only is a low-risk first step
-- **Vendor diversification** — Reduces single-vendor risk
-- **Feature access** — Bedrock features not available on Vertex AI (e.g., Guardrails, Knowledge Bases)
+- **Vendor diversification** — Reduces single-vendor risk (Google or OpenAI)
+- **Feature access** — Bedrock Guardrails, Knowledge Bases, Agents — managed features not available elsewhere
+- **Multi-model strategy** — Route tasks to optimal models (impossible on single-provider platforms)
 
 ## Part 6: Cost Optimization Opportunities
 
@@ -282,6 +354,39 @@ Techniques to reduce token costs:
   - Summarize context before sending (reduce RAG context size)
   - Use structured output formats (reduce output verbosity)
   - Estimated savings: 10-30% token reduction achievable
+```
+
+### 6. Multi-Model Tiered Routing (High Volume)
+
+If `ai_constraints.ai_token_volume` is `"high"` or `"very_high"`, or if `aws-design-ai.json` has a `tiered_strategy`, present tiered cost analysis:
+
+```
+Current: Single model ([recommended]) at [volume]
+  Monthly cost: $[single_model_cost]
+
+Tiered approach (from design phase tiered_strategy):
+  Tier 1 — Simple (60%): Nova Micro      $[calc]
+  Tier 2 — Moderate (30%): Llama 4 Maverick  $[calc]
+  Tier 3 — Complex (10%): Claude Sonnet   $[calc]
+  -----------------------------------------------
+  Total tiered monthly:                    $[total]
+  vs Single model:                         -$[savings] ([X]% savings)
+  vs Source provider:                      [+/-]$[diff] ([X]%)
+```
+
+Example at 150M input + 75M output tokens/month:
+
+```
+Single model (Claude Sonnet):
+  Input:  150M × $3.00/1M = $450
+  Output: 75M × $15.00/1M = $1,125
+  Total: $1,575/month
+
+Tiered approach:
+  Tier 1 (60%): 90M in + 45M out × Nova Micro = $3.15 + $6.30 = $9.45
+  Tier 2 (30%): 45M in + 22.5M out × Llama 4 Maverick = $10.80 + $21.83 = $32.63
+  Tier 3 (10%): 15M in + 7.5M out × Claude Sonnet = $45.00 + $112.50 = $157.50
+  Total: $199.58/month (87% savings vs single model)
 ```
 
 ## Output

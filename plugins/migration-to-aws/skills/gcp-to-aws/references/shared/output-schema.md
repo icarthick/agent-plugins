@@ -301,7 +301,8 @@ Focused profile of AI/ML workloads including models, capabilities, integration p
     "overall_confidence": 0.95,
     "confidence_level": "very_high",
     "total_models_detected": 2,
-    "languages_found": ["python"]
+    "languages_found": ["python"],
+    "ai_source": "gemini|openai|both|other"
   },
 
   "models": [
@@ -349,6 +350,7 @@ Focused profile of AI/ML workloads including models, capabilities, integration p
     "frameworks": ["langchain"],
     "languages": ["python"],
     "pattern": "direct_sdk",
+    "gateway_type": "llm_router|api_gateway|voice_platform|framework|direct|null",
     "capabilities_summary": {
       "text_generation": true,
       "streaming": true,
@@ -410,7 +412,9 @@ Focused profile of AI/ML workloads including models, capabilities, integration p
 - `capabilities_used` — Array of capability strings per model (NOT `capabilities`, `features`)
 - `usage_context` — Human-readable description of what the model does (NOT `description`, `purpose`)
 - `pattern` — Integration pattern in `integration` object (NOT `integration_type`, `method`)
+- `gateway_type` — Gateway/router type in `integration` object: `"llm_router"`, `"api_gateway"`, `"voice_platform"`, `"framework"`, `"direct"`, or `null`
 - `capabilities_summary` — Boolean map in `integration` object (NOT `capabilities`, `feature_flags`)
+- `ai_source` — Source AI provider in `summary` object: `"gemini"`, `"openai"`, `"both"`, or `"other"`
 
 **Key Fields:**
 
@@ -548,6 +552,14 @@ Adaptive migration preferences organized as design constraints. Each constraint 
     "kubernetes": { "value": "eks-or-ecs", "chosen_by": "user" },
     "database_tier": { "value": "standard", "chosen_by": "user" },
     "db_io_workload": { "value": "medium", "chosen_by": "user" }
+  },
+  "ai_constraints": {
+    "ai_priority": { "value": "quality", "chosen_by": "user" },
+    "token_volume": { "value": "medium", "chosen_by": "user" },
+    "latency_requirement": { "value": "near-realtime", "chosen_by": "user" },
+    "model_preference": { "value": "no-preference", "chosen_by": "default" },
+    "ai_capabilities": { "value": ["text_generation", "streaming"], "chosen_by": "extracted" },
+    "ai_gateway": { "value": "framework", "chosen_by": "extracted" }
   }
 }
 ```
@@ -568,13 +580,19 @@ Adaptive migration preferences organized as design constraints. Each constraint 
 | `design_constraints.<key>.value`            | The constraint value                                                                                                                                                                            |
 | `design_constraints.<key>.chosen_by`        | Provenance: `"user"` (explicitly answered), `"default"` (system default — includes "I don't know"), `"extracted"` (inferred from inventory), `"derived"` (computed from combination of answers) |
 | `ai_constraints`                            | _(v1.1)_ Present ONLY if Category F fired (AI discovery). Omit entirely otherwise                                                                                                               |
+| `ai_constraints.ai_priority`                | User's optimization priority: `"quality"`, `"speed"`, `"cost"`, `"balanced"`                                                                                                                    |
+| `ai_constraints.token_volume`               | Expected token volume: `"low"` (<1M/day), `"medium"` (1-10M), `"high"` (10-100M), `"very_high"` (>100M)                                                                                        |
+| `ai_constraints.latency_requirement`        | Latency need: `"realtime"` (<500ms), `"near-realtime"` (<2s), `"batch"` (minutes OK)                                                                                                            |
+| `ai_constraints.model_preference`           | User's model preference: `"anthropic"`, `"meta"`, `"amazon"`, `"no-preference"`                                                                                                                 |
+| `ai_constraints.ai_capabilities`            | Capabilities needed (array): `"text_generation"`, `"streaming"`, `"function_calling"`, `"vision"`, `"embeddings"`, etc.                                                                          |
+| `ai_constraints.ai_gateway`                 | _(v1.2)_ Gateway/router type from detection or Q_GATEWAY: `"llm_router"`, `"api_gateway"`, `"voice_platform"`, `"framework"`, `"direct"`, or `null`                                              |
 
 ### Rules
 
 - Every entry in `design_constraints` is an object with `value` and `chosen_by` fields
 - Only write a key to `design_constraints` if the answer produces a constraint; absent keys mean "no constraint — Design decides"
 - No null values in `design_constraints`
-- `ai_constraints` section is present ONLY if Category F fired (v1.1: currently always omitted)
+- `ai_constraints` section is present ONLY if Category F fired (v1.1). Uses same `value` + `chosen_by` structure as `design_constraints`
 
 ---
 
@@ -635,20 +653,27 @@ AI workload design mapping GCP Vertex AI models to Amazon Bedrock. Generated by 
   "metadata": {
     "phase": "design",
     "focus": "ai_workloads",
+    "ai_source": "gemini",
     "bedrock_models_selected": 2,
     "timestamp": "2026-02-26T14:30:00Z"
   },
   "ai_architecture": {
+    "honest_assessment": "strong_migrate",
+    "tiered_strategy": null,
     "bedrock_models": [
       {
         "gcp_model_id": "gemini-pro",
         "gcp_service": "vertex_ai_generative",
-        "aws_model_id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
+        "aws_model_id": "anthropic.claude-sonnet-4-6",
         "aws_service": "Amazon Bedrock",
         "capabilities_matched": ["text_generation", "streaming"],
         "capability_gaps": [],
         "rationale": "General-purpose LLM with streaming and tool use parity",
-        "migration_complexity": "medium"
+        "migration_complexity": "medium",
+        "honest_assessment": "strong_migrate",
+        "source_provider_price": { "input_per_1m": 1.25, "output_per_1m": 5.00 },
+        "bedrock_price": { "input_per_1m": 3.00, "output_per_1m": 15.00 },
+        "price_comparison": "Source 58% cheaper — migration justified by ecosystem integration and model flexibility"
       }
     ],
     "capability_mapping": {
@@ -688,19 +713,50 @@ AI workload design mapping GCP Vertex AI models to Amazon Bedrock. Generated by 
         "notes": "SDK swap + model ID mapping"
       }
     ]
+  },
+  "tiered_strategy": {
+    "enabled": false,
+    "tiers": [
+      {
+        "tier": "simple",
+        "percentage": 60,
+        "model_id": "amazon.nova-micro-v1:0",
+        "rationale": "Low-complexity requests: classification, extraction, short answers"
+      },
+      {
+        "tier": "moderate",
+        "percentage": 30,
+        "model_id": "meta.llama4-maverick-17b-instruct-v1:0",
+        "rationale": "Medium-complexity: summarization, moderate generation"
+      },
+      {
+        "tier": "complex",
+        "percentage": 10,
+        "model_id": "anthropic.claude-sonnet-4-6",
+        "rationale": "High-complexity: reasoning, long-form generation, agentic tasks"
+      }
+    ],
+    "estimated_monthly_savings_vs_single_model": "60-80%"
   }
 }
 ```
 
 **Key Fields:**
 
+- `metadata.ai_source` — Source AI provider: `"gemini"`, `"openai"`, `"both"`, `"other"` (from `ai-workload-profile.json`)
 - `metadata.bedrock_models_selected` — Count of Bedrock models selected (must match `bedrock_models` array length)
+- `ai_architecture.honest_assessment` — Overall migration recommendation: `"strong_migrate"`, `"moderate_migrate"`, `"weak_migrate"`, `"recommend_stay"`
+- `ai_architecture.tiered_strategy` — `null` for low/medium volume; object with `tiers[]` for high/very-high volume users
 - `ai_architecture.bedrock_models[]` — Per-model mapping from GCP to Bedrock
   - `gcp_model_id` — Source model identifier from `ai-workload-profile.json`
-  - `aws_model_id` — Target Bedrock model identifier
+  - `aws_model_id` — Target Bedrock model identifier (use current IDs, e.g., `anthropic.claude-sonnet-4-6`)
   - `capabilities_matched` — Capabilities confirmed as available in Bedrock
   - `capability_gaps` — Capabilities with partial or no parity (array, may be empty)
   - `migration_complexity` — `"low"`, `"medium"`, or `"high"`
+  - `honest_assessment` — Per-model recommendation: `"strong_migrate"`, `"moderate_migrate"`, `"weak_migrate"`, `"recommend_stay"`
+  - `source_provider_price` — Source provider pricing per 1M tokens (`input_per_1m`, `output_per_1m`)
+  - `bedrock_price` — Bedrock pricing per 1M tokens (`input_per_1m`, `output_per_1m`)
+  - `price_comparison` — Human-readable price comparison with justification if migration increases cost
 - `ai_architecture.capability_mapping` — Per-capability parity assessment
   - `parity` — `"full"`, `"partial"`, or `"none"`
 - `ai_architecture.code_migration` — Code change plan
@@ -709,6 +765,9 @@ AI workload design mapping GCP Vertex AI models to Amazon Bedrock. Generated by 
   - `dependency_changes` — Package additions and removals
 - `ai_architecture.infrastructure[]` — GCP AI resources mapped to AWS equivalents
 - `ai_architecture.services_to_migrate[]` — Summary of service-level migrations
+- `tiered_strategy.enabled` — Whether multi-model tiering is recommended (true for high/very-high volume)
+- `tiered_strategy.tiers[]` — Routing tiers with percentage, model ID, and rationale
+- `tiered_strategy.estimated_monthly_savings_vs_single_model` — Expected savings from tiering
 
 ---
 

@@ -15,43 +15,81 @@ Read the following artifacts from `$MIGRATION_DIR/`:
 
 If any required file is missing: **STOP**. Output: "Missing required artifact: [filename]. Complete the prior phase that produces it."
 
+## Part 0: Model Validation (Optional)
+
+Before proceeding with migration code, offer the user an opportunity to validate the recommended Bedrock models with real prompts.
+
+> "Would you like to validate the recommended Bedrock model(s) with your own prompts before proceeding? This requires an AWS account, costs ~$2-5, and helps ensure the recommended model meets your quality bar."
+>
+> A) Yes — validate with real prompts first
+> B) No — proceed with migration (I'll validate during integration testing)
+
+**If Yes:** Load `references/phases/generate/generate-evaluation.md` and follow the evaluation guide. Resume at Part 1 after evaluation is complete.
+
+**If No:** Continue to Part 1.
+
+---
+
 ## Part 1: Fast-Track Timeline
 
 AI migrations are typically faster than full infrastructure migrations because:
 
 - No data migration (models are API-based)
 - No infrastructure provisioning (Bedrock is serverless)
-- Changes are primarily code-level (SDK swap)
+- Changes are primarily code-level (SDK swap or config change)
 - Feature flags enable gradual rollout
 
-### 1-3 Week Timeline
+### Gateway-Aware Timeline
 
-#### Week 1: Setup and Adapter Development
+Check `preferences.json` → `ai_constraints.ai_gateway` to determine the appropriate timeline:
+
+#### Gateway Users (1-3 DAYS) — `ai_gateway` = `llm_router`, `api_gateway`, `voice_platform`, or `framework`
+
+Gateway users can migrate by changing configuration, not code:
+
+- **Day 1:** Enable Bedrock model access + configure gateway to route to Bedrock
+- **Day 2:** Test in staging, validate quality and latency
+- **Day 3:** Gradual rollout (10% → 50% → 100%)
+
+| Gateway Type | Migration Action | Effort |
+| --- | --- | --- |
+| LLM Router (LiteLLM, OpenRouter) | Change model string to `bedrock/<model_id>` | 1 config line |
+| API Gateway (Kong, Apigee) | Add Bedrock upstream + SigV4 signing | 1-2 config files |
+| Voice Platform (Vapi, Bland.ai) | Check native Bedrock support, update dashboard | Dashboard config |
+| Framework (LangChain, LlamaIndex) | Swap provider import (`ChatBedrock` instead of `ChatVertexAI`/`ChatOpenAI`) | 1-5 lines of code |
+
+#### Direct SDK Users (1-3 WEEKS) — `ai_gateway` = `direct`
+
+Direct SDK users need full code migration:
+
+##### Week 1: Setup and Adapter Development
 
 - Enable Bedrock model access in AWS account (from `aws-design-ai.json` model IDs)
 - Create IAM role for Bedrock access
-- Develop provider adapter (abstraction layer over Vertex AI and Bedrock)
+- Develop provider adapter (abstraction layer over source SDK and Bedrock)
 - Implement feature flag for provider switching
 - Unit test adapter with both providers
 
-#### Week 2: Integration Testing and Comparison
+##### Week 2: Integration Testing and Comparison
 
 - Deploy adapter to staging environment
-- Run A/B test harness comparing Vertex AI vs Bedrock responses
+- Run A/B test harness comparing source provider vs Bedrock responses
 - Measure latency, quality, and cost per request
 - Tune prompt templates for Bedrock models (if quality differs)
 - Validate all capabilities from `ai-workload-profile.json` work on Bedrock
 
-#### Week 3: Gradual Rollout and Cutover
+##### Week 3: Gradual Rollout and Cutover
 
 - Enable feature flag for 10% of traffic to Bedrock
 - Monitor error rates, latency, and quality metrics
 - Increase to 50%, then 100% over 3-5 days
-- Disable Vertex AI provider after 48 hours stable at 100%
-- Remove feature flag and Vertex AI code (optional, can keep as fallback)
+- Disable source provider after 48 hours stable at 100%
+- Remove feature flag and source SDK code (optional, can keep as fallback)
 
 ### Timeline Adjustments
 
+- **Gateway user, single model**: 1-2 days (config change)
+- **Gateway user, multiple models**: 2-3 days (config changes per model)
 - **Single model, direct SDK**: 1 week (simple SDK swap)
 - **Multiple models, direct SDK**: 2 weeks (adapter per model)
 - **Framework integration (LangChain, etc.)**: 1-2 weeks (framework handles most changes)
@@ -81,7 +119,7 @@ import json
 
 bedrock = boto3.client("bedrock-runtime", region_name="us-east-1")
 response = bedrock.converse(
-    modelId="anthropic.claude-3-5-sonnet-20241022-v2:0",  # From aws-design-ai.json
+    modelId="anthropic.claude-sonnet-4-6",  # From aws-design-ai.json
     messages=[{"role": "user", "content": [{"text": "Hello, world!"}]}]
 )
 print(response["output"]["message"]["content"][0]["text"])
@@ -101,7 +139,7 @@ const { BedrockRuntimeClient, ConverseCommand } = require("@aws-sdk/client-bedro
 const client = new BedrockRuntimeClient({ region: "us-east-1" });
 const result = await client.send(
   new ConverseCommand({
-    modelId: "anthropic.claude-3-5-sonnet-20241022-v2:0",
+    modelId: "anthropic.claude-sonnet-4-6",
     messages: [{ role: "user", content: [{ text: "Hello, world!" }] }],
   })
 );
@@ -120,7 +158,7 @@ import (
 
 client := bedrockruntime.NewFromConfig(cfg)
 output, err := client.Converse(ctx, &bedrockruntime.ConverseInput{
-    ModelId: aws.String("anthropic.claude-3-5-sonnet-20241022-v2:0"),
+    ModelId: aws.String("anthropic.claude-sonnet-4-6"),
     Messages: []types.Message{
         {Role: types.ConversationRoleUser, Content: []types.ContentBlock{
             &types.ContentBlockMemberText{Value: "Hello, world!"},
@@ -144,7 +182,7 @@ BedrockRuntimeClient client = BedrockRuntimeClient.builder()
     .region(Region.US_EAST_1)
     .build();
 ConverseResponse response = client.converse(ConverseRequest.builder()
-    .modelId("anthropic.claude-3-5-sonnet-20241022-v2:0")
+    .modelId("anthropic.claude-sonnet-4-6")
     .messages(Message.builder()
         .role(ConversationRole.USER)
         .content(ContentBlock.fromText("Hello, world!"))
@@ -161,7 +199,7 @@ for chunk in model.generate_content("Hello", stream=True):
 
 # AFTER: Bedrock streaming
 response = bedrock.converse_stream(
-    modelId="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    modelId="anthropic.claude-sonnet-4-6",
     messages=[{"role": "user", "content": [{"text": "Hello"}]}]
 )
 for event in response["stream"]:
@@ -183,6 +221,67 @@ response = bedrock.invoke_model(
     body=json.dumps({"inputText": "Hello, world!"})
 )
 embedding = json.loads(response["body"].read())["embedding"]
+```
+
+### OpenAI SDK Migration (if `ai_source` = `"openai"` or `"both"`)
+
+```python
+# BEFORE: OpenAI SDK
+from openai import OpenAI
+
+client = OpenAI()
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello, world!"}]
+)
+print(response.choices[0].message.content)
+
+# AFTER: Amazon Bedrock
+import boto3
+
+bedrock = boto3.client("bedrock-runtime", region_name="us-east-1")
+response = bedrock.converse(
+    modelId="anthropic.claude-sonnet-4-6",
+    messages=[{"role": "user", "content": [{"text": "Hello, world!"}]}]
+)
+print(response["output"]["message"]["content"][0]["text"])
+```
+
+### Gateway Migration Patterns (if `ai_gateway` != `"direct"`)
+
+#### LLM Router (LiteLLM)
+
+```python
+# BEFORE: LiteLLM with OpenAI/Gemini
+from litellm import completion
+response = completion(model="gpt-4o", messages=[{"role": "user", "content": "Hello"}])
+
+# AFTER: LiteLLM with Bedrock (config change only)
+response = completion(model="bedrock/anthropic.claude-sonnet-4-6", messages=[{"role": "user", "content": "Hello"}])
+```
+
+#### LangChain (OpenAI → Bedrock)
+
+```python
+# BEFORE: LangChain with OpenAI
+from langchain_openai import ChatOpenAI
+llm = ChatOpenAI(model="gpt-4o")
+
+# AFTER: LangChain with Bedrock
+from langchain_aws import ChatBedrock
+llm = ChatBedrock(model_id="anthropic.claude-sonnet-4-6")
+```
+
+#### LlamaIndex (Vertex AI → Bedrock)
+
+```python
+# BEFORE: LlamaIndex with Vertex AI
+from llama_index.llms.vertex import Vertex
+llm = Vertex(model="gemini-pro")
+
+# AFTER: LlamaIndex with Bedrock
+from llama_index.llms.bedrock_converse import BedrockConverse
+llm = BedrockConverse(model="anthropic.claude-sonnet-4-6")
 ```
 
 ### Model ID Mapping
@@ -339,7 +438,7 @@ Generate `generation-ai.json` in `$MIGRATION_DIR/` with the following schema:
     "models_to_migrate": [
       {
         "gcp_model_id": "gemini-pro",
-        "bedrock_model_id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
+        "bedrock_model_id": "anthropic.claude-sonnet-4-6",
         "capabilities": ["text_generation", "streaming"],
         "migration_complexity": "medium"
       }

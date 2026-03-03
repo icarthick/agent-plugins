@@ -4,7 +4,7 @@
 
 The output — `preferences.json` — is consumed directly by Design and Estimate without any further interpretation.
 
-Questions are organized into **six named categories (A-F)** with documented firing rules. Up to 18 questions across categories A-F, depending on which discovery artifacts exist and which GCP services are detected.
+Questions are organized into **six named categories (A-F)** with documented firing rules. Up to 19 questions across categories A-F (including Q_GW), depending on which discovery artifacts exist and which GCP services are detected.
 
 ---
 
@@ -76,7 +76,7 @@ Record extracted values. Questions whose answers are fully determined by extract
 | **C**    | Compute Model      | Compute resources present (Cloud Run, Cloud Functions, GKE, GCE)                                                    | Q7 (K8s sentiment), Q8 (WebSocket), Q9 (Cloud Run traffic), Q10 (Cloud Run spend)                      |
 | **D**    | Database Model     | Database resources present (Cloud SQL, Spanner, Memorystore)                                                        | Q11 (DB scale), Q12 (DB I/O)                                                                           |
 | **E**    | Migration Posture  | **Disabled by default** — requires explicit user opt-in                                                             | HA upgrades, right-sizing from billing utilization                                                     |
-| **F**    | AI/Bedrock         | `ai-workload-profile.json` exists                                                                                   | Q13 (AI priority), Q14 (token volume), Q15 (latency), Q16 (model preference), Q17 (capabilities)       |
+| **F**    | AI/Bedrock         | `ai-workload-profile.json` exists                                                                                   | Q_GW (gateway), Q13 (AI priority), Q14 (token volume), Q15 (latency), Q16 (model preference), Q17 (capabilities) |
 
 **Apply firing rules:**
 
@@ -465,10 +465,41 @@ _Fire when:_ `ai-workload-profile.json` exists in `$MIGRATION_DIR/`.
 Before presenting questions, show the AI detection context:
 
 > **AI Context Summary:**
+> **AI source:** [from `summary.ai_source`: "Gemini", "OpenAI", "Both", or "Other"]
 > **Models detected:** [from `models[].model_id`]
 > **Capabilities in use:** [from `integration.capabilities_summary` where true]
 > **Integration pattern:** [from `integration.pattern`] via [from `integration.primary_sdk`]
-> **Frameworks:** [from `integration.frameworks`, or "None (direct SDK)"]
+> **Gateway/router:** [from `integration.gateway_type`, or "None (direct SDK)"]
+> **Frameworks:** [from `integration.frameworks`, or "None"]
+
+---
+
+**Q_GW — Are your AI calls going through a gateway, router, or framework?**
+
+_Fire when:_ `ai-workload-profile.json` exists AND `integration.gateway_type` is `null` (ambiguous detection).
+_Skip when:_ `integration.gateway_type` is already set to a non-null value. Use the detected value with `chosen_by: "extracted"`.
+
+> How your AI calls reach the model determines migration effort. Gateway users can often migrate by changing a single config line.
+>
+> A) LLM router (LiteLLM, OpenRouter, Portkey, Helicone) — Multi-provider routing layer
+> B) API gateway (Kong, Apigee, custom proxy) — API management layer proxying to AI
+> C) Voice platform (Vapi, Bland.ai, Retell) — Voice AI platform with model selection
+> D) Orchestration framework (LangChain, LlamaIndex) — Framework managing AI calls
+> E) Direct API calls — Raw SDK calls to Gemini/OpenAI/other provider
+> F) I don't know
+
+Interpret:
+
+```
+A -> ai_gateway: "llm_router" — Config change only (1-3 days migration)
+B -> ai_gateway: "api_gateway" — Add Bedrock upstream + SigV4 signing (1-3 days)
+C -> ai_gateway: "voice_platform" — Check native Bedrock support (1-3 days if supported)
+D -> ai_gateway: "framework" — Swap provider import (1-5 lines of code, 1-3 days)
+E -> ai_gateway: "direct" — Full SDK migration required (1-3 weeks)
+F -> same as default (E) — assume direct API calls
+```
+
+Default: E — `ai_gateway: "direct"`.
 
 ---
 
@@ -663,6 +694,8 @@ Wait for the user's response. Do NOT proceed to Design without a response or an 
 | Zero downtime required  | Q6 = No downtime                 | Blue/green + AWS DMS required            |
 | HIPAA compliance        | Q2 = HIPAA                       | BAA services only, specific regions      |
 | FedRAMP required        | Q2 = FedRAMP                     | GovCloud regions only                    |
+| Gateway AI user         | Q_GW = A/B/C/D (not direct)     | 1-3 day migration; skip full SDK rewrite |
+| Direct API AI user      | Q_GW = E (direct)               | Full SDK migration; 1-3 weeks            |
 | Cost-sensitive AI       | Q13 = Cost + Q14 >= 100M         | Open-source models strongly preferred    |
 | Quality-critical AI     | Q13 = Quality + Q17 incl. tools  | Claude Opus or Sonnet required           |
 | High-volume batch AI    | Q14 >= 100M + Q15 = Batch        | Batch API with 50% discount, open-source |
@@ -697,6 +730,7 @@ Apply the interpret rule for every answered question. For skipped questions, app
     "db_io_workload": { "value": "medium", "chosen_by": "user" }
   },
   "ai_constraints": {
+    "ai_gateway": { "value": "direct", "chosen_by": "user" },
     "ai_priority": { "value": "speed", "chosen_by": "user" },
     "ai_token_volume": { "value": "10M-100M", "chosen_by": "user" },
     "ai_latency": { "value": "near-real-time", "chosen_by": "user" },
@@ -740,6 +774,7 @@ Apply the interpret rule for every answered question. For skipped questions, app
 | Q10 — Cloud Run spend  | B ($100-$500)      | `cloud_run_monthly_spend: "$100-$500"`            |
 | Q11 — DB scale         | A (no limits)      | `database_tier: "standard"`                       |
 | Q12 — DB I/O           | B (medium)         | `db_io_workload: "medium"`                        |
+| Q_GW — Gateway         | E (direct)         | `ai_gateway: "direct"`                            |
 | Q13 — AI priority      | A (speed)          | `ai_priority: "speed"`                            |
 | Q14 — Token volume     | B (10-100M)        | `ai_token_volume: "10M-100M"`                     |
 | Q15 — AI latency       | B (near-real-time) | `ai_latency: "near-real-time"`                    |
@@ -760,6 +795,7 @@ Before handing off to Design:
 - [ ] Config gap answers recorded in `metadata.inventory_clarifications` (billing mode only)
 - [ ] Early-exit skips recorded in `metadata.questions_skipped_early_exit`
 - [ ] `ai_constraints` section present ONLY if Category F fired
+- [ ] If Category F fired, `ai_constraints.ai_gateway` is populated (from detection or Q_GW)
 - [ ] If Category F fired, `ai_capabilities_required` is the union of detected + Q17 additions
 - [ ] Output is valid JSON
 
