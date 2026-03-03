@@ -129,7 +129,7 @@ Record all signals for the `ai_detection` section in `gcp-resource-inventory.jso
 ### 7a: Write gcp-resource-inventory.json
 
 1. Create file: `$MIGRATION_DIR/gcp-resource-inventory.json`
-2. Write with exact schema per `references/shared/output-schema.md` → `gcp-resource-inventory.json (Phase 1 output)` section
+2. Write with exact schema per `output-schema.md` → `gcp-resource-inventory.json (Phase 1 output)` section (already loaded by discover.md orchestrator — do not reload)
 
 **CRITICAL field names (use EXACTLY these):**
 
@@ -162,7 +162,7 @@ Include top-level sections:
 ### 7b: Write gcp-resource-clusters.json
 
 1. Create file: `$MIGRATION_DIR/gcp-resource-clusters.json`
-2. Write with exact schema per `references/shared/output-schema.md` → `gcp-resource-clusters.json (Phase 1 output)` section
+2. Write with exact schema per `output-schema.md` → `gcp-resource-clusters.json (Phase 1 output)` section (already loaded by discover.md orchestrator — do not reload)
 
 **CRITICAL field names (use EXACTLY these):**
 

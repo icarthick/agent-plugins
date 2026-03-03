@@ -230,7 +230,7 @@ If no Terraform files were provided, set `infrastructure: []`.
 
 ## Step 8: Generate ai-workload-profile.json
 
-Generate output following schema in `references/shared/output-schema.md` > "ai-workload-profile.json" section.
+Generate output following schema in `output-schema.md` > "ai-workload-profile.json" section (already loaded by discover.md orchestrator — do not reload).
 
 **CRITICAL field names** — use EXACTLY these keys:
 

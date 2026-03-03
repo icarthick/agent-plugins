@@ -70,8 +70,6 @@ Sub-design files may reference rubrics in `design-refs/`:
 - `design-refs/messaging.md` — Messaging service rubric
 - `design-refs/ai.md` — AI/ML service rubric
 
-Output schemas are defined in `shared/output-schema.md`.
-
 ## Scope Boundary
 
 **This phase covers architecture mapping ONLY.**

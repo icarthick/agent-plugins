@@ -51,11 +51,13 @@ Multiple artifacts can be produced in a single run — they are not mutually exc
    }
    ```
 
-   **Schema reference:** See `references/shared/output-schema.md` > ".phase-status.json" for the canonical schema.
-
 5. Confirm both `.migration/.gitignore` and `.phase-status.json` exist before proceeding to Step 1.
 
-## Step 1: Run Sub-Discoveries
+## Step 1: Load Output Schemas
+
+Load `references/shared/output-schema.md` once now. Sub-discovery files reference these schemas when writing output files — do not reload it from sub-files.
+
+## Step 2: Run Sub-Discoveries
 
 Load ALL three sub-discovery files. Each is self-contained — it scans for its own input, processes what it finds, and exits cleanly if nothing is relevant.
 
@@ -65,7 +67,7 @@ Load ALL three sub-discovery files. Each is self-contained — it scans for its 
 
 Each sub-file handles its own exit gate. No conditional loading needed — just run all three.
 
-## Step 2: Check Outputs
+## Step 3: Check Outputs
 
 After all sub-discoveries complete, check what artifacts were produced in `$MIGRATION_DIR/`:
 
@@ -77,7 +79,7 @@ After all sub-discoveries complete, check what artifacts were produced in `$MIGR
 2. **If NO artifacts were produced**: STOP and output: "No GCP sources detected. Provide at least one source type (Terraform files, application code, or billing exports) and try again."
 3. Record produced artifacts in `.phase-status.json` → `discovery_outputs`.
 
-## Step 3: Update Phase Status
+## Step 4: Update Phase Status
 
 1. Update `.phase-status.json`:
    - Set `input_files_detected` with counts from sub-discoveries (e.g., `{"terraform_files": 12, "terraform_lines": 850, "app_code_languages": ["python"]}`)

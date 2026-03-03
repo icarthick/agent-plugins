@@ -92,7 +92,6 @@ Output to user: "Cost estimation complete. Proceeding to Phase 5: Execution Plan
 ## Reference Files
 
 - `shared/pricing-fallback.json` — Cached AWS pricing (±15-25%)
-- `shared/output-schema.md` — JSON schemas for estimation output files
 
 ## Scope Boundary
 
