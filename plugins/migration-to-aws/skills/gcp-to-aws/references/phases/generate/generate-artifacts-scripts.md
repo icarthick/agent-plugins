@@ -22,16 +22,35 @@ Read the following artifacts from `$MIGRATION_DIR/`:
 
 If any REQUIRED file is missing: **STOP**. Output: "Missing required artifact: [filename]. Complete the prior phase that produces it."
 
+## Step 4: Detect Resource Categories
+
+Scan `aws-design.json` clusters[].resources[] to determine which resource categories exist.
+Set boolean flags for downstream script generation:
+
+- **has_databases**: true if ANY resource has `aws_service` containing "RDS", "Aurora", "DynamoDB",
+  "ElastiCache", "Redshift" OR `gcp_type` starting with `google_sql_`, `google_firestore_`,
+  `google_bigtable_`, `google_bigquery_`, `google_redis_`
+- **has_storage**: true if ANY resource has `aws_service` = "S3" OR `gcp_type` = `google_storage_bucket`
+- **has_containers**: true if ANY resource has `aws_service` containing "Fargate", "ECS", "EKS"
+  OR `gcp_type` starting with `google_cloud_run_`, `google_container_cluster`
+- **has_secrets**: true if ANY resource has `aws_service` containing "Secrets Manager"
+  OR `gcp_type` starting with `google_secret_manager_`
+- **has_data_migration**: has_databases OR has_storage (used for script 02)
+
+Report detected categories to user: "Resource categories detected: [list active flags]"
+
 ## Output Structure
+
+Scripts 02-04 are generated **only** when the corresponding resource categories are detected:
 
 ```
 $MIGRATION_DIR/
 ├── scripts/
-│   ├── 01-validate-prerequisites.sh
-│   ├── 02-migrate-data.sh
-│   ├── 03-migrate-containers.sh
-│   ├── 04-migrate-secrets.sh
-│   └── 05-validate-migration.sh
+│   ├── 01-validate-prerequisites.sh          # Always
+│   ├── 02-migrate-data.sh                    # Only if has_data_migration
+│   ├── 03-migrate-containers.sh              # Only if has_containers
+│   ├── 04-migrate-secrets.sh                 # Only if has_secrets
+│   └── 05-validate-migration.sh              # Always (adapts checks)
 ```
 
 ## Step 5: Generate Migration Scripts
@@ -54,11 +73,13 @@ Verify all prerequisites before migration:
 - GCP connectivity established (for data transfer)
 - Required tools installed (aws, gcloud, terraform, jq)
 
-### 02-migrate-data.sh
+### 02-migrate-data.sh — IF has_data_migration
 
-Based on database resources in `aws-design.json`:
+**Skip this script entirely if `has_data_migration` is false.**
 
-**Cloud SQL to RDS/Aurora:**
+Based on database and storage resources in `aws-design.json`:
+
+**Cloud SQL to RDS/Aurora** — include only if `has_databases`:
 
 ```bash
 #!/usr/bin/env bash
@@ -100,7 +121,7 @@ echo "TODO: Compare row counts between source and target"
 echo "TODO: Run checksum validation on critical tables"
 ```
 
-**BigQuery to S3 (if applicable):**
+**BigQuery to S3** — include only if `has_storage`:
 
 ```bash
 # BigQuery → S3 data export
@@ -109,14 +130,16 @@ echo "TODO: Run checksum validation on critical tables"
 # aws s3 sync gs://bucket/export/ s3://target-bucket/import/
 ```
 
-**Firestore to DynamoDB (if applicable):**
+**Firestore to DynamoDB** — include only if `has_databases`:
 
 ```bash
 # Firestore → DynamoDB migration
 # TODO: Use AWS DMS or custom export/import script
 ```
 
-### 03-migrate-containers.sh
+### 03-migrate-containers.sh — IF has_containers
+
+**Skip this script entirely if `has_containers` is false.**
 
 Migrate container images from GCR/Artifact Registry to ECR:
 
@@ -168,7 +191,9 @@ echo "Listing ECR repositories..."
 aws ecr describe-repositories --region "$AWS_REGION" --query 'repositories[].repositoryName' --output table
 ```
 
-### 04-migrate-secrets.sh
+### 04-migrate-secrets.sh — IF has_secrets
+
+**Skip this script entirely if `has_secrets` is false.**
 
 Migrate secrets from GCP Secret Manager to AWS Secrets Manager:
 
@@ -214,7 +239,8 @@ aws secretsmanager list-secrets --query 'SecretList[].Name' --output table
 
 ### 05-validate-migration.sh
 
-Post-migration validation script:
+Post-migration validation script. **Always generated**, but adapt checks based on which resource
+categories were detected in Step 4. Only include validation sections for resources that exist.
 
 ```bash
 #!/usr/bin/env bash
@@ -225,24 +251,28 @@ set -euo pipefail
 
 echo "=== Migration Validation ==="
 
-# Check Terraform state
+# Check Terraform state (always included)
 echo "--- Terraform Resources ---"
 cd terraform/
 terraform state list | wc -l
 echo "resources in Terraform state"
 
+# --- Include ONLY if has_containers ---
 # Check ECS services
 echo "--- ECS Services ---"
 aws ecs list-services --cluster "${PROJECT_NAME:-gcp-migration}" --query 'serviceArns' --output table 2>/dev/null || echo "No ECS cluster found"
 
+# --- Include ONLY if has_databases ---
 # Check RDS instances
 echo "--- RDS Instances ---"
 aws rds describe-db-instances --query 'DBInstances[].{ID:DBInstanceIdentifier,Status:DBInstanceStatus,Endpoint:Endpoint.Address}' --output table 2>/dev/null || echo "No RDS instances found"
 
+# --- Include ONLY if has_storage ---
 # Check S3 buckets
 echo "--- S3 Buckets ---"
 aws s3 ls | grep "${PROJECT_NAME:-gcp-migration}" || echo "No matching S3 buckets found"
 
+# --- Include ONLY if has_secrets ---
 # Check secrets
 echo "--- Secrets Manager ---"
 aws secretsmanager list-secrets --query 'SecretList[].Name' --output table 2>/dev/null || echo "No secrets found"
@@ -269,16 +299,19 @@ After generating all scripts, verify the following quality rules:
 
 Report the list of generated script files to the parent orchestrator. **Do NOT update `.phase-status.json`** — the parent `generate.md` handles phase completion.
 
-Output:
+Only list scripts that were actually generated (based on Step 4 resource detection flags):
 
 ```
+Resource categories detected: [list active flags from Step 4]
+
 Generated migration scripts:
 - scripts/01-validate-prerequisites.sh
-- scripts/02-migrate-data.sh
-- scripts/03-migrate-containers.sh
-- scripts/04-migrate-secrets.sh
+- scripts/02-migrate-data.sh                    # only if has_data_migration
+- scripts/03-migrate-containers.sh              # only if has_containers
+- scripts/04-migrate-secrets.sh                 # only if has_secrets
 - scripts/05-validate-migration.sh
 
 Total: [N] migration scripts
 TODO markers: [N] items requiring manual configuration
+Skipped scripts: [list any scripts not generated, with reason]
 ```

@@ -74,15 +74,21 @@ Generate the following sections:
 
 Post-Infrastructure Tasks checklist: verify resources, check security groups, validate IAM roles.
 
-**Section 3: Data Migration** — Database Migration subsection with numbered steps:
+**Section 3: Data Migration** — **Include ONLY if `scripts/02-migrate-data.sh`,
+`scripts/03-migrate-containers.sh`, or `scripts/04-migrate-secrets.sh` exist.**
+If NONE of these scripts were generated, skip Section 3 entirely.
+
+Include only subsections for scripts that were generated:
+
+Database Migration subsection (only if `scripts/02-migrate-data.sh` exists) with numbered steps:
 
 1. Run prerequisites check: `./scripts/01-validate-prerequisites.sh`
 1. Execute data migration (dry run first): `./scripts/02-migrate-data.sh` then `./scripts/02-migrate-data.sh --execute`
 1. Validate data integrity: `./scripts/05-validate-migration.sh`
 
-Container Image Migration: `./scripts/03-migrate-containers.sh` (dry run, then `--execute`)
+Container Image Migration (only if `scripts/03-migrate-containers.sh` exists): `./scripts/03-migrate-containers.sh` (dry run, then `--execute`)
 
-Secrets Migration: `./scripts/04-migrate-secrets.sh` (dry run, then `--execute`)
+Secrets Migration (only if `scripts/04-migrate-secrets.sh` exists): `./scripts/04-migrate-secrets.sh` (dry run, then `--execute`)
 
 **Section 4: Service Migration** — Per-cluster migration steps from generation-infra.json, organized by creation_order depth.
 

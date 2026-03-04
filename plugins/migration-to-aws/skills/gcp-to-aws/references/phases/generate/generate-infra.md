@@ -55,6 +55,11 @@ Build an 8-12 week migration timeline based on:
 
 ### Phase 4: Data Migration (Weeks 8-9)
 
+**Include this phase ONLY if `aws-design.json` contains database or storage resources
+(see resource detection rules in generate-artifacts-scripts.md Step 4).**
+**If no data migration is needed, compress the timeline: move Cutover to Weeks 8-9
+and Validation to Week 10. Reduce `total_weeks` accordingly.**
+
 - **Databases**: Set up continuous replication (Cloud SQL to RDS/Aurora)
   - Initial full snapshot transfer
   - Enable ongoing replication (DMS or native replication)
@@ -65,7 +70,7 @@ Build an 8-12 week migration timeline based on:
 - **Secrets**: Migrate secrets from Secret Manager to AWS Secrets Manager
 - Establish dual-write pattern for production data
 
-### Phase 5: Cutover (Weeks 10-11)
+### Phase 5: Cutover (Weeks 10-11, or Weeks 8-9 if Phase 4 skipped)
 
 - Pre-cutover validation:
   - All clusters deployed and healthy on AWS
@@ -299,7 +304,7 @@ Generate `generation-infra.json` in `$MIGRATION_DIR/` with the following schema:
         "migration_week": 5,
         "cluster_id": "compute_cloudrun_us-central1_001",
         "estimated_effort_hours": 40,
-        "data_migration_required": false
+        "data_migration_required": false // derive from resource detection flags (has_databases, has_storage)
       }
     ],
     "critical_path": [
@@ -383,7 +388,7 @@ Generate `generation-infra.json` in `$MIGRATION_DIR/` with the following schema:
 - `phase` is `"generate"`
 - `generation_source` is `"infrastructure"`
 - `migration_plan.total_weeks` is a positive integer (8-16 range)
-- `migration_plan.phases` array has at least 4 entries (Setup, PoC, Infrastructure, Data Migration, Cutover, Validation)
+- `migration_plan.phases` array has at least 4 entries (Setup, PoC, Infrastructure, Cutover, Validation — plus Data Migration if data resources exist)
 - `migration_plan.services` covers every service from `aws-design.json`
 - `migration_plan.critical_path` is non-empty
 - `migration_plan.dependencies` reflect `gcp-resource-clusters.json` creation_order

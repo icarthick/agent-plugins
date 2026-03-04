@@ -72,10 +72,10 @@ google_cloud_tasks_queue, google_monitoring_alert_policy
 
 Count resources matching these types. This is the **primary resource count**.
 
-- **If primary resource count ≤ 5:** Use **simplified discovery** (Step 3S below). Skip Steps 3-6.
-- **If primary resource count > 5:** Use **full discovery** (Steps 3-6, unchanged).
+- **If primary resource count ≤ 8:** Use **simplified discovery** (Step 3S below). Skip Steps 3-6.
+- **If primary resource count > 8:** Use **full discovery** (Steps 3-6, unchanged).
 
-## Step 3S: Simplified Discovery (≤ 5 primary resources)
+## Step 3S: Simplified Discovery (≤ 8 primary resources)
 
 For small projects, skip the full clustering pipeline. Instead:
 

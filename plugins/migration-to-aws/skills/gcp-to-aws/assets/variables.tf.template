@@ -1,0 +1,23 @@
+variable "aws_region" {
+  description = "AWS region for deployment"
+  type        = string
+  default     = "{{TARGET_REGION}}"
+}
+
+variable "project_name" {
+  description = "Project name for resource naming and tagging"
+  type        = string
+  default     = "{{PROJECT_NAME}}"
+}
+
+variable "environment" {
+  description = "Deployment environment"
+  type        = string
+  default     = "{{ENVIRONMENT}}"
+}
+
+variable "migration_id" {
+  description = "Migration session identifier"
+  type        = string
+  default     = "{{MIGRATION_ID}}"
+}

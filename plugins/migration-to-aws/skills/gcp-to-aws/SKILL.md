@@ -1,6 +1,6 @@
 ---
 name: gcp-to-aws
-description: "Migrate workloads from Google Cloud Platform to AWS. Triggers on: migrate from GCP, GCP to AWS, move off Google Cloud, migrate Terraform to AWS, migrate Cloud SQL to RDS, migrate GKE to EKS, migrate Cloud Run to Fargate, Google Cloud migration. Runs a 6-phase process: discover GCP resources from Terraform files, app code, or billing exports, clarify migration requirements, design AWS architecture, estimate costs, plan execution, and collect optional feedback."
+description: "Migrate workloads from Google Cloud Platform to AWS. Triggers on: migrate from GCP, GCP to AWS, move off Google Cloud, migrate Terraform to AWS, migrate Cloud SQL to RDS, migrate GKE to EKS, migrate Cloud Run to Fargate, Google Cloud migration. Runs a 6-phase process: discover GCP resources from Terraform files, app code, or billing exports, clarify migration requirements, design AWS architecture, estimate costs, plan execution, and collect optional feedback. Do not use for: Azure or on-premises migrations to AWS, AWS-to-GCP reverse migration, general AWS architecture advice without migration intent, GCP-to-GCP refactoring, or multi-cloud deployments that do not involve migrating off GCP."
 ---
 
 # GCP-to-AWS Migration Skill
@@ -191,6 +191,13 @@ gcp-to-aws/
 │       ├── schema-discover-billing.md          # billing-profile schema (loaded by discover-billing.md)
 │       ├── cached_prices.json                  # Pre-fetched live AWS pricing (±5-10%, primary source)
 │       └── pricing-fallback.json               # Broad coverage static cache (±15-25%, tertiary fallback)
+│
+├── assets/
+│   ├── main.tf.template                        # Terraform provider/backend boilerplate
+│   ├── variables.tf.template                   # Global variable declarations
+│   ├── provider_adapter.py.template            # Feature-flag dual-provider adapter
+│   ├── test_comparison.py.template             # A/B test harness (source vs Bedrock)
+│   └── setup_bedrock.sh.template               # Bedrock IAM + model access setup
 ```
 
 | Condition                                                     | Action                                                                                                                                           |
