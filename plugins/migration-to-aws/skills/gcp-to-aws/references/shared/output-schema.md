@@ -1471,49 +1471,30 @@ Conservative billing-only migration plan with extended discovery, relaxed thresh
 
 ## feedback.json (Phase 6 output)
 
-User feedback responses and submission metadata. Written at the end of the optional Feedback phase.
+Records that the feedback phase ran and the user was directed to the Pulse survey form. Written at the end of the optional Feedback phase.
 
 ```json
 {
   "timestamp": "2026-02-26T16:00:00Z",
-  "submitted": true,
-  "submission_id": "SurveySubmission-abc123",
-  "visitor_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "survey_url": "https://pulse.amazon/survey/VIJMF5G9",
   "phases_completed_at_feedback": ["discover", "clarify", "design", "estimate", "generate"],
-  "answers": {
-    "q1_time_saved": "A",
-    "q2_mapping_accuracy": "B",
-    "q3_terraform_usability": "A",
-    "q4_cost_accuracy": "B",
-    "q5_weakest_phase": ["D", "E"]
-  },
-  "trace_included": true,
-  "auto_skipped": []
+  "trace_included": true
 }
 ```
 
 **Field Definitions:**
 
-| Field                            | Type             | Description                                                     |
-| -------------------------------- | ---------------- | --------------------------------------------------------------- |
-| `timestamp`                      | ISO 8601         | When feedback was recorded                                      |
-| `submitted`                      | boolean          | Whether the Pulse API submission succeeded                      |
-| `submission_id`                  | string or null   | Pulse API submission ID (null if submission failed or declined) |
-| `visitor_id`                     | string           | Random UUID used as anonymous identifier                        |
-| `phases_completed_at_feedback`   | string[]         | Phases with `status: "completed"` at time of feedback           |
-| `answers.q1_time_saved`          | string or null   | A/B/C/D or null if skipped                                      |
-| `answers.q2_mapping_accuracy`    | string or null   | A/B/C/D or null if skipped or auto-skipped                      |
-| `answers.q3_terraform_usability` | string or null   | A/B/C/D or null if skipped or auto-skipped                      |
-| `answers.q4_cost_accuracy`       | string or null   | A/B/C/D or null if skipped or auto-skipped                      |
-| `answers.q5_weakest_phase`       | string[] or null | Array of selected letters or null if skipped                    |
-| `trace_included`                 | boolean          | Whether trace.json was successfully built and included          |
-| `auto_skipped`                   | string[]         | Question IDs auto-skipped because their phase was not completed |
+| Field                          | Type     | Description                                           |
+| ------------------------------ | -------- | ----------------------------------------------------- |
+| `timestamp`                    | ISO 8601 | When feedback was offered                             |
+| `survey_url`                   | string   | Pulse survey URL the user was directed to             |
+| `phases_completed_at_feedback` | string[] | Phases with `status: "completed"` at time of feedback |
+| `trace_included`               | boolean  | Whether trace.json was successfully built and shown   |
 
 **Rules:**
 
-- `submitted` is `false` when: user declined submission, curl failed, or API returned non-200
-- `answers` are always recorded even if submission failed
-- `auto_skipped` contains question keys (e.g., `"q2_mapping_accuracy"`) for phases that did not complete
+- `trace_included` is `false` when trace building failed
+- User answers are submitted directly via the browser form, not recorded locally
 
 ---
 
