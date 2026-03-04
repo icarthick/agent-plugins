@@ -6,7 +6,15 @@
 
 Before running any sub-estimate file, determine the pricing source.
 
-### MCP Retry Logic
+### Step 0a: Check Cached Prices
+
+Read `shared/cached_prices.json`. Check `metadata.last_updated`:
+
+- If file exists and <= 90 days old: **Cached prices are the primary source.** No MCP calls needed for services listed in the cache. Proceed to Step 1.
+- If file exists but > 90 days old: Cached prices are stale. Attempt MCP (Step 0b) for fresh prices; use stale cache as fallback.
+- If file missing: Attempt MCP (Step 0b).
+
+### Step 0b: MCP Availability Check (only if cached prices stale or missing)
 
 Attempt to reach awspricing with **up to 2 retries** (3 total attempts):
 
@@ -15,25 +23,20 @@ Attempt to reach awspricing with **up to 2 retries** (3 total attempts):
 3. **If still fails**: Wait 2 seconds, retry (Attempt 3)
 4. **If all 3 attempts fail**: Proceed to fallback
 
-### Live Pricing (pricing_mode = "live")
+### Pricing Hierarchy
 
-- **If any attempt succeeds**: Use live AWS pricing for all estimates
-- Accuracy: ±5-10%
-- Pass `pricing_mode: "live"` to all sub-estimate files
+Each sub-estimate file uses this lookup order per service:
 
-### Fallback Pricing (pricing_mode = "fallback")
+1. **`shared/cached_prices.json`** — Pre-fetched live prices (±5-10% accuracy). Set `pricing_source: "cached"`.
+2. **MCP API** — Real-time pricing using recipes in sub-estimate files (±5-10% accuracy). Set `pricing_source: "live"`.
+3. **`shared/pricing-fallback.json`** — Broad coverage static cache (±15-25% accuracy). Set `pricing_source: "fallback"`.
 
-- **If all 3 attempts fail**:
-  1. Load `shared/pricing-fallback.json`
-  2. **Check staleness**:
-     - Read `metadata.last_updated` (e.g., "2026-02-24")
-     - Calculate days since update: `today - last_updated`
-     - If > 90 days: Add warning: "Cached pricing data is >90 days old; accuracy may be significantly degraded"
-     - If <= 90 days: Add note: "Using cached 2026 rates (±15-25% accuracy)"
-  3. Log warning: "AWS pricing API unavailable; using cached rates from [last_updated]"
-  4. **Display to user**: Add visible warning to estimation report with staleness notice
-- Accuracy: ±15-25%
-- Pass `pricing_mode: "fallback"` to all sub-estimate files
+If using fallback, check staleness:
+
+- Read `metadata.last_updated`
+- If > 90 days: Add warning: "Cached pricing data is >90 days old; accuracy may be significantly degraded"
+- If <= 90 days: Add note: "Using cached rates (±15-25% accuracy)"
+- **Display to user**: Add visible warning with staleness notice
 
 ## Step 1: Prerequisites
 
@@ -91,7 +94,8 @@ Output to user: "Cost estimation complete. Proceeding to Phase 5: Execution Plan
 
 ## Reference Files
 
-- `shared/pricing-fallback.json` — Cached AWS pricing (±15-25%)
+- `shared/cached_prices.json` — Pre-fetched live AWS pricing (±5-10%, primary source)
+- `shared/pricing-fallback.json` — Broad coverage static cache (±15-25%, tertiary fallback)
 
 ## Scope Boundary
 

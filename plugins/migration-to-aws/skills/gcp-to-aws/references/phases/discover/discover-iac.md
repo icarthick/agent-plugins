@@ -35,18 +35,10 @@ Record file paths and types for all files found.
    - `address` (e.g., `google_compute_instance.web`)
    - `type` (e.g., `google_compute_instance`)
    - `name` (resource name component, e.g., `web`)
-   - `file` (source file path, e.g., `compute.tf`)
    - `config` (object with key attributes: `machine_type`, `name`, `region`, etc.)
    - `raw_hcl` (raw HCL text for this resource, needed for Step 4)
    - `depends_on` (array of addresses this resource depends on)
-   - `variables_used` (list of variables referenced, e.g., `["var.app_name", "var.region"]`)
-   - `dynamic` (boolean — whether resource uses `count` or `for_each`)
-4. Also extract:
-   - All `variable` blocks (name, type, default, description)
-   - All `output` blocks (name, value expression)
-   - All `data` sources (address, type, config)
-   - All `module` blocks (name, source, variables passed)
-   - Provider and backend configuration
+4. Also extract provider and backend configuration (for region detection)
 5. Report total resources found to user (e.g., "Parsed 50 GCP resources from 12 Terraform files")
 
 ## Step 2: Flag AI Signals
@@ -96,7 +88,7 @@ For small projects, skip the full clustering pipeline. Instead:
      - `google_secret_manager*`, `google_kms*` → role: encryption
      - `google_project_service` → role: configuration
      - Everything else → role: configuration
-   - Set `classification_source: "hardcoded_rules"`, `confidence: 0.99` for all
+   - Set `confidence: 0.99` for all
 
 2. **Build simple dependency edges:**
    - For each SECONDARY resource, find which PRIMARY resource it serves by checking
@@ -130,12 +122,11 @@ phases (clarify, design, estimate, generate) work identically regardless of clus
 2. For EACH resource from Step 1, apply classification rules in priority order:
    - **Priority 1**: Check if in PRIMARY list → mark `classification: "PRIMARY"`, assign `tier`, continue
    - **Priority 2**: Check if type matches SECONDARY patterns → mark `classification: "SECONDARY"` with `secondary_role` (one of: `identity`, `access_control`, `network_path`, `configuration`, `encryption`, `orchestration`)
-   - **Priority 3**: Apply fallback heuristics first, then LLM inference → mark as SECONDARY with `secondary_role`, `classification_source: "llm_inference"`, and `confidence` field
+   - **Priority 3**: Apply fallback heuristics first, then LLM inference → mark as SECONDARY with `secondary_role` and `confidence` field (0.5-0.75)
    - **Default**: Mark as `SECONDARY` with `secondary_role: "configuration"` and `confidence: 0.5`
 3. For each resource, also record:
-   - `classification_source`: `"hardcoded_rules"` (Priority 1/2) or `"llm_inference"` (Priority 3)
    - `confidence`: `0.99` (hardcoded) or `0.5-0.75` (LLM inference)
-4. Confirm ALL resources have `classification`, `classification_source`, and `confidence` fields
+4. Confirm ALL resources have `classification` and `confidence` fields
 5. Report counts (e.g., "Classified: 12 PRIMARY, 38 SECONDARY")
 
 ## Step 4: Build Dependency Edges and Populate Serves
@@ -195,27 +186,19 @@ phases (clarify, design, estimate, generate) work identically regardless of clus
 - `address` (resource Terraform address)
 - `type` (resource Terraform type)
 - `name` (resource name component)
-- `file` (source file path)
 - `classification` (PRIMARY or SECONDARY)
 - `tier` (infrastructure layer: compute, database, storage, networking, identity, etc.)
-- `classification_source` (`"hardcoded_rules"` or `"llm_inference"`)
 - `confidence` (classification confidence, 0.0-1.0)
 - `secondary_role` (for secondaries only; one of: identity, access_control, network_path, configuration, encryption, orchestration)
 - `serves` (for secondaries only; list of resources this secondary supports)
 - `cluster_id` (assigned cluster)
 - `depth` (topological depth, integer >= 0)
-- `variables_used` (list of variables referenced)
-- `dynamic` (boolean — uses count/for_each)
 
 Include top-level sections:
 
 - `metadata` — report_date, project_directory, terraform_version
 - `summary` — total_resources, primary_resources, secondary_resources, total_clusters, classification_coverage
 - `resources[]` — all resources with above fields
-- `variables[]` — extracted variable blocks
-- `outputs[]` — extracted output blocks
-- `data_sources[]` — extracted data sources
-- `modules[]` — extracted module blocks
 - `ai_detection` — has_ai_workload, confidence, confidence_level, signals_found, ai_services
 
 ### 7b: Write gcp-resource-clusters.json
@@ -270,8 +253,8 @@ After generating output files, update `$MIGRATION_DIR/.phase-status.json`: set `
 
 ### gcp-resource-inventory.json
 
-- Every resource has `address`, `type`, `name`, `file`, and `classification` fields
-- Every resource has `classification_source` and `confidence` fields
+- Every resource has `address`, `type`, `name`, and `classification` fields
+- Every resource has `confidence` field
 - Every PRIMARY resource has `depth` and `tier` fields
 - Every SECONDARY resource has `secondary_role` and `serves` fields
 - Every resource has `cluster_id` matching one of the generated clusters

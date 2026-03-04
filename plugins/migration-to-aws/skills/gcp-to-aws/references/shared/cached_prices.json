@@ -1,0 +1,108 @@
+{
+  "metadata": {
+    "last_updated": "2026-03-04",
+    "source": "AWS Price List API (live fetch)",
+    "accuracy": "±5-10%",
+    "region": "us-east-1",
+    "currency": "USD",
+    "note": "Pre-fetched from AWS Pricing API. Use directly — no MCP calls needed for listed services. For unlisted services, fall back to MCP recipes or pricing-fallback.json."
+  },
+  "fargate": {
+    "vcpu_per_hour": 0.04048,
+    "memory_gb_per_hour": 0.004445,
+    "unit_note": "Per vCPU-hour and per GB-hour (Linux/x86)"
+  },
+  "aurora_postgresql": {
+    "deployment_note": "Aurora replicates across 3 AZs by default. Pricing is listed as Single-AZ. Do NOT use Multi-AZ filter.",
+    "instances": {
+      "db.t4g.medium": 0.073,
+      "db.t4g.large": 0.146,
+      "db.r6g.large": 0.26,
+      "db.r6i.large": 0.29,
+      "db.r7g.xlarge": 0.553,
+      "db.r8g.large": 0.359,
+      "db.r8g.xlarge": 0.718,
+      "db.r8g.2xlarge": 1.104,
+      "db.r8g.4xlarge": 2.872,
+      "db.r8g.8xlarge": 5.744
+    },
+    "storage_per_gb_month": 0.10,
+    "io_per_million_requests": 0.20,
+    "unit_note": "Per instance-hour (on-demand)"
+  },
+  "aurora_mysql": {
+    "deployment_note": "Same as Aurora PostgreSQL — Multi-AZ is inherent.",
+    "instances": {
+      "db.t4g.medium": 0.073,
+      "db.t4g.large": 0.146
+    },
+    "storage_per_gb_month": 0.10,
+    "io_per_million_requests": 0.20,
+    "unit_note": "Per instance-hour (on-demand)"
+  },
+  "rds_postgresql": {
+    "deployment_note": "Standard RDS. Multi-AZ prices shown (includes standby replica).",
+    "instances": {
+      "db.t4g.micro": 0.032,
+      "db.t4g.small": 0.065,
+      "db.t4g.medium": 0.129,
+      "db.t4g.large": 0.258,
+      "db.t4g.xlarge": 0.517,
+      "db.t4g.2xlarge": 1.034
+    },
+    "storage_per_gb_month": 0.23,
+    "unit_note": "Per instance-hour (on-demand, Multi-AZ)"
+  },
+  "s3": {
+    "standard_first_50tb_per_gb": 0.023,
+    "standard_next_450tb_per_gb": 0.022,
+    "standard_over_500tb_per_gb": 0.021,
+    "put_per_1k_requests": 0.005,
+    "get_per_1k_requests": 0.0004,
+    "unit_note": "Per GB-month storage, per 1K requests"
+  },
+  "alb": {
+    "per_hour": 0.0225,
+    "lcu_per_hour": 0.008,
+    "monthly_fixed": 16.43,
+    "unit_note": "Per ALB-hour + per LCU-hour"
+  },
+  "nat_gateway": {
+    "per_hour": 0.045,
+    "per_gb_processed": 0.045,
+    "monthly_fixed": 32.85,
+    "unit_note": "Per NAT Gateway-hour + per GB data processed"
+  },
+  "lambda": {
+    "per_request": 0.0000002,
+    "per_gb_second_tier1": 0.0000166667,
+    "per_gb_second_tier2": 0.000015,
+    "tier1_limit_gb_seconds": 6000000000,
+    "unit_note": "Per request + per GB-second compute"
+  },
+  "secrets_manager": {
+    "per_secret_month": 0.40,
+    "per_10k_api_calls": 0.05,
+    "unit_note": "Per secret per month + per 10K API calls"
+  },
+  "cloudwatch_logs": {
+    "ingestion_per_gb": 0.50,
+    "storage_per_gb_month": 0.03,
+    "insights_query_per_gb_scanned": 0.005,
+    "unit_note": "Standard log class — per GB ingested, per GB-month stored, per GB scanned"
+  },
+  "elasticache_redis": {
+    "instances": {
+      "cache.t4g.micro": 0.016,
+      "cache.t4g.small": 0.032,
+      "cache.t4g.medium": 0.065
+    },
+    "unit_note": "Per node-hour (on-demand)"
+  },
+  "dynamodb": {
+    "on_demand_read_per_million": 0.125,
+    "on_demand_write_per_million": 0.625,
+    "storage_per_gb_month": 0.25,
+    "unit_note": "On-demand mode — per million RRU/WRU, per GB-month storage"
+  }
+}

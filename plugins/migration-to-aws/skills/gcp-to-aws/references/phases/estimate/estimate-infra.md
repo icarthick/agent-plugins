@@ -6,20 +6,24 @@
 
 ## Pricing Mode
 
-The parent `estimate.md` selects the pricing mode before loading this file. Use whichever mode was selected:
+The parent `estimate.md` determines MCP availability before loading this file.
 
-- **Live (MCP Server)**: Real-time pricing from AWS API, accuracy ±5-10%
-- **Fallback (Cached)**: Uses `pricing-fallback.json`, accuracy ±15-25%
+**Price lookup order for each AWS service in `aws-design.json`:**
 
-The formulas and methodology below are identical for both modes. The only difference is the price source. Track the source for each service:
+1. **`shared/cached_prices.json` (primary)** — Read the file once. Look up each service by key. If found, use the price directly. No MCP call needed. Accuracy: ±5-10%. Set `pricing_source: "cached"`.
+2. **MCP with recipes (secondary)** — If a service is NOT in cached_prices.json and MCP is available, use the Pricing Recipes table below. Set `pricing_source: "live"`.
+3. **`shared/pricing-fallback.json` (tertiary)** — If neither cache nor MCP has the price. Set `pricing_source: "fallback"`. Accuracy: ±15-25%.
+4. **Conservative estimate** — Service not in any source. Set `pricing_source: "estimated"`.
 
-- `pricing_source: "live"` — Price came from MCP API
-- `pricing_source: "fallback"` — Price came from `shared/pricing-fallback.json`
-- `pricing_source: "estimated"` — Service not in fallback data; conservative estimate used
+For typical migrations (Fargate, Aurora/RDS, S3, ALB, NAT Gateway, Lambda, Secrets Manager, CloudWatch, ElastiCache, DynamoDB), ALL prices are in `cached_prices.json`. Zero MCP calls needed.
 
-**Live mode workflow:** Read the Pricing Recipes table below. For each AWS service in
-`aws-design.json`, look up the recipe and call `get_pricing` directly with the provided
-service_code, filters, and output_options. Do NOT call discovery tools first.
+### Cached Prices Staleness Check
+
+Read `cached_prices.json` → `metadata.last_updated`. Calculate days since update:
+
+- If <= 90 days: Use cached prices, note: "Using cached rates from [last_updated] (±5-10% accuracy)"
+- If > 90 days and MCP available: Prefer MCP for all services (cached prices may be stale)
+- If > 90 days and MCP unavailable: Use cached prices with warning: "Cached prices are >90 days old; accuracy may be degraded"
 
 ## Step 0: Validate Design Output
 
@@ -35,34 +39,34 @@ Before pricing queries, validate `aws-design.json`:
 
 If all validations pass, proceed to Part 1.
 
-## Pricing Recipes (Live Mode Only)
+## Pricing Recipes (MCP Fallback Only)
 
-When using live pricing (MCP), use these exact parameters. Do NOT call get_pricing_service_codes,
-get_pricing_service_attributes, or get_pricing_attribute_values — go directly to get_pricing.
+Only use these recipes when a service is NOT in `cached_prices.json` and MCP is available.
+Do NOT call get_pricing_service_codes, get_pricing_service_attributes, or get_pricing_attribute_values — go directly to get_pricing.
 
-Query multiple services in parallel (batch independent get_pricing calls in a single turn).
+| AWS Service       | service_code      | filters                                                                                                     | output_options                                                                                                                                     |
+| ----------------- | ----------------- | ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Fargate           | AmazonECS         | `[{"Field":"productFamily","Value":"Compute"}]`                                                             | `{"pricing_terms":["OnDemand"],"product_attributes":["usagetype","location"],"exclude_free_products":true}`                                        |
+| Aurora PostgreSQL | AmazonRDS         | `[{"Field":"databaseEngine","Value":"Aurora PostgreSQL"},{"Field":"deploymentOption","Value":"Single-AZ"}]` | `{"pricing_terms":["OnDemand"],"product_attributes":["instanceType","databaseEngine","deploymentOption","location"],"exclude_free_products":true}` |
+| RDS PostgreSQL    | AmazonRDS         | `[{"Field":"databaseEngine","Value":"PostgreSQL"},{"Field":"deploymentOption","Value":"Multi-AZ"}]`         | `{"pricing_terms":["OnDemand"],"product_attributes":["instanceType","databaseEngine","deploymentOption","location"],"exclude_free_products":true}` |
+| Aurora MySQL      | AmazonRDS         | `[{"Field":"databaseEngine","Value":"Aurora MySQL"},{"Field":"deploymentOption","Value":"Single-AZ"}]`      | `{"pricing_terms":["OnDemand"],"product_attributes":["instanceType","databaseEngine","deploymentOption","location"],"exclude_free_products":true}` |
+| S3                | AmazonS3          | `[{"Field":"storageClass","Value":"General Purpose"}]`                                                      | `{"pricing_terms":["OnDemand"],"product_attributes":["storageClass","volumeType","location"],"exclude_free_products":true}`                        |
+| ALB               | AWSELB            | `[{"Field":"productFamily","Value":"Load Balancer-Application"}]`                                           | `{"pricing_terms":["OnDemand"],"product_attributes":["productFamily","location"],"exclude_free_products":true}`                                    |
+| NAT Gateway       | AmazonEC2         | `[{"Field":"productFamily","Value":"NAT Gateway"}]`                                                         | `{"pricing_terms":["OnDemand"],"product_attributes":["productFamily","location","group"],"exclude_free_products":true}`                            |
+| Lambda            | AWSLambda         | `[{"Field":"group","Value":"AWS-Lambda-Duration"}]`                                                         | `{"pricing_terms":["OnDemand"],"product_attributes":["group","location","usagetype"],"exclude_free_products":true}`                                |
+| Secrets Manager   | AWSSecretsManager | `[]`                                                                                                        | `{"pricing_terms":["OnDemand"],"exclude_free_products":true}`                                                                                      |
+| CloudWatch Logs   | AmazonCloudWatch  | `[{"Field":"usagetype","Value":"DataProcessing-Bytes"}]`                                                    | `{"pricing_terms":["OnDemand"],"product_attributes":["productFamily","location","usagetype"],"exclude_free_products":true}`                        |
+| ElastiCache Redis | AmazonElastiCache | `[{"Field":"cacheEngine","Value":"Redis"},{"Field":"instanceType","Value":"cache.t4g","Type":"CONTAINS"}]`  | `{"pricing_terms":["OnDemand"],"product_attributes":["instanceType","cacheEngine","location"],"exclude_free_products":true}`                       |
+| DynamoDB          | AmazonDynamoDB    | `[]`                                                                                                        | `{"pricing_terms":["OnDemand"],"product_attributes":["group","location"],"exclude_free_products":true}`                                            |
 
-| AWS Service       | service_code      | filters                                                                                                                        | output_options                                                                                                                                     |
-| ----------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Fargate           | AmazonECS         | `[{"Field":"operatingSystem","Value":"Linux"},{"Field":"tenancy","Value":"Shared"},{"Field":"capacitystatus","Value":"Used"}]` | `{"pricing_terms":["OnDemand"],"product_attributes":["instanceType","memory","vcpu","location"],"exclude_free_products":true}`                     |
-| Aurora PostgreSQL | AmazonRDS         | `[{"Field":"databaseEngine","Value":"Aurora PostgreSQL"},{"Field":"deploymentOption","Value":"Multi-AZ"}]`                     | `{"pricing_terms":["OnDemand"],"product_attributes":["instanceType","databaseEngine","deploymentOption","location"],"exclude_free_products":true}` |
-| RDS PostgreSQL    | AmazonRDS         | `[{"Field":"databaseEngine","Value":"PostgreSQL"},{"Field":"deploymentOption","Value":"Multi-AZ"}]`                            | `{"pricing_terms":["OnDemand"],"product_attributes":["instanceType","databaseEngine","deploymentOption","location"],"exclude_free_products":true}` |
-| Aurora MySQL      | AmazonRDS         | `[{"Field":"databaseEngine","Value":"Aurora MySQL"},{"Field":"deploymentOption","Value":"Multi-AZ"}]`                          | `{"pricing_terms":["OnDemand"],"product_attributes":["instanceType","databaseEngine","deploymentOption","location"],"exclude_free_products":true}` |
-| S3                | AmazonS3          | `[{"Field":"storageClass","Value":"General Purpose"}]`                                                                         | `{"pricing_terms":["OnDemand"],"product_attributes":["storageClass","volumeType","location"],"exclude_free_products":true}`                        |
-| ALB               | AWSELB            | `[{"Field":"productFamily","Value":"Load Balancer-Application"}]`                                                              | `{"pricing_terms":["OnDemand"],"product_attributes":["productFamily","location"],"exclude_free_products":true}`                                    |
-| NAT Gateway       | AmazonEC2         | `[{"Field":"productFamily","Value":"NAT Gateway"}]`                                                                            | `{"pricing_terms":["OnDemand"],"product_attributes":["productFamily","location","group"],"exclude_free_products":true}`                            |
-| Lambda            | AWSLambda         | `[]`                                                                                                                           | `{"pricing_terms":["OnDemand"],"product_attributes":["group","location"],"exclude_free_products":true}`                                            |
-| Secrets Manager   | AWSSecretsManager | `[]`                                                                                                                           | `{"pricing_terms":["OnDemand"],"exclude_free_products":true}`                                                                                      |
-| CloudWatch Logs   | AmazonCloudWatch  | `[{"Field":"productFamily","Value":"Data Payload","Type":"CONTAINS"}]`                                                         | `{"pricing_terms":["OnDemand"],"product_attributes":["productFamily","location"],"exclude_free_products":true}`                                    |
-| ElastiCache Redis | AmazonElastiCache | `[{"Field":"cacheEngine","Value":"Redis"}]`                                                                                    | `{"pricing_terms":["OnDemand"],"product_attributes":["instanceType","cacheEngine","location"],"exclude_free_products":true}`                       |
-| DynamoDB          | AmazonDynamoDB    | `[]`                                                                                                                           | `{"pricing_terms":["OnDemand"],"product_attributes":["group","location"],"exclude_free_products":true}`                                            |
+**Important notes on MCP filters:**
 
-**Batching rule:** Group all get_pricing calls for services in aws-design.json into as few turns as possible.
-Call up to 4 get_pricing requests in parallel per turn. For a typical 5-service design, this means 2 turns of MCP calls instead of 30.
+- **Fargate**: Use `productFamily=Compute`, NOT EC2-style filters (operatingSystem, tenancy, capacitystatus do not exist in AmazonECS)
+- **Aurora (PostgreSQL/MySQL)**: Use `deploymentOption=Single-AZ`. Aurora handles multi-AZ replication natively — there is no "Multi-AZ" pricing option for Aurora
+- **Lambda**: Filter by `group=AWS-Lambda-Duration` for compute pricing, separate call with `group=AWS-Lambda-Requests` for request pricing
+- **CloudWatch**: Filter by specific `usagetype=DataProcessing-Bytes` for log ingestion pricing (avoids pulling all vended log types)
 
-If a recipe above does not cover a service in aws-design.json, then use the standard
-discovery workflow (get_pricing_service_codes → get_pricing_service_attributes → get_pricing)
-for that specific service only.
+**Batching rule:** If MCP calls are needed, group up to 4 requests in parallel per turn.
 
 ## Part 1: Calculate Current GCP Costs
 
@@ -549,8 +553,8 @@ Write `estimation-infra.json`.
   "design_source": "infrastructure",
   "timestamp": "2026-02-24T14:00:00Z",
   "pricing_source": {
-    "status": "live|fallback",
-    "message": "Using live AWS pricing API|Using cached rates from 2026-02-24 (±15-25% accuracy)",
+    "status": "cached|live|fallback",
+    "message": "Using cached prices from 2026-03-04 (±5-10% accuracy)|Using live AWS pricing API|Using cached rates from 2026-02-24 (±15-25% accuracy)",
     "fallback_staleness": {
       "last_updated": "2026-02-24",
       "days_old": 3,
@@ -728,8 +732,8 @@ Write `estimation-infra.json`.
 ## Output Validation Checklist
 
 - `design_source` is `"infrastructure"`
-- `pricing_source.status` is `"live"` or `"fallback"`
-- `accuracy_confidence` matches the pricing mode (±5-10% for live, ±15-25% for fallback)
+- `pricing_source.status` is `"cached"`, `"live"`, or `"fallback"`
+- `accuracy_confidence` matches the pricing mode (±5-10% for cached/live, ±15-25% for fallback)
 - `current_costs.source` is `"billing_data"` if `billing-profile.json` was used, `"inventory_estimate"`, `"preferences"`, or `"default"` otherwise
 - `current_costs.gcp_monthly` matches billing-profile.json total (if used) or is a reasonable estimate
 - `projected_costs` has all three tiers (premium, balanced, optimized)

@@ -29,18 +29,14 @@ Complete inventory of discovered GCP resources with classification, dependencies
       "address": "google_cloud_run_service.orders_api",
       "type": "google_cloud_run_service",
       "name": "orders_api",
-      "file": "cloudrun.tf",
       "classification": "PRIMARY",
       "tier": "compute",
-      "classification_source": "hardcoded_rules",
       "confidence": 0.99,
       "config": {
         "timeout": 60,
         "memory_mb": 512,
         "concurrency": 100
       },
-      "variables_used": ["var.app_name"],
-      "dynamic": false,
       "depth": 3,
       "cluster_id": "compute_cloudrun_us-central1_001"
     },
@@ -48,10 +44,8 @@ Complete inventory of discovered GCP resources with classification, dependencies
       "address": "google_service_account.app",
       "type": "google_service_account",
       "name": "app",
-      "file": "iam.tf",
       "classification": "SECONDARY",
       "tier": "identity",
-      "classification_source": "hardcoded_rules",
       "confidence": 0.99,
       "secondary_role": "identity",
       "serves": ["google_cloud_run_service.orders_api", "google_cloud_run_service.products_api"],
@@ -65,10 +59,8 @@ Complete inventory of discovered GCP resources with classification, dependencies
       "address": "google_compute_network.main",
       "type": "google_compute_network",
       "name": "main",
-      "file": "vpc.tf",
       "classification": "PRIMARY",
       "tier": "networking",
-      "classification_source": "hardcoded_rules",
       "confidence": 0.99,
       "config": {
         "auto_create_subnetworks": false
@@ -77,10 +69,6 @@ Complete inventory of discovered GCP resources with classification, dependencies
       "cluster_id": "networking_vpc_us-central1_001"
     }
   ],
-  "variables": [],
-  "outputs": [],
-  "data_sources": [],
-  "modules": [],
   "ai_detection": {
     "has_ai_workload": false,
     "confidence": 0,
@@ -96,27 +84,19 @@ Complete inventory of discovered GCP resources with classification, dependencies
 - `address` — Terraform resource address (NOT `id`, `resource_address`)
 - `type` — Resource type (NOT `resource_type`)
 - `name` — Resource name component (NOT `resource_name`)
-- `file` — Source file path (NOT `source_file`, `filename`)
 - `classification` — `"PRIMARY"` or `"SECONDARY"` (NOT `class`, `category`)
 - `tier` — Infrastructure layer: compute, database, storage, networking, identity, messaging, monitoring (NOT `layer`)
-- `classification_source` — `"hardcoded_rules"` or `"llm_inference"` (NOT `source`)
 - `confidence` — Classification confidence 0.0-1.0 (NOT `certainty`)
 - `secondary_role` — For secondaries only: identity, access_control, network_path, configuration, encryption, orchestration
 - `serves` — For secondaries only: array of primary resource addresses served
 - `depth` — Dependency depth (0 = foundational, N = depends on depth N-1)
 - `cluster_id` — Which cluster this resource belongs to
-- `variables_used` — List of Terraform variables referenced
-- `dynamic` — Boolean, whether resource uses count/for_each
 
 **Key Sections:**
 
 - `metadata` — Report metadata (report_date, project_directory, terraform_version)
 - `summary` — Aggregate statistics (total_resources, primary/secondary counts, cluster count, classification_coverage)
 - `resources[]` — All discovered resources with fields above
-- `variables[]` — Extracted Terraform variable blocks
-- `outputs[]` — Extracted Terraform output blocks
-- `data_sources[]` — Extracted Terraform data sources
-- `modules[]` — Extracted Terraform module blocks
 - `ai_detection` — AI workload detection results:
   - `has_ai_workload` — boolean
   - `confidence` — 0.0-1.0
