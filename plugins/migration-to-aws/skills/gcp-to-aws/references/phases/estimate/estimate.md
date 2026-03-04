@@ -55,7 +55,7 @@ IF `aws-design.json` exists:
 
 > Load `estimate-infra.md`
 
-Produces: `estimation-infra.json`, `estimation-infra-report.md`
+Produces: `estimation-infra.json`
 
 ### Billing-Only Estimate
 
@@ -63,7 +63,7 @@ IF `aws-design-billing.json` exists AND `aws-design.json` does **NOT** exist:
 
 > Load `estimate-billing.md`
 
-Produces: `estimation-billing.json`, `estimation-billing-report.md`
+Produces: `estimation-billing.json`
 
 ### AI Estimate
 
@@ -71,7 +71,7 @@ IF `aws-design-ai.json` exists:
 
 > Load `estimate-ai.md`
 
-Produces: `estimation-ai.json`, `estimation-ai-report.md`
+Produces: `estimation-ai.json`
 
 ### Mutual Exclusion
 
@@ -84,7 +84,7 @@ After all applicable sub-estimates finish, update `$MIGRATION_DIR/.phase-status.
 
 - Set `phases.estimate.status` to `"completed"`
 - Set `phases.estimate.timestamp` to current ISO 8601 timestamp
-- Set `phases.estimate.outputs` to the combined list of output files produced (e.g., `["estimation-infra.json", "estimation-infra-report.md"]` or `["estimation-billing.json", "estimation-billing-report.md", "estimation-ai.json", "estimation-ai-report.md"]`)
+- Set `phases.estimate.outputs` to the combined list of output files produced (e.g., `["estimation-infra.json"]` or `["estimation-billing.json", "estimation-ai.json"]`)
 - Update `last_updated` to current timestamp
 
 Output to user: "Cost estimation complete. Proceeding to Phase 5: Execution Plan."

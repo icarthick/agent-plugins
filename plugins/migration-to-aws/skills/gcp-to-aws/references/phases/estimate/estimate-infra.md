@@ -17,6 +17,10 @@ The formulas and methodology below are identical for both modes. The only differ
 - `pricing_source: "fallback"` — Price came from `shared/pricing-fallback.json`
 - `pricing_source: "estimated"` — Service not in fallback data; conservative estimate used
 
+**Live mode workflow:** Read the Pricing Recipes table below. For each AWS service in
+`aws-design.json`, look up the recipe and call `get_pricing` directly with the provided
+service_code, filters, and output_options. Do NOT call discovery tools first.
+
 ## Step 0: Validate Design Output
 
 Before pricing queries, validate `aws-design.json`:
@@ -30,6 +34,35 @@ Before pricing queries, validate `aws-design.json`:
    - Each resource has `aws_config` field: If missing, **STOP**. Output: "Resource [address] missing aws_config. Re-run Phase 3."
 
 If all validations pass, proceed to Part 1.
+
+## Pricing Recipes (Live Mode Only)
+
+When using live pricing (MCP), use these exact parameters. Do NOT call get_pricing_service_codes,
+get_pricing_service_attributes, or get_pricing_attribute_values — go directly to get_pricing.
+
+Query multiple services in parallel (batch independent get_pricing calls in a single turn).
+
+| AWS Service       | service_code      | filters                                                                                                                        | output_options                                                                                                                                     |
+| ----------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Fargate           | AmazonECS         | `[{"Field":"operatingSystem","Value":"Linux"},{"Field":"tenancy","Value":"Shared"},{"Field":"capacitystatus","Value":"Used"}]` | `{"pricing_terms":["OnDemand"],"product_attributes":["instanceType","memory","vcpu","location"],"exclude_free_products":true}`                     |
+| Aurora PostgreSQL | AmazonRDS         | `[{"Field":"databaseEngine","Value":"Aurora PostgreSQL"},{"Field":"deploymentOption","Value":"Multi-AZ"}]`                     | `{"pricing_terms":["OnDemand"],"product_attributes":["instanceType","databaseEngine","deploymentOption","location"],"exclude_free_products":true}` |
+| RDS PostgreSQL    | AmazonRDS         | `[{"Field":"databaseEngine","Value":"PostgreSQL"},{"Field":"deploymentOption","Value":"Multi-AZ"}]`                            | `{"pricing_terms":["OnDemand"],"product_attributes":["instanceType","databaseEngine","deploymentOption","location"],"exclude_free_products":true}` |
+| Aurora MySQL      | AmazonRDS         | `[{"Field":"databaseEngine","Value":"Aurora MySQL"},{"Field":"deploymentOption","Value":"Multi-AZ"}]`                          | `{"pricing_terms":["OnDemand"],"product_attributes":["instanceType","databaseEngine","deploymentOption","location"],"exclude_free_products":true}` |
+| S3                | AmazonS3          | `[{"Field":"storageClass","Value":"General Purpose"}]`                                                                         | `{"pricing_terms":["OnDemand"],"product_attributes":["storageClass","volumeType","location"],"exclude_free_products":true}`                        |
+| ALB               | AWSELB            | `[{"Field":"productFamily","Value":"Load Balancer-Application"}]`                                                              | `{"pricing_terms":["OnDemand"],"product_attributes":["productFamily","location"],"exclude_free_products":true}`                                    |
+| NAT Gateway       | AmazonEC2         | `[{"Field":"productFamily","Value":"NAT Gateway"}]`                                                                            | `{"pricing_terms":["OnDemand"],"product_attributes":["productFamily","location","group"],"exclude_free_products":true}`                            |
+| Lambda            | AWSLambda         | `[]`                                                                                                                           | `{"pricing_terms":["OnDemand"],"product_attributes":["group","location"],"exclude_free_products":true}`                                            |
+| Secrets Manager   | AWSSecretsManager | `[]`                                                                                                                           | `{"pricing_terms":["OnDemand"],"exclude_free_products":true}`                                                                                      |
+| CloudWatch Logs   | AmazonCloudWatch  | `[{"Field":"productFamily","Value":"Data Payload","Type":"CONTAINS"}]`                                                         | `{"pricing_terms":["OnDemand"],"product_attributes":["productFamily","location"],"exclude_free_products":true}`                                    |
+| ElastiCache Redis | AmazonElastiCache | `[{"Field":"cacheEngine","Value":"Redis"}]`                                                                                    | `{"pricing_terms":["OnDemand"],"product_attributes":["instanceType","cacheEngine","location"],"exclude_free_products":true}`                       |
+| DynamoDB          | AmazonDynamoDB    | `[]`                                                                                                                           | `{"pricing_terms":["OnDemand"],"product_attributes":["group","location"],"exclude_free_products":true}`                                            |
+
+**Batching rule:** Group all get_pricing calls for services in aws-design.json into as few turns as possible.
+Call up to 4 get_pricing requests in parallel per turn. For a typical 5-service design, this means 2 turns of MCP calls instead of 30.
+
+If a recipe above does not cover a service in aws-design.json, then use the standard
+discovery workflow (get_pricing_service_codes → get_pricing_service_attributes → get_pricing)
+for that specific service only.
 
 ## Part 1: Calculate Current GCP Costs
 
@@ -506,7 +539,7 @@ Decision: Only if costs are non-negotiable
 
 ## Output
 
-Write `estimation-infra.json` and `estimation-infra-report.md`.
+Write `estimation-infra.json`.
 
 ### estimation-infra.json schema
 
@@ -692,20 +725,7 @@ Write `estimation-infra.json` and `estimation-infra-report.md`.
 }
 ```
 
-### estimation-infra-report.md
-
-Present the financial analysis as a readable report covering:
-
-- Monthly operating costs (balanced tier recommended, with premium and optimized for comparison)
-- Per-service cost breakdown
-- One-time migration costs
-- ROI analysis with payback period
-- Cost optimization opportunities
-- Executive summary and recommendation
-
 ## Output Validation Checklist
-
-### estimation-infra.json
 
 - `design_source` is `"infrastructure"`
 - `pricing_source.status` is `"live"` or `"fallback"`
@@ -728,14 +748,18 @@ Present the financial analysis as a readable report covering:
 - All cost values are numbers, not strings
 - Output is valid JSON
 
-### estimation-infra-report.md
+## Present Summary
 
-- Balanced tier section shows per-service breakdown with total
-- Comparison tiers section lists premium and optimized totals
-- One-time costs section present
-- ROI analysis section present with payback period
-- Cost optimization section present
-- Executive summary present
+After writing `estimation-infra.json`, present a concise summary to the user:
+
+1. GCP baseline vs AWS projected (balanced tier) — one-line comparison
+2. Three-tier table: Premium / Balanced / Optimized with monthly totals
+3. Per-service cost breakdown (balanced tier, 1 line per service)
+4. One-time migration cost range
+5. ROI summary: payback period with operational efficiency
+6. Top 2-3 optimization opportunities with savings amounts
+
+Keep it under 25 lines. The user can ask for details or re-read `estimation-infra.json` at any time.
 
 ## Execute Phase Integration
 

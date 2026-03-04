@@ -117,52 +117,9 @@ Write to `$MIGRATION_DIR/aws-design-billing.json`:
 }
 ```
 
-**File 2: `aws-design-billing-report.md`**
-
-```markdown
-# Billing-Only Design Report
-
-## Overview
-
-Mapped X of Y GCP billing services to AWS equivalents.
-Source: billing data only (no IaC/Terraform configuration available).
-Confidence: billing_inferred for all mappings.
-
-## ⚠️ Accuracy Notice
-
-These mappings are inferred from GCP billing service names and SKU descriptions.
-Without Terraform configuration, specific resource settings (instance sizes, regions,
-feature flags) cannot be determined. Provide `.tf` files for higher-confidence mapping.
-
-## Mapped Services
-
-### [gcp_service] → [aws_service]
-
-- Monthly GCP cost: $[monthly_cost]
-- SKU hints: [sku_hints]
-- Confidence: billing_inferred
-- Rationale: [rationale]
-
-[repeat per mapped service]
-
-## Unmapped Services
-
-### [gcp_service]
-
-- Monthly GCP cost: $[monthly_cost]
-- Reason: [reason]
-- Suggestion: [suggestion]
-
-[repeat per unknown]
-
-## Total Monthly GCP Spend: $[total]
-```
-
 <!-- TODO: Add cost comparison column once Estimate phase supports billing-only designs -->
 
 ## Output Validation Checklist
-
-### aws-design-billing.json
 
 - `metadata.design_source` is `"billing_only"`
 - `metadata.total_services` equals `mapped_services` + `unmapped_services`
@@ -172,9 +129,14 @@ feature flags) cannot be determined. Provide `.tf` files for higher-confidence m
 - Every `unknowns[]` entry has `gcp_service`, `monthly_cost`, `reason`, `suggestion`
 - Output is valid JSON
 
-### aws-design-billing-report.md
+## Present Summary
 
-- Overview lists mapped vs total count
-- Accuracy notice is present
-- Every mapped service has a section
-- Every unmapped service has a section
+After writing `aws-design-billing.json`, present a concise summary to the user:
+
+1. Mapped X of Y GCP billing services to AWS equivalents
+2. Accuracy notice: billing-inferred confidence, provide .tf files for higher accuracy
+3. Per-service table: GCP service → AWS service (with monthly GCP cost)
+4. Unmapped services list with suggestions
+5. Total monthly GCP spend
+
+Keep it under 20 lines. The user can ask for details or re-read `aws-design-billing.json` at any time.

@@ -392,7 +392,7 @@ Tiered approach:
 
 ## Output
 
-Write `estimation-ai.json` and `estimation-ai-report.md`.
+Write `estimation-ai.json`.
 
 ### estimation-ai.json schema
 
@@ -511,18 +511,6 @@ Write `estimation-ai.json` and `estimation-ai-report.md`.
 }
 ```
 
-### estimation-ai-report.md
-
-Present the AI cost analysis as a readable report covering:
-
-- Current GCP AI costs
-- Model comparison table with all viable Bedrock models
-- Recommended model with detailed cost breakdown
-- One-time migration costs
-- ROI analysis
-- Cost optimization opportunities
-- Optimized projection
-
 ## Output Validation Checklist
 
 - `pricing_mode` is either `"live"` or `"fallback"`
@@ -539,6 +527,19 @@ Present the AI cost analysis as a readable report covering:
 - No compute, database, storage, or networking cost calculations (those belong in `estimate-infra.md`)
 - All cost values are numbers, not strings
 - Output is valid JSON
+
+## Present Summary
+
+After writing `estimation-ai.json`, present a concise summary to the user:
+
+1. Current GCP AI spend vs projected Bedrock cost (recommended model)
+2. Model comparison table: model name, monthly cost, vs source provider %, capabilities match
+3. Recommended model with cost breakdown (input + output + embeddings)
+4. If migration increases cost: flag honestly with non-cost justification
+5. Top 2-3 optimization opportunities with potential savings
+6. Optimized projection (monthly cost with all optimizations applied)
+
+Keep it under 25 lines. The user can ask for details or re-read `estimation-ai.json` at any time.
 
 ## Execute Phase Integration
 

@@ -83,7 +83,7 @@ The overall `honest_assessment` at the architecture level is the weakest assessm
 
 ### Model Comparison Table
 
-When writing the design report, include a comparison for each mapped model:
+Include this comparison for each mapped model in `aws-design-ai.json` and in the user summary:
 
 | Dimension        | Source Provider                 | AWS Bedrock (Target)        |
 | ---------------- | ------------------------------- | --------------------------- |
@@ -476,58 +476,7 @@ Write to `$MIGRATION_DIR/aws-design-ai.json`:
 }
 ```
 
-**File 2: `aws-design-ai-report.md`**
-
-```markdown
-# AI Workload Design Report
-
-## Overview
-
-Mapped X GCP AI models to Y Amazon Bedrock models.
-Integration pattern: [direct_sdk|framework|rest_api|mixed]
-
-## Model Mappings
-
-### [gcp_model_id] → [aws_model_id]
-
-- GCP Service: [service]
-- AWS Service: Amazon Bedrock
-- Capabilities matched: [list]
-- Capability gaps: [list or "None"]
-- Migration complexity: [low|medium|high]
-- Rationale: [rationale]
-
-[repeat per model]
-
-## Feature Parity Summary
-
-| Capability                | Parity | Notes |
-| ------------------------- | ------ | ----- |
-| [from capability_mapping] |        |       |
-
-## Code Migration Guide
-
-### Files to modify
-
-[from code_migration.files_to_modify]
-
-### Dependency changes
-
-- Remove: [list]
-- Add: [list]
-
-### Code examples
-
-[Include relevant patterns from Part 5 based on detected integration pattern]
-
-## Infrastructure Changes
-
-[from infrastructure mappings]
-```
-
 ## Output Validation Checklist
-
-### aws-design-ai.json
 
 - `metadata.ai_source` matches `summary.ai_source` from `ai-workload-profile.json`
 - `metadata.bedrock_models_selected` matches length of `ai_architecture.bedrock_models`
@@ -542,9 +491,14 @@ Integration pattern: [direct_sdk|framework|rest_api|mixed]
 - All model IDs use current Bedrock identifiers (e.g., `anthropic.claude-sonnet-4-6`, not legacy IDs)
 - Output is valid JSON
 
-### aws-design-ai-report.md
+## Present Summary
 
-- Overview section lists model count and integration pattern
-- Every model has a mapping section
-- Feature parity table is present
-- Code migration guide includes at least one pattern example
+After writing `aws-design-ai.json`, present a concise summary to the user:
+
+1. Overall honest assessment (strong_migrate / moderate_migrate / weak_migrate / recommend_stay)
+2. Model comparison table: Source model → Bedrock model (with price comparison and assessment per model)
+3. Integration pattern and migration complexity
+4. Capability gaps (if any)
+5. If honest_assessment is weak_migrate or recommend_stay, flag prominently with cost justification
+
+Keep it under 25 lines. The user can ask for details or re-read `aws-design-ai.json` at any time.

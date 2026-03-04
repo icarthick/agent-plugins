@@ -86,13 +86,13 @@ For each mapped AWS service, verify:
 **If awsknowledge unavailable:**
 
 - Set `validation_status: "skipped"` in output
-- Add note to report: "Architecture validation unavailable (non-critical)"
+- Note in summary: "Architecture validation unavailable (non-critical)"
 - Continue with design (validation is informational, not blocking)
 
 **If validation succeeds:**
 
 - Set `validation_status: "completed"` in output
-- List validated services in report
+- List validated services in summary
 
 ## Step 4: Write Design Output
 
@@ -140,29 +140,7 @@ For each mapped AWS service, verify:
 }
 ```
 
-**File 2: `aws-design-report.md`**
-
-```
-# AWS Architecture Design Report
-
-## Overview
-Mapped X GCP resources to Y AWS services across Z clusters.
-
-## Cluster: compute_instance_us-central1_001
-### Compute
-- google_compute_instance.web → Fargate (0.5 CPU, 1 GB memory)
-  Confidence: deterministic
-  Rationale: Direct compute mapping, Cold Start not applicable (always-on)
-
-[repeat per resource]
-
-## Warnings
-- Service X: falling back to region Y due to regional unavailability
-```
-
 ## Output Validation Checklist
-
-### aws-design.json
 
 - `clusters` array is non-empty
 - Every cluster has `cluster_id` matching a cluster from `gcp-resource-clusters.json`
@@ -174,8 +152,12 @@ Mapped X GCP resources to Y AWS services across Z clusters.
 - No duplicate `gcp_address` values across clusters
 - Output is valid JSON
 
-### aws-design-report.md
+## Present Summary
 
-- Overview section lists total resources, services, and clusters
-- Every cluster has a section with per-resource mappings
-- Warnings section present (even if empty)
+After writing `aws-design.json`, present a concise summary to the user:
+
+1. Total resources mapped and cluster count
+2. Per-cluster table: GCP resource → AWS service (one line each, include confidence)
+3. Any warnings (regional fallbacks, inferred mappings with low confidence)
+
+Keep it under 20 lines. The user can ask for details or re-read `aws-design.json` at any time.

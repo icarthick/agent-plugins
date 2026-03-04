@@ -23,7 +23,7 @@ IF `gcp-resource-inventory.json` AND `gcp-resource-clusters.json` both exist:
 
 → Load `design-infra.md`
 
-Produces: `aws-design.json`, `aws-design-report.md`
+Produces: `aws-design.json`
 
 ### Billing-Only Design (fallback)
 
@@ -31,7 +31,7 @@ IF `billing-profile.json` exists AND `gcp-resource-inventory.json` does **NOT** 
 
 → Load `design-billing.md`
 
-Produces: `aws-design-billing.json`, `aws-design-billing-report.md`
+Produces: `aws-design-billing.json`
 
 ### AI Workload Design
 
@@ -39,7 +39,7 @@ IF `ai-workload-profile.json` exists:
 
 → Load `design-ai.md`
 
-Produces: `aws-design-ai.json`, `aws-design-ai-report.md`
+Produces: `aws-design-ai.json`
 
 ### Mutual Exclusion
 
@@ -52,7 +52,7 @@ After all applicable sub-designs finish, update `$MIGRATION_DIR/.phase-status.js
 
 - Set `phases.design.status` to `"completed"`
 - Set `phases.design.timestamp` to current ISO 8601 timestamp
-- Set `phases.design.outputs` to the combined list of output files produced (e.g., `["aws-design.json", "aws-design-report.md"]` or `["aws-design-billing.json", "aws-design-billing-report.md", "aws-design-ai.json", "aws-design-ai-report.md"]`)
+- Set `phases.design.outputs` to the combined list of output files produced (e.g., `["aws-design.json"]` or `["aws-design-billing.json", "aws-design-ai.json"]`)
 - Update `last_updated` to current timestamp
 
 Output to user: "AWS Architecture designed. Proceeding to Phase 4: Estimate Costs."

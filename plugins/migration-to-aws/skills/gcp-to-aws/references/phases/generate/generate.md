@@ -61,7 +61,12 @@ IF `generation-infra.json` AND `aws-design.json` exist:
 
 > Load `generate-artifacts-infra.md`
 
-Produces: `terraform/` directory, `scripts/` directory
+Produces: `terraform/` directory
+
+After generate-artifacts-infra.md completes (terraform files generated),
+load `generate-artifacts-scripts.md` to generate migration scripts.
+
+Produces: `scripts/` directory
 
 ### AI Artifacts
 

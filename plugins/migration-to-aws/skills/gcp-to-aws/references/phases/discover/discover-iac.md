@@ -65,6 +65,65 @@ Record all signals for the `ai_detection` section in `gcp-resource-inventory.jso
 
 **Note:** This step only detects signals from Terraform. Full AI workload profiling (code analysis, billing data) will be handled by `discover-app-code.md` (v1.1).
 
+## Step 2.5: Complexity Assessment
+
+Count the unique GCP resource types extracted in Step 1 that are PRIMARY candidates
+(compute, database, storage, messaging services — not IAM, firewall rules, or project services).
+Use the Priority 1 list from classification-rules.md as reference:
+
+**Primary types:** google_cloud_run_v2_service, google_cloud_run_service, google_cloudfunctions_function,
+google_cloudfunctions2_function, google_compute_instance, google_container_cluster,
+google_app_engine_application, google_sql_database_instance, google_spanner_instance,
+google_firestore_database, google_bigtable_instance, google_bigquery_dataset,
+google_redis_instance, google_storage_bucket, google_pubsub_topic, google_pubsub_subscription,
+google_cloud_tasks_queue, google_monitoring_alert_policy
+
+Count resources matching these types. This is the **primary resource count**.
+
+- **If primary resource count ≤ 5:** Use **simplified discovery** (Step 3S below). Skip Steps 3-6.
+- **If primary resource count > 5:** Use **full discovery** (Steps 3-6, unchanged).
+
+## Step 3S: Simplified Discovery (≤ 5 primary resources)
+
+For small projects, skip the full clustering pipeline. Instead:
+
+1. **Classify resources** using only Priority 1 hardcoded rules from the PRIMARY types list above.
+   - Resources matching the list → PRIMARY
+   - All other resources → SECONDARY with role inferred from type:
+     - `google_service_account*`, `google_project_iam*` → role: identity
+     - `google_compute_firewall`, `google_compute_network`, `google_compute_subnetwork`,
+       `google_compute_global_address`, `google_compute_router*`, `google_dns*` → role: network_path
+     - `google_secret_manager*`, `google_kms*` → role: encryption
+     - `google_project_service` → role: configuration
+     - Everything else → role: configuration
+   - Set `classification_source: "hardcoded_rules"`, `confidence: 0.99` for all
+
+2. **Build simple dependency edges:**
+   - For each SECONDARY resource, find which PRIMARY resource it serves by checking
+     Terraform reference expressions (e.g., `google_cloud_run_v2_service.X.name` referenced
+     in a service account → that SA serves that Cloud Run service)
+   - Edge type: `serves` for all edges (skip typed-edge classification)
+   - If no reference found, attach to the nearest PRIMARY resource by file proximity
+
+3. **Create clusters** using simple grouping:
+   - **Networking cluster:** All `google_compute_network`, `google_compute_subnetwork`,
+     `google_compute_firewall`, `google_compute_router*`, `google_compute_global_address`,
+     `google_dns*` resources → 1 cluster
+   - **Per-primary clusters:** Each PRIMARY resource + its SECONDARY `serves` dependents → 1 cluster
+   - `google_project_service` resources → attach to the cluster of the service they enable
+   - Naming: `{category}_{type}_{region}_{sequence}` (same convention as full clustering)
+
+4. **Set depth:** Networking cluster = depth 0. All other clusters = depth 1. (No Kahn's algorithm needed.)
+
+5. **Load** `references/shared/schema-discover-iac.md` and write output files
+   (`gcp-resource-inventory.json`, `gcp-resource-clusters.json`) using the same schema.
+   Add to metadata: `"clustering_mode": "simplified"`.
+
+6. **Proceed to Step 7** (same as full path).
+
+**Note:** The simplified path produces the SAME output schema as the full path. Downstream
+phases (clarify, design, estimate, generate) work identically regardless of clustering mode.
+
 ## Step 3: Classify Resources (PRIMARY vs SECONDARY)
 
 1. Read `references/clustering/terraform/classification-rules.md` completely

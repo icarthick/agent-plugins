@@ -22,7 +22,7 @@ Note: Even with live pricing, billing-only estimates carry wider overall ranges 
 When only billing data was available for design, cost estimates carry wider ranges. Without source configuration, we cannot calculate precise AWS costs. Instead, we produce low/mid/high estimates per service based on typical AWS pricing for the mapped service type.
 
 **Input:** `$MIGRATION_DIR/aws-design-billing.json`, `$MIGRATION_DIR/billing-profile.json`, `$MIGRATION_DIR/preferences.json`
-**Output:** `$MIGRATION_DIR/estimation-billing.json`, `$MIGRATION_DIR/estimation-billing-report.md`
+**Output:** `$MIGRATION_DIR/estimation-billing.json`
 
 ## Prerequisites
 
@@ -146,7 +146,7 @@ Recommendation:
 
 ## Step 6: Generate Output
 
-Write `estimation-billing.json` and `estimation-billing-report.md`.
+Write `estimation-billing.json`.
 
 ### estimation-billing.json schema
 
@@ -242,17 +242,6 @@ Write `estimation-billing.json` and `estimation-billing-report.md`.
 }
 ```
 
-### estimation-billing-report.md
-
-Present the billing-only cost analysis as a readable report covering:
-
-- GCP baseline from billing data
-- AWS cost ranges (low/mid/high) per service
-- Total cost projection with best/expected/worst case
-- One-time migration cost ranges
-- Documented unknowns with resolution steps
-- Recommendation to run IaC discovery for tighter estimates
-
 ## Output Validation Checklist
 
 - `metadata.estimate_source` is `"billing_only"`
@@ -265,6 +254,19 @@ Present the billing-only cost analysis as a readable report covering:
 - All unknowns documented with impact and resolution
 - All cost values are numbers, not strings
 - Output is valid JSON
+
+## Present Summary
+
+After writing `estimation-billing.json`, present a concise summary to the user:
+
+1. GCP baseline from billing data (total monthly spend)
+2. AWS projected cost ranges: low / mid / high per service
+3. Total projection: best case / expected / worst case vs GCP
+4. One-time migration cost range
+5. Key unknowns that would narrow the estimates
+6. Recommendation: run IaC discovery for tighter estimates (±10-15% vs ±30-40%)
+
+Keep it under 20 lines. The user can ask for details or re-read `estimation-billing.json` at any time.
 
 ## Execute Phase Integration
 
