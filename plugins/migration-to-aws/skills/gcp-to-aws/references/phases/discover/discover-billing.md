@@ -117,7 +117,7 @@ Write `$MIGRATION_DIR/billing-profile.json` with the following structure:
 }
 ```
 
-**Schema reference:** See `output-schema.md` > Phase 1: DISCOVER > billing-profile.json (already loaded by discover.md orchestrator — do not reload).
+Load `references/shared/schema-discover-billing.md` and validate the output against the `billing-profile.json` schema.
 
 After generating the output file, update `$MIGRATION_DIR/.phase-status.json`: record `billing-profile.json` in outputs.
 

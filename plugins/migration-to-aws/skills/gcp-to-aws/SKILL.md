@@ -184,7 +184,10 @@ gcp-to-aws/
 │   │   └── typed-edges-strategy.md             # Edge type assignment
 │   │
 │   └── shared/
-│       ├── output-schema.md                    # JSON schemas for all output files
+│       ├── schema-phase-status.md              # .phase-status.json schema (loaded by discover.md)
+│       ├── schema-discover-iac.md              # gcp-resource-inventory + clusters schemas (loaded by discover-iac.md)
+│       ├── schema-discover-ai.md               # ai-workload-profile schema (loaded by discover-app-code.md)
+│       ├── schema-discover-billing.md          # billing-profile schema (loaded by discover-billing.md)
 │       └── pricing-fallback.json               # Cached AWS pricing (±15-25%)
 ```
 

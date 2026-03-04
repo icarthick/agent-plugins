@@ -54,9 +54,9 @@ Multiple artifacts can be produced in a single run — they are not mutually exc
 
 5. Confirm both `.migration/.gitignore` and `.phase-status.json` exist before proceeding to Step 1.
 
-## Step 1: Load Output Schemas
+## Step 1: Load Phase Status Schema
 
-Load `references/shared/output-schema.md` once now. Sub-discovery files reference these schemas when writing output files — do not reload it from sub-files.
+Load `references/shared/schema-phase-status.md` now. Each sub-discovery file loads its own output schema — do not load them here.
 
 ## Step 2: Scan for Input Sources and Run Sub-Discoveries
 
