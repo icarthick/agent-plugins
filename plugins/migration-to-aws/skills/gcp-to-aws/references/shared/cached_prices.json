@@ -40,6 +40,14 @@
     "io_per_million_requests": 0.20,
     "unit_note": "Per instance-hour (on-demand)"
   },
+  "aurora_serverless_v2": {
+    "deployment_note": "Scales between min and max ACU. Storage and I/O same as provisioned Aurora. Both PostgreSQL and MySQL cost the same per ACU.",
+    "standard_per_acu_hour": 0.12,
+    "io_optimized_per_acu_hour": 0.16,
+    "storage_per_gb_month": 0.10,
+    "io_per_million_requests": 0.20,
+    "unit_note": "Per ACU-hour (on-demand). Min ACU = 0.5, scales to 256 ACU."
+  },
   "rds_postgresql": {
     "deployment_note": "Standard RDS. Multi-AZ prices shown (includes standby replica).",
     "instances": {

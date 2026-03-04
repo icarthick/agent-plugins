@@ -189,6 +189,7 @@ gcp-to-aws/
 │       ├── schema-discover-iac.md              # gcp-resource-inventory + clusters schemas (loaded by discover-iac.md)
 │       ├── schema-discover-ai.md               # ai-workload-profile schema (loaded by discover-app-code.md)
 │       ├── schema-discover-billing.md          # billing-profile schema (loaded by discover-billing.md)
+│       ├── schema-estimate-infra.md            # estimation-infra.json schema (loaded by estimate-infra.md at write time)
 │       ├── cached_prices.json                  # Pre-fetched live AWS pricing (±5-10%, primary source)
 │       └── pricing-fallback.json               # Broad coverage static cache (±15-25%, tertiary fallback)
 │
