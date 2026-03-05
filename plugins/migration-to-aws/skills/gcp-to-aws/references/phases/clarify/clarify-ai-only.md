@@ -32,6 +32,12 @@ or say "use all defaults" to proceed.
 
 ---
 
+### AI Framework & Orchestration (Q1)
+
+Always asked first. The orchestration layer determines the entire migration approach — gateway config change, provider swap, or full agent migration.
+
+---
+
 ### Q1 — What AI framework or orchestration layer are you using? (select all that apply)
 
 Same decision logic, auto-detect signals, combination logic, and interpretation as Q14 in `clarify-ai.md`. Refer to that file for full details.
@@ -62,9 +68,23 @@ Default: _(auto-detect)_ — fall back to `["direct"]`.
 
 ---
 
+### Priority & Cost (Q2–Q3)
+
+Top-level filters for model selection and credits eligibility.
+
+---
+
 ### Q2 — What matters most for your AI application?
 
 Same decision logic as Q16 in `clarify-ai.md`.
+
+**Context for user:** When asking, help the user think about their actual priority rather than defaulting to "best quality":
+
+- **Best quality/reasoning** — accuracy and depth matter most; you'd pay more or wait longer for better answers (e.g., legal analysis, complex code generation, medical summarization)
+- **Fastest speed** — response time is the primary constraint; users are waiting in real-time (e.g., chat UI, autocomplete, live suggestions)
+- **Lowest cost** — volume is high and budget is tight; good-enough quality at scale (e.g., classification, tagging, bulk summarization)
+- **Specialized capability** — you rely on a specific feature like vision, function calling, or extended thinking (covered in Q10)
+- **Balanced** — no single dimension dominates; you want a solid all-rounder
 
 > This determines our model selection strategy.
 >
@@ -75,6 +95,14 @@ Same decision logic as Q16 in `clarify-ai.md`.
 > E) Balanced
 > F) I don't know
 
+| Answer                 | Recommendation Impact                                                                                                        |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Best quality/reasoning | Claude Sonnet 4.6 (latest, highest reasoning in Sonnet family) — primary; Claude Opus 4.6 for most demanding reasoning tasks |
+| Fastest speed          | Claude Haiku 4.5 — lowest latency in Claude family; also consider Amazon Nova Micro/Lite for cost-optimized speed            |
+| Lowest cost            | Claude Haiku 4.5 or Amazon Nova Micro — lowest cost per token                                                                |
+| Specialized capability | Deferred to Q10 to determine which model                                                                                     |
+| Balanced               | Claude Sonnet 4.6 as default balanced recommendation                                                                         |
+
 Interpret: same as Q16 → `ai_priority`.
 
 Default: E — `ai_priority: "balanced"`.
@@ -83,7 +111,7 @@ Default: E — `ai_priority: "balanced"`.
 
 ### Q3 — Approximately how much are you spending on OpenAI or Gemini per month?
 
-Same decision logic as Q15 in `clarify-ai.md`.
+Same decision logic as Q15 in `clarify-ai.md` — credits eligibility and cost baseline.
 
 > AI spend helps me calculate migration credits eligibility and establish a Bedrock cost baseline.
 >
@@ -96,6 +124,12 @@ Same decision logic as Q15 in `clarify-ai.md`.
 Interpret: same as Q15 → `ai_monthly_spend`.
 
 Default: B — `ai_monthly_spend: "$500-$2K"`.
+
+---
+
+### Cross-Cloud Architecture (Q4)
+
+Unique to AI-only migrations where infrastructure stays on GCP while AI calls route to AWS.
 
 ---
 
@@ -137,16 +171,22 @@ Default: B — `cross_cloud: "latency-acceptable"`.
 
 ---
 
+### Model & Modality (Q5–Q6)
+
+Establish the baseline model recommendation and whether multimodal capabilities are needed.
+
+---
+
 ### Q5 — Which model are you currently using?
 
-Same decision logic and override hierarchy as Q19 in `clarify-ai.md`.
+**Rationale:** The source model establishes the baseline Bedrock recommendation — a like-for-like capability match. This is a starting point only; answers to Q2 (priority), Q7 (volume), Q8 (latency), Q9 (complexity), and Q10 (special features) can all override this baseline.
 
 **Override hierarchy:**
 
-1. Q10 special features — hard overrides
-2. Q2 priority — adjusts within Claude family
-3. Q7/Q8 volume and latency — may adjust toward provisioned throughput
-4. Q5 source model — baseline only
+1. Q10 special features — hard overrides (e.g., speech-to-speech forces Nova Sonic regardless of source model)
+2. Q2 priority — adjusts up or down within the Claude family (e.g., "lowest cost" downgrades Sonnet → Haiku even if source model was GPT-4)
+3. Q7/Q8 volume and latency — may adjust toward provisioned throughput or faster models
+4. Q5 source model — baseline only, used when no overrides apply
 
 > The model you're currently using helps me recommend the closest Bedrock equivalent.
 >
@@ -160,6 +200,25 @@ Same decision logic and override hierarchy as Q19 in `clarify-ai.md`.
 > H) Other / Multiple models
 > I) I don't know
 
+| Source Model              | Baseline Bedrock Recommendation                                       | Pricing Context                                                  |
+| ------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Gemini Flash variants     | Claude Haiku 4.5 ($1/$5) — speed and cost optimized                   | Strong savings vs Gemini Flash pricing                           |
+| Gemini Pro variants       | Claude Sonnet 4.6 ($3/$15) — quality match                            | Comparable pricing tier                                          |
+| GPT-3.5 Turbo             | Claude Haiku 4.5 ($1/$5) — cost-equivalent                            | Haiku is faster and cheaper                                      |
+| GPT-4 / GPT-4 Turbo       | Claude Sonnet 4.6 ($3/$15) — quality equivalent                       | Major savings: GPT-4 Turbo is $10/$30 vs Sonnet $3/$15           |
+| GPT-4o                    | Claude Sonnet 4.6 ($3/$15) — performance equivalent                   | Modest savings on output; input slightly higher on Bedrock       |
+| GPT-5 / GPT-5.x           | Claude Sonnet 4.6 ($3/$15) — performance equivalent                   | GPT-5 is $1.25/$10 — savings story is quality/features, not cost |
+| GPT-5 (flagship use case) | Claude Opus 4.6 ($5/$25) — flagship-to-flagship                       | Opus still cheaper than GPT-5 Pro ($15/$120)                     |
+| o-series (o1, o3)         | Claude Sonnet 4.6 with extended thinking; Opus 4.6 for most demanding | o1 is $15/$60 — significant savings with Sonnet 4.6 at $3/$15    |
+
+**Example overrides:**
+
+- GPT-4 user (baseline: Sonnet 4.6) + Q2=lowest cost → **Haiku 4.5**
+- Gemini Flash user (baseline: Haiku 4.5) + Q10=extended thinking → **Sonnet 4.6 with extended thinking**
+- GPT-4o user (baseline: Sonnet 4.6) + Q10=real-time speech → **Nova Sonic** (Claude has no speech capability)
+- GPT-3.5 user (baseline: Haiku 4.5) + Q9=complex reasoning → **Sonnet 4.6** (task complexity overrides cost-equivalent mapping)
+- GPT-5 user (baseline: Opus 4.6) + Q2=balanced → **Sonnet 4.6** (priority overrides flagship-to-flagship mapping)
+
 Interpret: same as Q19 in `clarify-ai.md` → `ai_model_baseline`.
 
 Default: _(auto-detect)_ — fall back to Q2 priority-based selection.
@@ -168,7 +227,7 @@ Default: _(auto-detect)_ — fall back to Q2 priority-based selection.
 
 ### Q6 — Do you need vision or just text?
 
-Same decision logic as Q20 in `clarify-ai.md`.
+**Rationale:** Vision capability narrows the model selection to multimodal-capable models only.
 
 > Vision capability limits which models are available.
 >
@@ -176,9 +235,21 @@ Same decision logic as Q20 in `clarify-ai.md`.
 > B) Vision required
 > C) Audio/Video inputs needed
 
+| Answer             | Recommendation Impact                                                                 |
+| ------------------ | ------------------------------------------------------------------------------------- |
+| Text only          | Full model catalog available; cheapest/fastest text model per Q2 priority             |
+| Vision required    | Claude Sonnet family (multimodal) required; Haiku excluded for vision tasks           |
+| Audio/Video inputs | Amazon Nova Reel (video) or Nova Sonic (audio); Claude excluded for audio/video input |
+
 Interpret: same as Q20 → `ai_vision`.
 
 Default: A — no constraint (text only).
+
+---
+
+### Workload Characteristics (Q7–Q10)
+
+These questions refine the model recommendation based on actual usage patterns — volume, latency, complexity, and specialized features can all override the baseline from Q5.
 
 ---
 
@@ -194,12 +265,12 @@ Default: A — no constraint (text only).
 > D) Very high (> 100M tokens/month)
 > E) I don't know
 
-| Answer    | Recommendation Impact                                                |
-| --------- | -------------------------------------------------------------------- |
-| Low       | On-demand pricing; no provisioned throughput needed                  |
-| Medium    | On-demand with prompt caching analysis                               |
-| High      | Provisioned throughput analysis; prompt caching strongly recommended |
-| Very high | Provisioned throughput required; dedicated capacity planning         |
+| Answer    | Recommendation Impact                                                                  |
+| --------- | -------------------------------------------------------------------------------------- |
+| Low       | On-demand pricing; no provisioned throughput needed                                    |
+| Medium    | On-demand with prompt caching analysis                                                 |
+| High      | Provisioned throughput analysis; prompt caching strongly recommended                   |
+| Very high | Provisioned throughput required for cost control; dedicated capacity planning included |
 
 Interpret:
 
@@ -217,13 +288,25 @@ Default: B — `ai_token_volume: "1M-10M"`.
 
 ### Q8 — How important is response speed?
 
-Same decision logic as Q21 in `clarify-ai.md`.
+**Rationale:** Latency requirements can override cost and quality preferences from Q2.
+
+**Context for user:** When asking, anchor each option in a real scenario:
+
+- **Critical (< 500ms)** — users are staring at a loading spinner; every millisecond matters (e.g., autocomplete, live chat, real-time transcription)
+- **Important (< 2s)** — users expect a quick response but a brief pause is acceptable (e.g., chat assistant, search augmentation, inline suggestions)
+- **Flexible (2–10s)** — users submit a request and can wait; background or async is fine (e.g., report generation, batch analysis, email drafting)
 
 > Latency requirements can override cost and quality preferences.
 >
 > A) Critical (< 500ms)
 > B) Important (< 2s)
 > C) Flexible (2–10s)
+
+| Answer             | Recommendation Impact                                                                             |
+| ------------------ | ------------------------------------------------------------------------------------------------- |
+| Critical (< 500ms) | Claude Haiku 4.5 or Nova Micro; streaming required; provisioned throughput for consistent latency |
+| Important (< 2s)   | Claude Sonnet 4.6 with streaming; standard on-demand acceptable                                   |
+| Flexible (2–10s)   | Any model; batch inference considered for cost savings at high volume                             |
 
 Interpret: same as Q21 → `ai_latency`.
 
@@ -233,13 +316,25 @@ Default: B — `ai_latency: "important"`.
 
 ### Q9 — How complex are your AI tasks?
 
-Same decision logic as Q22 in `clarify-ai.md`.
+**Rationale:** Task complexity determines whether a cheaper/faster model can handle the workload or whether a more capable model is required.
+
+**Context for user:** When asking, give concrete examples so the user doesn't over- or under-estimate:
+
+- **Simple** — single-step tasks with short prompts: classify this text, extract these fields, summarize this paragraph
+- **Moderate** — multi-step prompts with examples or structured output: analyze this document and return JSON, generate content following a template, few-shot classification
+- **Complex** — multi-turn reasoning, tool use, or long chain-of-thought: agentic workflows, code generation with debugging loops, research tasks that require planning and iteration
 
 > Task complexity determines whether cheaper models can handle your workload.
 >
 > A) Simple (classification, short summaries, extraction)
 > B) Moderate (analysis, structured content, few-shot)
 > C) Complex (multi-step reasoning, tool use, agentic workflows)
+
+| Answer   | Recommendation Impact                                                                       |
+| -------- | ------------------------------------------------------------------------------------------- |
+| Simple   | Claude Haiku 4.5 or Nova Micro sufficient; significant cost savings vs larger models        |
+| Moderate | Claude Sonnet 4.6 recommended; Haiku may suffice with prompt engineering                    |
+| Complex  | Claude Sonnet 4.6 required; extended thinking considered; Claude Opus 4.6 for hardest tasks |
 
 Interpret: same as Q22 → `ai_complexity`.
 

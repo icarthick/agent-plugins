@@ -105,7 +105,7 @@ Default: _(auto-detect from code)_ — fall back to `["direct"]` if detection fa
 
 **Rationale:** AI spend drives the IW Migrate credits calculation at the 35% rate (vs 25% for infrastructure-only). Also provides the cost engine with a baseline for Bedrock cost comparison when detailed billing CSV is not uploaded.
 
-**Pricing context:** GPT-5 ($1.25/$10 per 1M tokens) is actually cheaper than GPT-4o ($2.50/$10) and significantly cheaper than GPT-4 Turbo ($10/$30). Users on GPT-4 Turbo have the strongest cost savings case for migrating to Bedrock — Claude Sonnet 4.6 at $3/$15 is 70% cheaper on input tokens.
+**Pricing context:** GPT-5 ($1.25/$10 per 1M tokens) is actually cheaper than GPT-4o ($2.50/$10) and significantly cheaper than GPT-4 Turbo ($10/$30). Users on GPT-4 Turbo have the strongest cost savings case for migrating to Bedrock — Claude Sonnet 4.6 at $3/$15 is 70% cheaper on input tokens. Users on GPT-5 will see more modest savings since GPT-5 is already competitively priced.
 
 > AI spend helps me calculate your migration credits eligibility (35% rate for AI workloads) and establish a cost baseline for Bedrock comparison.
 >
