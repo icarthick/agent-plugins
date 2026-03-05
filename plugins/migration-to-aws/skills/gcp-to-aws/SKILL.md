@@ -39,7 +39,7 @@ This is the execution controller. After completing each phase, consult this tabl
 | Current State   | Condition | Next Action                                   |
 | --------------- | --------- | --------------------------------------------- |
 | `start`         | always    | Load `references/phases/discover/discover.md` |
-| `discover_done` | always    | Load `references/phases/clarify.md`           |
+| `discover_done` | always    | Load `references/phases/clarify/clarify.md`   |
 | `clarify_done`  | always    | Load `references/phases/design/design.md`     |
 | `design_done`   | always    | Load `references/phases/estimate/estimate.md` |
 | `estimate_done` | always    | Load `references/phases/generate/generate.md` |
@@ -112,7 +112,7 @@ The `.migration/` directory is automatically protected by a `.gitignore` file cr
 | Phase        | Inputs                                                                                                                                                                   | Outputs                                                                                                                                                                                   | Reference                                |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
 | **Discover** | `.tf` files, app source code, and/or billing exports (at least one required)                                                                                             | `gcp-resource-inventory.json`, `gcp-resource-clusters.json`, `ai-workload-profile.json`, `billing-profile.json`, `.phase-status.json` updated (outputs vary by input)                     | `references/phases/discover/discover.md` |
-| **Clarify**  | Discovery artifacts (`gcp-resource-inventory.json`, `gcp-resource-clusters.json`, `ai-workload-profile.json`, `billing-profile.json` — whichever exist)                  | `preferences.json`, `.phase-status.json` updated                                                                                                                                          | `references/phases/clarify.md`           |
+| **Clarify**  | Discovery artifacts (`gcp-resource-inventory.json`, `gcp-resource-clusters.json`, `ai-workload-profile.json`, `billing-profile.json` — whichever exist)                  | `preferences.json`, `.phase-status.json` updated                                                                                                                                          | `references/phases/clarify/clarify.md`   |
 | **Design**   | `preferences.json` + discovery artifacts                                                                                                                                 | `aws-design.json` (infra), `aws-design-ai.json` (AI), `aws-design-billing.json` (billing-only)                                                                                            | `references/phases/design/design.md`     |
 | **Estimate** | `aws-design.json` or `aws-design-billing.json` or `aws-design-ai.json`, `preferences.json`                                                                               | `estimation-infra.json` or `estimation-ai.json` or `estimation-billing.json`, `.phase-status.json` updated                                                                                | `references/phases/estimate/estimate.md` |
 | **Generate** | `estimation-infra.json` or `estimation-ai.json` or `estimation-billing.json`, `aws-design.json` or `aws-design-billing.json` or `aws-design-ai.json`, `preferences.json` | `generation-infra.json` or `generation-ai.json` or `generation-billing.json` + `terraform/`, `scripts/`, `ai-migration/`, `MIGRATION_GUIDE.md`, `README.md`, `.phase-status.json` updated | `references/phases/generate/generate.md` |
@@ -143,7 +143,13 @@ gcp-to-aws/
 │   │   │   ├── discover-iac.md                 # Terraform/IaC discovery
 │   │   │   ├── discover-app-code.md            # App code discovery
 │   │   │   └── discover-billing.md             # Billing data discovery
-│   │   ├── clarify.md                          # Phase 2: Clarify requirements
+│   │   ├── clarify/
+│   │   │   ├── clarify.md                     # Phase 2: Clarify orchestrator
+│   │   │   ├── clarify-global.md              # Category A: Global/Strategic (Q1-Q7)
+│   │   │   ├── clarify-compute.md             # Categories B+C: Config Gaps + Compute (Q8-Q11)
+│   │   │   ├── clarify-database.md            # Category D: Database (Q12-Q13)
+│   │   │   ├── clarify-ai.md                  # Category F: AI/Bedrock (Q14-Q22)
+│   │   │   └── clarify-ai-only.md             # Standalone AI-only migration flow
 │   │   ├── design/
 │   │   │   ├── design.md                       # Phase 3: Design orchestrator
 │   │   │   ├── design-infra.md                 # Infrastructure design (IaC-based)
@@ -230,7 +236,7 @@ When invoked, the agent **MUST follow this exact sequence**:
    - If status is `in-progress`: Resume that phase (read corresponding reference file)
    - If status is `completed`: Advance to next phase (read next reference file)
    - Phase mapping for advancement:
-     - discover (completed) → Execute clarify (read `references/phases/clarify.md`)
+     - discover (completed) → Execute clarify (read `references/phases/clarify/clarify.md`)
      - clarify (completed) → Execute design (read `references/phases/design/design.md`)
      - design (completed) → Execute estimate (read `references/phases/estimate/estimate.md`)
      - estimate (completed) → Execute generate (read `references/phases/generate/generate.md`)
