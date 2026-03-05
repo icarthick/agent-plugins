@@ -47,7 +47,9 @@ At least one discovery artifact must exist to proceed.
 - **Full migration**: `gcp-resource-inventory.json` or `billing-profile.json` exists (may also have `ai-workload-profile.json`)
 - **AI-only migration**: ONLY `ai-workload-profile.json` exists (no infrastructure or billing artifacts)
 
-**If AI-only**: Load `clarify-ai-only.md` and follow that flow. Skip all remaining steps below.
+**If AI-only**: Read `clarify-ai-only.md` NOW and follow that flow. Skip all remaining steps below.
+
+> **HARD GATE — AI-Only Path:** You MUST read `clarify-ai-only.md` before presenting any questions. The question text, answer options, and interpretation rules are ONLY in that file — they are NOT in this file. Do NOT fabricate questions from the summaries above.
 
 ### Discovery Summary
 
@@ -98,16 +100,33 @@ Record extracted values. Questions whose answers are fully determined by extract
 | **E**    | Migration Posture  | **Disabled by default** — requires explicit user opt-in                                         | _(inline below)_      | HA upgrades, right-sizing                                                                                           |
 | **F**    | AI/Bedrock         | `ai-workload-profile.json` exists                                                               | `clarify-ai.md`       | Q14–Q22                                                                                                             |
 
-**Apply firing rules:**
+**Apply firing rules to determine which categories are active:**
 
-1. Always include Category A (load `clarify-global.md`).
-2. Check inventory `metadata.source` — if `"billing"` with assumed configs, include Category B (load `clarify-compute.md`).
-3. Check for compute resources — if present, include Category C (load `clarify-compute.md`). Within C, skip Q8 if no GKE present. Skip Q10/Q11 if no Cloud Run present.
-4. Check for database resources — if present, include Category D (load `clarify-database.md`). Skip Q12/Q13 if no Cloud SQL present.
-5. Category E is disabled by default. Do not present unless user opts in.
-6. Check for `ai-workload-profile.json` — if present, include Category F (load `clarify-ai.md`).
+1. Category A is always active.
+2. Check inventory `metadata.source` — if `"billing"` with assumed configs, Category B is active.
+3. Check for compute resources — if present, Category C is active. Within C, skip Q8 if no GKE present. Skip Q10/Q11 if no Cloud Run present.
+4. Check for database resources — if present, Category D is active.
+5. Category E is disabled by default. Do not activate unless user opts in.
+6. Check for `ai-workload-profile.json` — if present, Category F is active.
 
-**If no IaC, billing data, or code is available** (empty discovery): fire only Category A. All service-specific categories are skipped.
+**If no IaC, billing data, or code is available** (empty discovery): only Category A is active. All service-specific categories are skipped.
+
+### HARD GATE — Read Category Files Before Proceeding
+
+> **STOP. You MUST read each active category's file NOW, before moving to Step 4.**
+>
+> The exact question wording, answer options, context rationale, and interpretation rules exist ONLY in the category files listed below. They are NOT in this file. The table above is a summary index only — do NOT use it to fabricate questions.
+>
+> **Read these files based on which categories are active:**
+>
+> | Active Category | File to Read                    |
+> | --------------- | ------------------------------- |
+> | A (always)      | `clarify-global.md`             |
+> | B or C          | `clarify-compute.md`            |
+> | D               | `clarify-database.md`           |
+> | F               | `clarify-ai.md`                 |
+>
+> **Do NOT proceed to Step 4 until you have read every applicable file above.**
 
 ### Early-Exit Rules
 

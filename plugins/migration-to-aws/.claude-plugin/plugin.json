@@ -2,7 +2,7 @@
   "author": {
     "name": "Amazon Web Services"
   },
-  "description": "Migrate workloads from Google Cloud Platform to AWS with a 5-phase guided process: Terraform infrastructure discovery, requirements clarification, AWS architecture design, cost estimation, and execution planning.",
+  "description": "Migrate workloads from Google Cloud Platform to AWS with a 5-phase guided process: Terraform infrastructure discovery, requirements clarification, AWS architecture design, cost estimation, and execution planning. This no-cost tool assesses usage, geography, and cost data of your current provider to estimate and compare with AWS services and pricing, and will recommend migration or staying with your current provider. AWS pricing is based on current-day published pricing, which may vary over time. The tool will may create a .migration folder with comparison and migration execution information. You may delete the folder when finished, or use it to migrate to AWS.",
   "homepage": "https://github.com/awslabs/agent-plugins",
   "keywords": [
     "aws",
