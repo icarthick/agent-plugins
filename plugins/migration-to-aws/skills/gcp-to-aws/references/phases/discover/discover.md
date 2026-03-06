@@ -77,8 +77,45 @@ Glob for: `**/*.py`, `**/*.js`, `**/*.ts`, `**/*.jsx`, `**/*.tsx`, `**/*.go`, `*
 **2c. Check for billing data:**
 Glob for: `**/*billing*.csv`, `**/*billing*.json`, `**/*cost*.csv`, `**/*cost*.json`, `**/*usage*.csv`, `**/*usage*.json`
 
-- If found → Load `references/phases/discover/discover-billing.md`
 - If not found → Skip. Log: "No billing files found — skipping billing discovery."
+- If found AND **no** Terraform files from 2a → Load `references/phases/discover/discover-billing.md` (billing is the primary source — needs full processing for the billing-only design path).
+- If found AND Terraform files **were** found in 2a → Use lightweight extraction below. Do **not** load `discover-billing.md`.
+
+**Lightweight billing extraction (when IaC is the primary source):**
+
+When Terraform is present, billing data is supplementary — only service-level costs and AI signal detection are needed. Extract via a script to avoid reading the raw file into context.
+
+1. Use Bash to read only the **first line** of the billing file to identify column headers.
+2. Write a script to `$MIGRATION_DIR/_extract_billing.py` (or `.js` / shell — use whatever runtime is available) that:
+   - Reads the billing CSV/JSON file
+   - Groups line items by service description, sums cost per service
+   - Extracts top 3 SKU descriptions per service by cost
+   - Scans service and SKU descriptions (case-insensitive) for AI keywords: `vertex ai`, `ai platform`, `bigquery ml`, `generative ai`, `gemini`, `document ai`, `vision ai`, `speech-to-text`, `natural language`, `dialogflow`, `translation`
+   - Outputs JSON to stdout matching the schema in step 4
+3. Run the script. Try `python3` first, then `python` if not found, then the appropriate runtime for the language chosen. If no runtime is available, fall back to loading `references/phases/discover/discover-billing.md`.
+4. Write the script's JSON output to `$MIGRATION_DIR/billing-profile.json` with this exact schema:
+
+   ```json
+   {
+     "summary": { "total_monthly_spend": 0.00 },
+     "services": [
+       {
+         "gcp_service": "Cloud Run",
+         "monthly_cost": 450.00,
+         "top_skus": [
+           { "sku_description": "Cloud Run - CPU Allocation Time", "monthly_cost": 300.00 }
+         ]
+       }
+     ],
+     "ai_signals": { "detected": false }
+   }
+   ```
+
+   Services sorted descending by `monthly_cost`. Only include services with cost > 0.
+
+5. Delete the script file after successful execution.
+
+**Critical:** Do **not** Read the billing file with the Read tool. Do **not** load `discover-billing.md` or `schema-discover-billing.md`.
 
 **If NONE of the three checks found files**: STOP and output: "No GCP sources detected. Provide at least one source type (Terraform files, application code, or billing exports) and try again."
 
