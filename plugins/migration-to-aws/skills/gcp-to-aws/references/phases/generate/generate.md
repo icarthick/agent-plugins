@@ -101,9 +101,7 @@ Verify both stages are complete:
 
 Update `$MIGRATION_DIR/.phase-status.json`:
 
-- Set `phases.generate.status` to `"completed"`
-- Set `phases.generate.timestamp` to current ISO 8601 timestamp
-- Set `phases.generate.outputs` to the combined list of all produced files (e.g., `["generation-infra.json", "terraform/", "scripts/", "MIGRATION_GUIDE.md", "README.md"]`)
+- Set `phases.generate` to `"completed"`
 - Update `last_updated` to current timestamp
 
 ## Summary

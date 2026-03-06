@@ -298,7 +298,7 @@ Load `references/shared/schema-discover-ai.md` and generate output following the
 - `current_costs` — Include ONLY if billing data was provided (billing discovery ran). Omit entirely if no billing data.
 - `infrastructure` — Set to `[]` if no Terraform files were provided (IaC discovery did not run).
 
-After generating the output file, update `$MIGRATION_DIR/.phase-status.json`: set `phases.discover.status` to `"completed"`, record `timestamp` and `outputs`.
+After generating the output file, update `$MIGRATION_DIR/.phase-status.json`: set `phases.discover` to `"completed"` and update `last_updated`.
 
 ---
 

@@ -45,7 +45,7 @@ This is the execution controller. After completing each phase, consult this tabl
 | `estimate_done` | always    | Load `references/phases/generate/generate.md` |
 | `generate_done` | always    | Migration planning complete                   |
 
-**How to determine current state:** Read `$MIGRATION_DIR/.phase-status.json` → check `phases` object → find the last phase with `status: "completed"`.
+**How to determine current state:** Read `$MIGRATION_DIR/.phase-status.json` → check `phases` object → find the last phase with value `"completed"`.
 
 **Phase gate checks**: If prior phase incomplete, do not advance (e.g., cannot enter estimate without completed design).
 
@@ -58,7 +58,7 @@ When reading `$MIGRATION_DIR/.phase-status.json`, validate before proceeding:
 1. **Multiple sessions**: If multiple directories exist under `.migration/`, STOP. Output: "Multiple migration sessions detected. Pick one to continue: [list]"
 2. **Invalid JSON**: If `.phase-status.json` fails to parse, STOP. Output: "State file corrupted (invalid JSON). Delete the file and restart the current phase."
 3. **Unrecognized phase**: If `phases` object contains a phase not in {discover, clarify, design, estimate, generate, feedback}, STOP. Output: "Unrecognized phase: [value]. Valid phases: discover, clarify, design, estimate, generate, feedback."
-4. **Unrecognized status**: If any `phases.*.status` is not in {pending, in_progress, completed}, STOP. Output: "Unrecognized status: [value]. Valid values: pending, in_progress, completed."
+4. **Unrecognized status**: If any `phases.*` value is not in {pending, in_progress, completed}, STOP. Output: "Unrecognized status: [value]. Valid values: pending, in_progress, completed."
 
 ---
 
@@ -71,32 +71,14 @@ Migration state lives in `$MIGRATION_DIR` (`.migration/[MMDD-HHMM]/`), created b
 ```json
 {
   "migration_id": "0226-1430",
-  "started_at": "2026-02-26T14:30:00Z",
   "last_updated": "2026-02-26T15:35:22Z",
-  "project_directory": "/path/to/project",
-  "input_files_detected": {
-    "terraform_files": 12,
-    "terraform_lines": 850
-  },
-  "discovery_outputs": [
-    "gcp-resource-inventory.json",
-    "gcp-resource-clusters.json"
-  ],
   "phases": {
-    "discover": {
-      "status": "completed",
-      "timestamp": "2026-02-26T14:31:00Z",
-      "outputs": ["gcp-resource-inventory.json", "gcp-resource-clusters.json"]
-    },
-    "clarify": {
-      "status": "completed",
-      "timestamp": "2026-02-26T14:32:00Z",
-      "outputs": ["preferences.json"]
-    },
-    "design": { "status": "in_progress", "timestamp": null, "outputs": [] },
-    "estimate": { "status": "pending", "timestamp": null, "outputs": [] },
-    "generate": { "status": "pending", "timestamp": null, "outputs": [] },
-    "feedback": { "status": "pending", "timestamp": null, "outputs": [] }
+    "discover": "completed",
+    "clarify": "completed",
+    "design": "in_progress",
+    "estimate": "pending",
+    "generate": "pending",
+    "feedback": "pending"
   }
 }
 ```
@@ -252,21 +234,21 @@ When invoked, the agent **MUST follow this exact sequence**:
 
 7. **Feedback checkpoint**: After a phase completes, check if feedback should be offered. This runs **before** advancing to the next phase.
 
-   - **After Discover** (if `phases.feedback.status` is `"pending"`): Output to user:
+   - **After Discover** (if `phases.feedback` is `"pending"`): Output to user:
      "Would you like to share quick feedback (5 optional questions + anonymized usage data) to help improve this tool? Your data never includes resource names, file paths, or account IDs.
      [N] Send feedback now
      [L] Wait until after the Estimate phase"
      - If user picks **N** → Load `references/phases/feedback/feedback.md`, execute it, then continue to Clarify.
      - If user picks **L** → Continue to Clarify (feedback stays `"pending"`).
 
-   - **After Estimate** (if `phases.feedback.status` is `"pending"`): Output to user:
+   - **After Estimate** (if `phases.feedback` is `"pending"`): Output to user:
      "Would you like to share quick feedback now? (5 optional questions + anonymized usage data)
      [Y] Yes, share feedback
      [N] No thanks, continue to Generate"
      - If user picks **Y** → Load `references/phases/feedback/feedback.md`, execute it, then continue to Generate.
-     - If user picks **N** → Set `phases.feedback.status` to `"completed"`, `phases.feedback.timestamp` to current ISO 8601 timestamp, `phases.feedback.outputs` to `[]`, update `last_updated`. Continue to Generate.
+     - If user picks **N** → Set `phases.feedback` to `"completed"`, update `last_updated`. Continue to Generate.
 
-   - **After Generate**: No feedback offer. If `phases.feedback.status` is still `"pending"`, set it to `"completed"` with empty outputs (user had two chances and chose to defer/skip).
+   - **After Generate**: No feedback offer. If `phases.feedback` is still `"pending"`, set it to `"completed"` (user had two chances and chose to defer/skip).
 
 8. **Display summary**: Show user what was accomplished, highlight next phase, or confirm migration completion.
 

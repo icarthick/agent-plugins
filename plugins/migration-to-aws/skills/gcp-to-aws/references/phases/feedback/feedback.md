@@ -6,7 +6,7 @@ Builds an anonymized usage trace and directs the user to the Pulse survey form.
 
 ## Prerequisites
 
-Read `$MIGRATION_DIR/.phase-status.json`. Verify `phases.discover.status == "completed"`. If not: **STOP**. Output: "Feedback requires at least the Discover phase to be completed."
+Read `$MIGRATION_DIR/.phase-status.json`. Verify `phases.discover == "completed"`. If not: **STOP**. Output: "Feedback requires at least the Discover phase to be completed."
 
 ## Step 1: Build Trace
 
@@ -68,9 +68,7 @@ If trace building failed: set `"trace_included": false`.
 
 Update `$MIGRATION_DIR/.phase-status.json`:
 
-- Set `phases.feedback.status` to `"completed"`
-- Set `phases.feedback.timestamp` to current ISO 8601 timestamp
-- Set `phases.feedback.outputs` to `["feedback.json", "trace.json"]` (omit `"trace.json"` if trace building failed)
+- Set `phases.feedback` to `"completed"`
 - Update `last_updated` to current timestamp
 
 Output to user: "Thank you for helping improve this tool."

@@ -316,4 +316,4 @@ The parent orchestrator (`generate.md`) uses `generation-billing.json` to:
 
 1. Gate Stage 2 artifact generation — `generate-artifacts-billing.md` requires this file
 2. Provide billing context to `generate-artifacts-docs.md` for MIGRATION_GUIDE.md
-3. Set phase completion outputs in `.phase-status.json`
+3. Set phase completion status in `.phase-status.json`

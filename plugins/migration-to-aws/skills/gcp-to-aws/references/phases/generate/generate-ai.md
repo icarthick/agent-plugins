@@ -538,4 +538,4 @@ The parent orchestrator (`generate.md`) uses `generation-ai.json` to:
 
 1. Gate Stage 2 artifact generation — `generate-artifacts-ai.md` requires this file
 2. Provide AI migration context to `generate-artifacts-docs.md` for MIGRATION_GUIDE.md
-3. Set phase completion outputs in `.phase-status.json`
+3. Set phase completion status in `.phase-status.json`

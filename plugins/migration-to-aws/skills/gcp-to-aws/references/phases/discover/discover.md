@@ -36,18 +36,14 @@ Multiple artifacts can be produced in a single run — they are not mutually exc
    ```json
    {
      "migration_id": "[MMDD-HHMM]",
-     "started_at": "[ISO 8601 timestamp]",
      "last_updated": "[ISO 8601 timestamp]",
-     "project_directory": "[absolute path to scanned project]",
-     "input_files_detected": {},
-     "discovery_outputs": [],
      "phases": {
-       "discover": { "status": "in_progress", "timestamp": null, "outputs": [] },
-       "clarify": { "status": "pending", "timestamp": null, "outputs": [] },
-       "design": { "status": "pending", "timestamp": null, "outputs": [] },
-       "estimate": { "status": "pending", "timestamp": null, "outputs": [] },
-       "generate": { "status": "pending", "timestamp": null, "outputs": [] },
-       "feedback": { "status": "pending", "timestamp": null, "outputs": [] }
+       "discover": "in_progress",
+       "clarify": "pending",
+       "design": "pending",
+       "estimate": "pending",
+       "generate": "pending",
+       "feedback": "pending"
      }
    }
    ```
@@ -129,16 +125,11 @@ After all loaded sub-discoveries complete, check what artifacts were produced in
    - `ai-workload-profile.json` — App code discovery detected AI workloads
    - `billing-profile.json` — Billing data parsed
 2. **If NO artifacts were produced** (sub-discoveries ran but produced no output): STOP and output: "Discovery ran but produced no artifacts. Check that your input files contain valid GCP resources and try again."
-3. Record produced artifacts in `.phase-status.json` → `discovery_outputs`.
 
 ## Step 4: Update Phase Status
 
 1. Update `.phase-status.json`:
-   - Set `input_files_detected` with counts from sub-discoveries (e.g., `{"terraform_files": 12, "terraform_lines": 850, "app_code_languages": ["python"]}`)
-   - Set `discovery_outputs` to the list of output files produced (e.g., `["gcp-resource-inventory.json", "gcp-resource-clusters.json"]`)
-   - Set `phases.discover.status` to `"completed"`
-   - Set `phases.discover.timestamp` to current ISO 8601 timestamp
-   - Set `phases.discover.outputs` to same list as `discovery_outputs`
+   - Set `phases.discover` to `"completed"`
    - Update `last_updated` to current timestamp
 
 2. Output to user: "Discover phase complete. Discovered X total resources across Y clusters. Proceeding to Phase 2: Clarify."

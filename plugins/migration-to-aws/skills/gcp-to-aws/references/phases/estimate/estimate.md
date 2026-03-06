@@ -85,9 +85,7 @@ Produces: `estimation-ai.json`
 
 After all applicable sub-estimates finish, update `$MIGRATION_DIR/.phase-status.json`:
 
-- Set `phases.estimate.status` to `"completed"`
-- Set `phases.estimate.timestamp` to current ISO 8601 timestamp
-- Set `phases.estimate.outputs` to the combined list of output files produced (e.g., `["estimation-infra.json"]` or `["estimation-billing.json", "estimation-ai.json"]`)
+- Set `phases.estimate` to `"completed"`
 - Update `last_updated` to current timestamp
 
 Output to user: "Cost estimation complete. Proceeding to Phase 5: Execution Plan."

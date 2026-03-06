@@ -119,12 +119,12 @@ Record extracted values. Questions whose answers are fully determined by extract
 >
 > **Read these files based on which categories are active:**
 >
-> | Active Category | File to Read                    |
-> | --------------- | ------------------------------- |
-> | A (always)      | `clarify-global.md`             |
-> | B or C          | `clarify-compute.md`            |
-> | D               | `clarify-database.md`           |
-> | F               | `clarify-ai.md`                 |
+> | Active Category | File to Read          |
+> | --------------- | --------------------- |
+> | A (always)      | `clarify-global.md`   |
+> | B or C          | `clarify-compute.md`  |
+> | D               | `clarify-database.md` |
+> | F               | `clarify-ai.md`       |
 >
 > **Do NOT proceed to Step 4 until you have read every applicable file above.**
 
@@ -345,9 +345,7 @@ Before handing off to Design:
 
 Update `$MIGRATION_DIR/.phase-status.json`:
 
-- Set `phases.clarify.status` to `"completed"`
-- Set `phases.clarify.timestamp` to current ISO 8601 timestamp
-- Set `phases.clarify.outputs` to `["preferences.json"]`
+- Set `phases.clarify` to `"completed"`
 - Update `last_updated` to current timestamp
 
 Output to user: "Clarification complete. Proceeding to Phase 3: Design AWS Architecture."

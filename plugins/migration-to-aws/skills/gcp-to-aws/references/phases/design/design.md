@@ -50,9 +50,7 @@ Produces: `aws-design-ai.json`
 
 After all applicable sub-designs finish, update `$MIGRATION_DIR/.phase-status.json`:
 
-- Set `phases.design.status` to `"completed"`
-- Set `phases.design.timestamp` to current ISO 8601 timestamp
-- Set `phases.design.outputs` to the combined list of output files produced (e.g., `["aws-design.json"]` or `["aws-design-billing.json", "aws-design-ai.json"]`)
+- Set `phases.design` to `"completed"`
 - Update `last_updated` to current timestamp
 
 Output to user: "AWS Architecture designed. Proceeding to Phase 4: Estimate Costs."

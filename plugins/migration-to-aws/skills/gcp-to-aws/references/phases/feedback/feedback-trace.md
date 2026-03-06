@@ -15,14 +15,11 @@ Read `$MIGRATION_DIR/.phase-status.json` and add to `trace`:
 ```json
 {
   "migration_id": "<from .phase-status.json>",
-  "phases_completed": ["<list of phases with status completed>"],
-  "phase_durations_seconds": {
-    "<phase>": "<difference between this phase timestamp and previous phase timestamp, or started_at for discover>"
-  }
+  "phases_completed": ["<list of phases with value 'completed'>"]
 }
 ```
 
-Only include phases with `status: "completed"` and a non-null `timestamp`.
+Only include phases with value `"completed"`.
 
 ## Step 3: Extract Discovery Summary
 
