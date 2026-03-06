@@ -99,10 +99,7 @@ Verify both stages are complete:
 1. **Stage 1**: At least one `generation-*.json` file exists
 2. **Stage 2**: At least one artifact directory or file was produced, plus documentation
 
-Update `$MIGRATION_DIR/.phase-status.json`:
-
-- Set `phases.generate` to `"completed"`
-- Update `last_updated` to current timestamp
+Use the Phase Status Update Protocol (Bash `cat` heredoc) to write `.phase-status.json` with `phases.generate` set to `"completed"` — **in the same turn** as the summary below.
 
 ## Summary
 

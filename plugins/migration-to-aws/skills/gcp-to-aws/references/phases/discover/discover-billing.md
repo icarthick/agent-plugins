@@ -119,7 +119,7 @@ Write `$MIGRATION_DIR/billing-profile.json` with the following structure:
 
 Load `references/shared/schema-discover-billing.md` and validate the output against the `billing-profile.json` schema.
 
-After generating the output file, update `$MIGRATION_DIR/.phase-status.json`: set `phases.discover` to `"completed"` and update `last_updated`.
+After generating the output file, the parent `discover.md` handles the phase status update — do not update `.phase-status.json` here.
 
 ---
 

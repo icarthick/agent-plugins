@@ -48,10 +48,7 @@ Produces: `aws-design-ai.json`
 
 ## Phase Completion
 
-After all applicable sub-designs finish, update `$MIGRATION_DIR/.phase-status.json`:
-
-- Set `phases.design` to `"completed"`
-- Update `last_updated` to current timestamp
+After all applicable sub-designs finish, use the Phase Status Update Protocol (Bash `cat` heredoc) to write `.phase-status.json` with `phases.design` set to `"completed"` — **in the same turn** as the output message below.
 
 Output to user: "AWS Architecture designed. Proceeding to Phase 4: Estimate Costs."
 

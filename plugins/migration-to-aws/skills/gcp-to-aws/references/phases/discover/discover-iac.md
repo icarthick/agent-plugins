@@ -247,7 +247,7 @@ Human-readable summary with:
 4. Verify all cluster IDs match resource cluster_id assignments
 5. Report to user: "Wrote gcp-resource-inventory.json (X resources) and gcp-resource-clusters.json (Y clusters)"
 
-After generating output files, update `$MIGRATION_DIR/.phase-status.json`: set `phases.discover` to `"completed"` and update `last_updated`.
+After generating output files, the parent `discover.md` handles the phase status update — do not update `.phase-status.json` here.
 
 ## Output Validation Checklist
 

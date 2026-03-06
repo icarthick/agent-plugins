@@ -50,11 +50,7 @@ Multiple artifacts can be produced in a single run — they are not mutually exc
 
 5. Confirm both `.migration/.gitignore` and `.phase-status.json` exist before proceeding to Step 1.
 
-## Step 1: Load Phase Status Schema
-
-Load `references/shared/schema-phase-status.md` now. Each sub-discovery file loads its own output schema — do not load them here.
-
-## Step 2: Scan for Input Sources and Run Sub-Discoveries
+## Step 1: Scan for Input Sources and Run Sub-Discoveries
 
 Scan the project directory for each input type. Only load sub-discovery files when their input files are present.
 
@@ -115,7 +111,7 @@ When Terraform is present, billing data is supplementary — only service-level 
 
 **If NONE of the three checks found files**: STOP and output: "No GCP sources detected. Provide at least one source type (Terraform files, application code, or billing exports) and try again."
 
-## Step 3: Check Outputs
+## Step 2: Check Outputs
 
 After all loaded sub-discoveries complete, check what artifacts were produced in `$MIGRATION_DIR/`:
 
@@ -126,13 +122,11 @@ After all loaded sub-discoveries complete, check what artifacts were produced in
    - `billing-profile.json` — Billing data parsed
 2. **If NO artifacts were produced** (sub-discoveries ran but produced no output): STOP and output: "Discovery ran but produced no artifacts. Check that your input files contain valid GCP resources and try again."
 
-## Step 4: Update Phase Status
+## Step 3: Update Phase Status
 
-1. Update `.phase-status.json`:
-   - Set `phases.discover` to `"completed"`
-   - Update `last_updated` to current timestamp
+In the **same turn** as the output message below, use the Phase Status Update Protocol (Bash `cat` heredoc) to write `.phase-status.json` with `phases.discover` set to `"completed"` and all other phases unchanged from their initial values.
 
-2. Output to user: "Discover phase complete. Discovered X total resources across Y clusters. Proceeding to Phase 2: Clarify."
+Output to user: "Discover phase complete. Discovered X total resources across Y clusters. Proceeding to Phase 2: Clarify."
 
 ## Output Files
 

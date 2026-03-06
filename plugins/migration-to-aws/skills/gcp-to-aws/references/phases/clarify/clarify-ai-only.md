@@ -414,9 +414,6 @@ Write `$MIGRATION_DIR/preferences.json` with AI-only structure:
 
 ## Step 4: Update Phase Status
 
-Update `$MIGRATION_DIR/.phase-status.json`:
-
-- Set `phases.clarify` to `"completed"`
-- Update `last_updated` to current timestamp
+Use the Phase Status Update Protocol (Bash `cat` heredoc) to write `.phase-status.json` with `phases.clarify` set to `"completed"` — **in the same turn** as the output message below.
 
 Output to user: "Clarification complete. Proceeding to Phase 3: Design AI Migration Architecture."

@@ -343,10 +343,7 @@ Before handing off to Design:
 
 ## Step 6: Update Phase Status
 
-Update `$MIGRATION_DIR/.phase-status.json`:
-
-- Set `phases.clarify` to `"completed"`
-- Update `last_updated` to current timestamp
+In the **same turn** as the output message below, use the Phase Status Update Protocol (Bash `cat` heredoc) to write `.phase-status.json` with `phases.clarify` set to `"completed"`.
 
 Output to user: "Clarification complete. Proceeding to Phase 3: Design AWS Architecture."
 

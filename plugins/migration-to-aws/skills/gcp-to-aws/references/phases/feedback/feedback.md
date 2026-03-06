@@ -66,10 +66,7 @@ If trace building failed: set `"trace_included": false`.
 
 ## Step 4: Update Phase Status
 
-Update `$MIGRATION_DIR/.phase-status.json`:
-
-- Set `phases.feedback` to `"completed"`
-- Update `last_updated` to current timestamp
+Use the Phase Status Update Protocol (Bash `cat` heredoc) to write `.phase-status.json` with `phases.feedback` set to `"completed"` — **in the same turn** as the output message below.
 
 Output to user: "Thank you for helping improve this tool."
 

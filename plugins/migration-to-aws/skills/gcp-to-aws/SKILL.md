@@ -87,6 +87,33 @@ Migration state lives in `$MIGRATION_DIR` (`.migration/[MMDD-HHMM]/`), created b
 
 The `.migration/` directory is automatically protected by a `.gitignore` file created in Phase 1.
 
+### Phase Status Update Protocol
+
+**Never Read `.phase-status.json` before updating it.** You already know the current state because you are executing phases sequentially. Instead, write the **complete file** using a Bash `cat` heredoc **in the same turn** as your final phase work (e.g., the output message announcing phase completion). This eliminates dedicated Read and Write turns.
+
+Example — after completing the Clarify phase:
+
+```bash
+cat > "$MIGRATION_DIR/.phase-status.json" << EOF
+{
+  "migration_id": "MMDD-HHMM",
+  "last_updated": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+  "phases": {
+    "discover": "completed",
+    "clarify": "completed",
+    "design": "pending",
+    "estimate": "pending",
+    "generate": "pending",
+    "feedback": "pending"
+  }
+}
+EOF
+```
+
+Replace `MMDD-HHMM` with the actual migration ID and set each phase to its correct status at that point.
+
+**The only time `.phase-status.json` should be Read is during session resume** (Step 0 of discover.md when checking for existing runs) or the feedback prerequisite check.
+
 ---
 
 ## Phase Summary Table
@@ -173,7 +200,7 @@ gcp-to-aws/
 │   │   └── typed-edges-strategy.md             # Edge type assignment
 │   │
 │   └── shared/
-│       ├── schema-phase-status.md              # .phase-status.json schema (loaded by discover.md)
+│       ├── schema-phase-status.md              # .phase-status.json schema (canonical reference)
 │       ├── schema-discover-iac.md              # gcp-resource-inventory + clusters schemas (loaded by discover-iac.md)
 │       ├── schema-discover-ai.md               # ai-workload-profile schema (loaded by discover-app-code.md)
 │       ├── schema-discover-billing.md          # billing-profile schema (loaded by discover-billing.md)
@@ -230,7 +257,7 @@ When invoked, the agent **MUST follow this exact sequence**:
 
 5. **Validate outputs**: Confirm all required output files exist with correct schema before proceeding.
 
-6. **Update phase status**: Each phase reference file specifies the final `.phase-status.json` update (records the phase that just completed).
+6. **Update phase status**: Use the Phase Status Update Protocol (Bash `cat` heredoc, no Read) in the same turn as the phase's final output message.
 
 7. **Feedback checkpoint**: After a phase completes, check if feedback should be offered. This runs **before** advancing to the next phase.
 
@@ -246,9 +273,9 @@ When invoked, the agent **MUST follow this exact sequence**:
      [Y] Yes, share feedback
      [N] No thanks, continue to Generate"
      - If user picks **Y** → Load `references/phases/feedback/feedback.md`, execute it, then continue to Generate.
-     - If user picks **N** → Set `phases.feedback` to `"completed"`, update `last_updated`. Continue to Generate.
+     - If user picks **N** → Use the Phase Status Update Protocol to set `phases.feedback` to `"completed"`. Continue to Generate.
 
-   - **After Generate**: No feedback offer. If `phases.feedback` is still `"pending"`, set it to `"completed"` (user had two chances and chose to defer/skip).
+   - **After Generate**: No feedback offer. If `phases.feedback` is still `"pending"`, use the Phase Status Update Protocol to set it to `"completed"` (user had two chances and chose to defer/skip).
 
 8. **Display summary**: Show user what was accomplished, highlight next phase, or confirm migration completion.
 

@@ -83,10 +83,7 @@ Produces: `estimation-ai.json`
 
 ## Phase Completion
 
-After all applicable sub-estimates finish, update `$MIGRATION_DIR/.phase-status.json`:
-
-- Set `phases.estimate` to `"completed"`
-- Update `last_updated` to current timestamp
+After all applicable sub-estimates finish, use the Phase Status Update Protocol (Bash `cat` heredoc) to write `.phase-status.json` with `phases.estimate` set to `"completed"` — **in the same turn** as the output message below.
 
 Output to user: "Cost estimation complete. Proceeding to Phase 5: Execution Plan."
 
