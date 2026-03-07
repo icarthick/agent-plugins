@@ -6,14 +6,14 @@
 
 ## Overview
 
-Generate migration artifacts from the AI migration plan and design. The artifacts generated depend on the gateway type detected in discovery.
+Generate migration artifacts from the AI migration plan and design. Artifacts vary by gateway type detected in discovery.
 
 **Outputs (all users):**
 
 - `ai-migration/setup_bedrock.sh` — Bedrock model access and IAM setup
 - `ai-migration/test_comparison.py` — A/B test harness (always Python)
 
-**Outputs (direct SDK users only — `ai_gateway` = `"direct"`):**
+**Outputs (direct SDK users — `ai_gateway` = `"direct"`):**
 
 - `ai-migration/provider_adapter.{py,js,go}` — Provider abstraction with feature flag
 
@@ -23,12 +23,12 @@ Generate migration artifacts from the AI migration plan and design. The artifact
 
 **Outputs (if user opted into model evaluation in generate-ai.md Part 0):**
 
-- `ai-migration/eval-prompts.jsonl` — Evaluation prompt dataset template
+- `ai-migration/eval-prompts.jsonl` — Evaluation prompt dataset
 - `ai-migration/run-evaluation.sh` — Bedrock evaluation job script
 
 ## Prerequisites
 
-Read the following artifacts from `$MIGRATION_DIR/`:
+Read from `$MIGRATION_DIR/`:
 
 - `aws-design-ai.json` (REQUIRED) — AI architecture with model mappings and code migration plan
 - `generation-ai.json` (REQUIRED) — AI migration plan with timeline and rollback strategy
@@ -36,800 +36,131 @@ Read the following artifacts from `$MIGRATION_DIR/`:
 
 If any required file is missing: **STOP**. Output: "Missing required artifact: [filename]. Complete the prior phase that produces it."
 
-## Output Structure
-
-```
-$MIGRATION_DIR/
-└── ai-migration/
-    ├── provider_adapter.py     # Direct SDK users only (.js/.go based on language)
-    ├── gateway_config.yaml     # Gateway users only (format varies by gateway type)
-    ├── test_comparison.py      # Always Python (rich ML testing ecosystem)
-    ├── setup_bedrock.sh        # AWS setup script (all users)
-    ├── eval-prompts.jsonl      # Model evaluation prompts (if opted in)
-    └── run-evaluation.sh       # Evaluation job script (if opted in)
-```
+---
 
 ## Step 0: Determine Artifact Path
 
 Check `preferences.json` → `ai_constraints.ai_gateway.value`:
 
-- If `"direct"` or absent: Generate full provider adapter (Steps 1-3) + gateway-specific artifacts skipped
-- If `"llm_router"`, `"api_gateway"`, `"voice_platform"`, or `"framework"`: Skip Step 1 (provider adapter), generate Step 3B (gateway config) instead
+- `"direct"` or absent → Generate provider adapter (Step 1) + setup (Step 3) + test harness (Step 2)
+- `"llm_router"`, `"api_gateway"`, `"voice_platform"`, or `"framework"` → Skip Step 1, generate gateway config (Step 3B) instead
 
-### Determine Language (for provider adapter)
+**Determine language** (direct SDK users only): Read `ai-workload-profile.json` → `integration.languages` array. Use the first entry: `"python"` → `.py`, `"javascript"`/`"typescript"` → `.js`, `"go"` → `.go`, other/unknown → `.py`.
 
-**Skip if gateway user.** Select the provider adapter language from `ai-workload-profile.json`:
+---
 
-1. Read `integration.languages` array
-2. Select the **first** language in the array as the primary adapter language
-3. Language mapping:
-   - `"python"` → Generate `provider_adapter.py`
-   - `"javascript"` or `"typescript"` → Generate `provider_adapter.js`
-   - `"go"` → Generate `provider_adapter.go`
-   - `"java"` → Generate `provider_adapter.py` (Python adapter + Java usage notes)
-   - Other/unknown → Default to `provider_adapter.py`
+## Step 1: Generate Provider Adapter (Direct SDK Only)
 
-The test comparison harness is always Python regardless of adapter language.
+Generate `ai-migration/provider_adapter.{py,js,go}` — an abstraction layer that lets the user switch between the source AI provider and Bedrock via an environment variable.
 
-## Step 1: Generate Provider Adapter
+**Requirements:**
 
-### Python Template (`provider_adapter.py`)
+- Read `AI_PROVIDER` env var to select provider: `vertex_ai` (current), `bedrock` (target), `shadow` (both — return source response, log Bedrock response)
+- Expose only the methods matching capabilities in `ai-workload-profile.json` → `integration.capabilities_summary`:
+  - `text_generation: true` → `generate(prompt) → str`
+  - `streaming: true` → `generate_stream(prompt) → Iterator[str]`
+  - `embeddings: true` → `embed(text) → list[float]`
+- **Source provider class**: Use SDK imports from `ai-workload-profile.json` → `integration.sdk_imports`. Use model IDs from `ai-workload-profile.json` → `models[].model_id`.
+- **Bedrock provider class**: Use `boto3` Converse API (`converse` for generate, `converse_stream` for streaming, `invoke_model` for embeddings with Titan). Use model IDs from `aws-design-ai.json` → `ai_architecture.bedrock_models[].aws_model_id`. Use region from `preferences.json` → `design_constraints.target_region`.
+- **Shadow mode**: Send requests to both providers, return source response, log Bedrock response for comparison.
+- Include error handling and logging for API calls.
 
-```python
-"""
-AI Provider Adapter — Abstraction layer for Vertex AI ↔ Bedrock migration.
+For JS: use `@aws-sdk/client-bedrock-runtime` + `@google-cloud/vertexai`. For Go: use `github.com/aws/aws-sdk-go-v2/service/bedrockruntime` + `cloud.google.com/go/aiplatform`.
 
-Generated by GCP to AWS Migration Advisor.
-
-Usage:
-    # Set provider via environment variable
-    export AI_PROVIDER=vertex_ai   # Use Vertex AI (default, current)
-    export AI_PROVIDER=bedrock     # Use Amazon Bedrock (migration target)
-    export AI_PROVIDER=shadow      # Send to both, return Vertex AI response
-
-    from provider_adapter import get_provider
-    provider = get_provider()
-    response = provider.generate("Hello, world!")
-"""
-
-import os
-import json
-import logging
-import time
-from abc import ABC, abstractmethod
-from typing import Optional, Iterator
-
-logger = logging.getLogger(__name__)
-
-# --- Configuration ---
-AI_PROVIDER = os.environ.get("AI_PROVIDER", "vertex_ai")
-
-
-class AIProvider(ABC):
-    """Base class for AI providers."""
-
-    @abstractmethod
-    def generate(self, prompt: str, **kwargs) -> str:
-        """Generate text from a prompt."""
-        ...
-
-    @abstractmethod
-    def generate_stream(self, prompt: str, **kwargs) -> Iterator[str]:
-        """Generate text with streaming response."""
-        ...
-
-    @abstractmethod
-    def embed(self, text: str, **kwargs) -> list[float]:
-        """Generate embeddings for text."""
-        ...
-
-
-class VertexAIProvider(AIProvider):
-    """Google Cloud Vertex AI provider (current)."""
-
-    def __init__(self):
-        # TODO: Import and configure Vertex AI SDK
-        # from google.cloud import aiplatform
-        # from vertexai.generative_models import GenerativeModel
-        logger.info("Initialized Vertex AI provider")
-        self.model_id = "VERTEX_MODEL_ID"  # TODO: From ai-workload-profile.json
-
-    def generate(self, prompt: str, **kwargs) -> str:
-        # TODO: Implement Vertex AI generation
-        # model = GenerativeModel(self.model_id)
-        # response = model.generate_content(prompt)
-        # return response.text
-        raise NotImplementedError("TODO: Implement Vertex AI generate")
-
-    def generate_stream(self, prompt: str, **kwargs) -> Iterator[str]:
-        # TODO: Implement Vertex AI streaming
-        # model = GenerativeModel(self.model_id)
-        # for chunk in model.generate_content(prompt, stream=True):
-        #     yield chunk.text
-        raise NotImplementedError("TODO: Implement Vertex AI streaming")
-
-    def embed(self, text: str, **kwargs) -> list[float]:
-        # TODO: Implement Vertex AI embeddings
-        # from vertexai.language_models import TextEmbeddingModel
-        # model = TextEmbeddingModel.from_pretrained("text-embedding-004")
-        # embeddings = model.get_embeddings([text])
-        # return embeddings[0].values
-        raise NotImplementedError("TODO: Implement Vertex AI embeddings")
-
-
-class BedrockProvider(AIProvider):
-    """Amazon Bedrock provider (migration target)."""
-
-    def __init__(self):
-        import boto3
-        self.client = boto3.client("bedrock-runtime", region_name="us-east-1")
-        # TODO: Populate model IDs from aws-design-ai.json
-        self.model_id = "BEDROCK_MODEL_ID"  # TODO: From aws-design-ai.json bedrock_models[].aws_model_id
-        self.embed_model_id = "amazon.titan-embed-text-v2:0"
-        logger.info("Initialized Bedrock provider with model: %s", self.model_id)
-
-    def generate(self, prompt: str, **kwargs) -> str:
-        response = self.client.converse(
-            modelId=self.model_id,
-            messages=[{"role": "user", "content": [{"text": prompt}]}],
-        )
-        return response["output"]["message"]["content"][0]["text"]
-
-    def generate_stream(self, prompt: str, **kwargs) -> Iterator[str]:
-        response = self.client.converse_stream(
-            modelId=self.model_id,
-            messages=[{"role": "user", "content": [{"text": prompt}]}],
-        )
-        for event in response["stream"]:
-            if "contentBlockDelta" in event:
-                yield event["contentBlockDelta"]["delta"]["text"]
-
-    def embed(self, text: str, **kwargs) -> list[float]:
-        response = self.client.invoke_model(
-            modelId=self.embed_model_id,
-            body=json.dumps({"inputText": text}),
-        )
-        result = json.loads(response["body"].read())
-        return result["embedding"]
-
-
-def get_provider(provider_name: Optional[str] = None) -> AIProvider:
-    """Get the configured AI provider.
-
-    Args:
-        provider_name: Override provider selection. If None, uses AI_PROVIDER env var.
-
-    Returns:
-        AIProvider instance.
-    """
-    name = provider_name or AI_PROVIDER
-
-    if name == "vertex_ai":
-        return VertexAIProvider()
-    elif name == "bedrock":
-        return BedrockProvider()
-    elif name == "shadow":
-        # Shadow mode: send to both, return Vertex AI response, log Bedrock response
-        logger.info("Shadow mode: requests sent to both Vertex AI and Bedrock")
-        return VertexAIProvider()  # TODO: Implement shadow proxy
-    else:
-        raise ValueError(f"Unknown AI provider: {name}. Use 'vertex_ai', 'bedrock', or 'shadow'.")
-```
-
-**Populate from design artifacts:**
-
-- Replace `VERTEX_MODEL_ID` with model IDs from `ai-workload-profile.json` `models[].model_id`
-- Replace `BEDROCK_MODEL_ID` with model IDs from `aws-design-ai.json` `ai_architecture.bedrock_models[].aws_model_id`
-- Adjust region from `preferences.json` `design_constraints.target_region`
-- Include/exclude methods based on `ai-workload-profile.json` `integration.capabilities_summary`:
-  - If `text_generation: false` → Remove `generate` method
-  - If `streaming: false` → Remove `generate_stream` method
-  - If `embeddings: false` → Remove `embed` method
-
-### JavaScript Template (`provider_adapter.js`)
-
-Generate equivalent adapter in JavaScript if the primary language is JS/TS:
-
-- Use `@aws-sdk/client-bedrock-runtime` for Bedrock
-- Use `@google-cloud/vertexai` for Vertex AI
-- Same provider pattern with `AI_PROVIDER` environment variable
-- Export `getProvider()` function
-
-### Go Template (`provider_adapter.go`)
-
-Generate equivalent adapter in Go if the primary language is Go:
-
-- Use `github.com/aws/aws-sdk-go-v2/service/bedrockruntime` for Bedrock
-- Use `cloud.google.com/go/aiplatform` for Vertex AI
-- Same provider pattern with `AI_PROVIDER` environment variable
-- Export `GetProvider()` function
+---
 
 ## Step 2: Generate Test Comparison Harness
 
-The test harness is always Python (rich ML testing ecosystem). It runs A/B comparisons between Vertex AI and Bedrock.
+Generate `ai-migration/test_comparison.py` — always Python regardless of adapter language.
 
-```python
-"""
-A/B Test Comparison Harness — Compare Vertex AI vs Bedrock responses.
+**Requirements:**
 
-Generated by GCP to AWS Migration Advisor.
+- Accept prompts from a JSON file (`--prompts`) or use built-in defaults (`--quick`)
+- Run each prompt against both the source provider and Bedrock
+- Measure per-prompt: latency (ms), success/failure, response text (truncated to 500 chars)
+- Compute summary statistics: p50/p95/mean latency per provider, quality score (trait matching against expected traits), pass/fail criteria
+- Pass criteria: Bedrock latency ≤ 2x source latency, mean quality score ≥ 0.9
+- Output structured JSON to `--output` (default: `comparison_results.json`)
+- Built-in test prompts: include 3-5 prompts based on `ai-workload-profile.json` → `models[].usage_context` covering the primary use case
+- Import the provider adapter via `from provider_adapter import get_provider`
 
-Usage:
-    python test_comparison.py --prompts prompts.json --output results.json
-    python test_comparison.py --quick  # Run with built-in test prompts
-"""
-
-import json
-import time
-import argparse
-import statistics
-from datetime import datetime
-
-# Import the provider adapter
-from provider_adapter import get_provider
-
-
-def load_prompts(prompts_file: str = None) -> list[dict]:
-    """Load test prompts from file or use built-in defaults."""
-    if prompts_file:
-        with open(prompts_file) as f:
-            return json.load(f)
-
-    # Built-in test prompts — customize based on usage context
-    # TODO: Add domain-specific prompts from ai-workload-profile.json usage_context
-    return [
-        {
-            "id": "basic_generation",
-            "prompt": "Explain cloud computing in 2 sentences.",
-            "capability": "text_generation",
-            "expected_traits": ["mentions servers", "mentions internet"]
-        },
-        {
-            "id": "code_generation",
-            "prompt": "Write a Python function to calculate fibonacci numbers.",
-            "capability": "text_generation",
-            "expected_traits": ["def fibonacci", "return"]
-        },
-        {
-            "id": "summarization",
-            "prompt": "Summarize the benefits of microservices architecture in 3 bullet points.",
-            "capability": "text_generation",
-            "expected_traits": ["scalability", "independent"]
-        },
-        # TODO: Add prompts specific to your use case from ai-workload-profile.json
-    ]
-
-
-def run_comparison(prompts: list[dict]) -> dict:
-    """Run A/B comparison between Vertex AI and Bedrock."""
-    vertex = get_provider("vertex_ai")
-    bedrock = get_provider("bedrock")
-
-    results = {
-        "timestamp": datetime.utcnow().isoformat() + "Z",
-        "total_prompts": len(prompts),
-        "comparisons": [],
-        "summary": {}
-    }
-
-    vertex_latencies = []
-    bedrock_latencies = []
-    quality_scores = []
-
-    for prompt_data in prompts:
-        prompt = prompt_data["prompt"]
-        prompt_id = prompt_data.get("id", "unknown")
-
-        comparison = {"id": prompt_id, "prompt": prompt}
-
-        # Vertex AI
-        try:
-            start = time.time()
-            vertex_response = vertex.generate(prompt)
-            vertex_latency = time.time() - start
-            comparison["vertex_ai"] = {
-                "response": vertex_response[:500],  # Truncate for report
-                "latency_ms": round(vertex_latency * 1000, 2),
-                "success": True
-            }
-            vertex_latencies.append(vertex_latency * 1000)
-        except Exception as e:
-            comparison["vertex_ai"] = {"error": str(e), "success": False}
-
-        # Bedrock
-        try:
-            start = time.time()
-            bedrock_response = bedrock.generate(prompt)
-            bedrock_latency = time.time() - start
-            comparison["bedrock"] = {
-                "response": bedrock_response[:500],
-                "latency_ms": round(bedrock_latency * 1000, 2),
-                "success": True
-            }
-            bedrock_latencies.append(bedrock_latency * 1000)
-        except Exception as e:
-            comparison["bedrock"] = {"error": str(e), "success": False}
-
-        # Quality scoring (basic trait matching)
-        expected_traits = prompt_data.get("expected_traits", [])
-        if expected_traits and comparison.get("bedrock", {}).get("success"):
-            traits_found = sum(
-                1 for trait in expected_traits
-                if trait.lower() in bedrock_response.lower()
-            )
-            quality_score = traits_found / len(expected_traits) if expected_traits else 1.0
-            comparison["quality_score"] = round(quality_score, 2)
-            quality_scores.append(quality_score)
-
-        results["comparisons"].append(comparison)
-
-    # Summary statistics
-    results["summary"] = {
-        "vertex_ai_latency": {
-            "p50_ms": round(statistics.median(vertex_latencies), 2) if vertex_latencies else None,
-            "p95_ms": round(sorted(vertex_latencies)[int(len(vertex_latencies) * 0.95)] if vertex_latencies else 0, 2),
-            "mean_ms": round(statistics.mean(vertex_latencies), 2) if vertex_latencies else None
-        },
-        "bedrock_latency": {
-            "p50_ms": round(statistics.median(bedrock_latencies), 2) if bedrock_latencies else None,
-            "p95_ms": round(sorted(bedrock_latencies)[int(len(bedrock_latencies) * 0.95)] if bedrock_latencies else 0, 2),
-            "mean_ms": round(statistics.mean(bedrock_latencies), 2) if bedrock_latencies else None
-        },
-        "quality": {
-            "mean_score": round(statistics.mean(quality_scores), 2) if quality_scores else None,
-            "min_score": round(min(quality_scores), 2) if quality_scores else None,
-            "prompts_above_90pct": sum(1 for s in quality_scores if s >= 0.9)
-        },
-        "pass_criteria": {
-            "latency_ok": all(b <= v * 2 for v, b in zip(vertex_latencies, bedrock_latencies)) if vertex_latencies and bedrock_latencies else None,
-            "quality_ok": (statistics.mean(quality_scores) >= 0.9) if quality_scores else None
-        }
-    }
-
-    return results
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="A/B Test: Vertex AI vs Bedrock")
-    parser.add_argument("--prompts", help="Path to prompts JSON file")
-    parser.add_argument("--output", default="comparison_results.json", help="Output file path")
-    parser.add_argument("--quick", action="store_true", help="Use built-in test prompts")
-    args = parser.parse_args()
-
-    prompts = load_prompts(None if args.quick else args.prompts)
-    print(f"Running comparison with {len(prompts)} prompts...")
-
-    results = run_comparison(prompts)
-
-    with open(args.output, "w") as f:
-        json.dump(results, f, indent=2)
-
-    print(f"Results saved to {args.output}")
-    print(f"Quality score: {results['summary']['quality']['mean_score']}")
-    print(f"Latency OK: {results['summary']['pass_criteria']['latency_ok']}")
-    print(f"Quality OK: {results['summary']['pass_criteria']['quality_ok']}")
-```
-
-**Customize from design artifacts:**
-
-- Add domain-specific test prompts from `ai-workload-profile.json` `models[].usage_context`
-- Include embedding tests if `capabilities_summary.embeddings` is true
-- Include streaming tests if `capabilities_summary.streaming` is true
-- Adjust quality scoring based on the specific use case
+---
 
 ## Step 3: Generate Bedrock Setup Script
 
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
+Generate `ai-migration/setup_bedrock.sh`.
 
-# Bedrock Setup Script — Configure AWS for AI migration
-# Generated by GCP to AWS Migration Advisor.
-#
-# Usage: ./setup_bedrock.sh [--execute]
+**Requirements:**
 
-DRY_RUN=true
-[[ "${1:-}" == "--execute" ]] && DRY_RUN=false
+- Dry-run by default (`--execute` flag to run for real)
+- Step 1 — Request model access: List each model from `aws-design-ai.json` → `bedrock_models[].aws_model_id` and the embedding model
+- Step 2 — Create IAM role: Trust policy for the compute platform (Lambda, ECS, or EC2 based on `aws-design.json` if present). Bedrock policy: `bedrock:InvokeModel` and `bedrock:InvokeModelWithResponseStream` scoped to `arn:aws:bedrock:*::foundation-model/*`
+- Step 3 — Print required environment variables: `AWS_REGION`, `AI_PROVIDER=bedrock`, model IDs
+- Step 4 — Verification: Test Bedrock access with a simple `converse` call using the primary model
+- If `$MIGRATION_DIR/terraform/` exists, print coordination note: "Ensure the IAM role is referenced in compute.tf task definitions"
+- Use region from `preferences.json` → `design_constraints.target_region`
 
-AWS_REGION="us-east-1"  # TODO: From preferences.json target_region
-ROLE_NAME="bedrock-inference-role"
-# TODO: Populate model IDs from aws-design-ai.json
-MODEL_IDS=(
-    "BEDROCK_MODEL_ID"    # TODO: From aws-design-ai.json bedrock_models[].aws_model_id
-    "amazon.titan-embed-text-v2:0"
-)
-
-echo "=== Bedrock Setup ==="
-echo "Region: $AWS_REGION"
-echo "Mode: $([ "$DRY_RUN" = true ] && echo 'DRY RUN' || echo 'EXECUTE')"
-
-# Step 1: Request model access
-echo "--- Step 1: Model Access ---"
-for MODEL_ID in "${MODEL_IDS[@]}"; do
-    if [ "$DRY_RUN" = true ]; then
-        echo "[DRY RUN] Would request access for model: $MODEL_ID"
-    else
-        echo "Requesting access for model: $MODEL_ID"
-        # Note: Model access must be enabled via AWS Console or CLI
-        # Some models require acceptance of terms
-        echo "TODO: Enable model access in AWS Console → Bedrock → Model access"
-        echo "  Model: $MODEL_ID"
-    fi
-done
-
-# Step 2: Create IAM role for Bedrock access
-echo "--- Step 2: IAM Role ---"
-TRUST_POLICY='{
-    "Version": "2012-10-17",
-    "Statement": [{
-        "Effect": "Allow",
-        "Principal": {"Service": "lambda.amazonaws.com"},
-        "Action": "sts:AssumeRole"
-    }]
-}'
-
-BEDROCK_POLICY='{
-    "Version": "2012-10-17",
-    "Statement": [{
-        "Effect": "Allow",
-        "Action": [
-            "bedrock:InvokeModel",
-            "bedrock:InvokeModelWithResponseStream"
-        ],
-        "Resource": "arn:aws:bedrock:*::foundation-model/*"
-    }]
-}'
-
-if [ "$DRY_RUN" = true ]; then
-    echo "[DRY RUN] Would create IAM role: $ROLE_NAME"
-    echo "[DRY RUN] Trust policy: Lambda service"
-    echo "[DRY RUN] Permissions: bedrock:InvokeModel, bedrock:InvokeModelWithResponseStream"
-else
-    echo "Creating IAM role: $ROLE_NAME"
-    aws iam create-role \
-        --role-name "$ROLE_NAME" \
-        --assume-role-policy-document "$TRUST_POLICY" \
-        --tags Key=Project,Value=gcp-migration Key=ManagedBy,Value=migration-script \
-        2>/dev/null || echo "Role already exists"
-
-    echo "Attaching Bedrock policy..."
-    aws iam put-role-policy \
-        --role-name "$ROLE_NAME" \
-        --policy-name "bedrock-invoke" \
-        --policy-document "$BEDROCK_POLICY"
-fi
-
-# Step 3: Set up environment variables
-echo "--- Step 3: Environment Variables ---"
-echo "Set these environment variables in your application:"
-echo ""
-echo "  export AWS_REGION=$AWS_REGION"
-echo "  export AI_PROVIDER=bedrock"
-for MODEL_ID in "${MODEL_IDS[@]}"; do
-    echo "  # Model: $MODEL_ID"
-done
-
-# Step 4: Verification
-echo "--- Step 4: Verification ---"
-if [ "$DRY_RUN" = true ]; then
-    echo "[DRY RUN] Would verify Bedrock access with test invocation"
-else
-    echo "Testing Bedrock access..."
-    RESPONSE=$(aws bedrock-runtime converse \
-        --model-id "${MODEL_IDS[0]}" \
-        --messages '[{"role":"user","content":[{"text":"Say hello in one word."}]}]' \
-        --region "$AWS_REGION" \
-        --query 'output.message.content[0].text' \
-        --output text 2>&1) || true
-
-    if [ -n "$RESPONSE" ]; then
-        echo "Bedrock access verified. Response: $RESPONSE"
-    else
-        echo "WARNING: Bedrock access test failed. Check model access and IAM permissions."
-    fi
-fi
-
-# Coordinate with infrastructure track
-echo ""
-echo "--- Infrastructure Coordination ---"
-# Check if infrastructure terraform was also generated
-if [ -d "../terraform" ]; then
-    echo "Infrastructure Terraform detected."
-    echo "Ensure the IAM role created above is referenced in compute.tf task definitions."
-    echo "The Bedrock IAM policy should be attached to the ECS task role."
-else
-    echo "No infrastructure Terraform detected. This is a standalone AI migration."
-fi
-
-echo ""
-echo "=== Bedrock Setup Complete ==="
-```
-
-**Populate from design artifacts:**
-
-- Replace `BEDROCK_MODEL_ID` with actual model IDs from `aws-design-ai.json`
-- Set `AWS_REGION` from `preferences.json` `design_constraints.target_region`
-- Adjust IAM trust policy based on compute platform (Lambda, ECS, EC2)
-- If infrastructure track is also running (`generation-infra.json` exists), add coordination notes
+---
 
 ## Step 3B: Generate Gateway Configuration (Gateway Users Only)
 
-**Skip this step if** `preferences.json` → `ai_constraints.ai_gateway` = `"direct"` or absent. Only generate for gateway users.
+Skip if `ai_gateway` = `"direct"` or absent. Read `preferences.json` → `ai_constraints.ai_gateway.value` to determine format.
 
-Read `ai_gateway` from `preferences.json` → `ai_constraints.ai_gateway.value` to determine which config to generate.
+**`"llm_router"`** → Generate `gateway_config.yaml` (LiteLLM format):
 
-### LLM Router — `ai_gateway` = `"llm_router"`
+- Map each model from `aws-design-ai.json` to a `bedrock/MODEL_ID` entry with `aws_region_name`
+- Include embedding model entry if embeddings are used
+- Note required env vars: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`
 
-Generate `gateway_config.yaml` (LiteLLM format):
+**`"framework"`** → Generate `gateway_config.py`:
 
-```yaml
-# LiteLLM Configuration — Bedrock Integration
-# Generated by GCP to AWS Migration Advisor.
-#
-# Replace your existing model configuration with these Bedrock models.
-# LiteLLM handles AWS authentication via environment variables or ~/.aws/credentials.
+- Show before/after import swap for the detected framework (`ai-workload-profile.json` → `integration.sdk_imports`)
+- LangChain: `langchain_google_vertexai` → `langchain_aws.ChatBedrock` (or `langchain_openai` → `langchain_aws.ChatBedrock`)
+- LlamaIndex: `llama_index.llms.vertex` → `llama_index.llms.bedrock_converse`
+- Include pip install note for the AWS package
 
-model_list:
-  - model_name: "primary"  # TODO: Replace with your model alias
-    litellm_params:
-      model: "bedrock/BEDROCK_MODEL_ID"  # TODO: From aws-design-ai.json
-      aws_region_name: "us-east-1"  # TODO: From preferences.json target_region
+**`"voice_platform"`** → Generate `gateway_config.json`:
 
-  - model_name: "embeddings"  # If embeddings are used
-    litellm_params:
-      model: "bedrock/amazon.titan-embed-text-v2:0"
-      aws_region_name: "us-east-1"
+- Dashboard configuration steps: add Bedrock as provider, set model ID, set region, test before switching production
+- Include the Bedrock model ID and region from design artifacts
 
-# Environment variables needed:
-# export AWS_ACCESS_KEY_ID=...
-# export AWS_SECRET_ACCESS_KEY=...
-# export AWS_REGION=us-east-1
-```
+**`"api_gateway"`** → Generate `gateway_config.yaml`:
 
-### Framework — `ai_gateway` = `"framework"`
-
-Generate `gateway_config.py` (Python — LangChain/LlamaIndex swap):
-
-```python
-"""
-Framework Provider Swap — Replace source provider with Bedrock.
-Generated by GCP to AWS Migration Advisor.
-
-Find and replace the import and initialization in your codebase.
-"""
-
-# --- BEFORE (Vertex AI via LangChain) ---
-# from langchain_google_vertexai import ChatVertexAI
-# llm = ChatVertexAI(model="gemini-pro", temperature=0.7)
-
-# --- BEFORE (OpenAI via LangChain) ---
-# from langchain_openai import ChatOpenAI
-# llm = ChatOpenAI(model="gpt-4o", temperature=0.7)
-
-# --- AFTER (Bedrock via LangChain) ---
-from langchain_aws import ChatBedrock
-
-llm = ChatBedrock(
-    model_id="BEDROCK_MODEL_ID",  # TODO: From aws-design-ai.json
-    model_kwargs={"temperature": 0.7},
-    region_name="us-east-1",  # TODO: From preferences.json target_region
-)
-
-# --- BEFORE (Vertex AI via LlamaIndex) ---
-# from llama_index.llms.vertex import Vertex
-# llm = Vertex(model="gemini-pro")
-
-# --- AFTER (Bedrock via LlamaIndex) ---
-# from llama_index.llms.bedrock_converse import BedrockConverse
-# llm = BedrockConverse(model="BEDROCK_MODEL_ID")
-
-# pip install: langchain-aws  (or llama-index-llms-bedrock)
-```
-
-### Voice Platform — `ai_gateway` = `"voice_platform"`
-
-Generate `gateway_config.json` (dashboard configuration notes):
-
-```json
-{
-  "note": "Voice platform migration — configure via provider dashboard",
-  "platform": "TODO: Detected platform name",
-  "steps": [
-    "1. Log into your voice platform dashboard",
-    "2. Navigate to AI/LLM model settings",
-    "3. Add Amazon Bedrock as a provider (requires AWS credentials)",
-    "4. Set model ID to: BEDROCK_MODEL_ID",
-    "5. Set AWS region to: us-east-1",
-    "6. Test with a sample call before switching production traffic"
-  ],
-  "bedrock_model_id": "BEDROCK_MODEL_ID",
-  "aws_region": "us-east-1",
-  "native_bedrock_support": "Check your platform's documentation for native Bedrock integration"
-}
-```
-
-### API Gateway — `ai_gateway` = `"api_gateway"`
-
-Generate `gateway_config.yaml` (upstream configuration):
-
-```yaml
-# API Gateway — Add Bedrock Upstream
-# Generated by GCP to AWS Migration Advisor.
-#
-# Add this upstream configuration to your API gateway (Kong, Apigee, custom).
-# Bedrock requires AWS SigV4 request signing.
-
-bedrock_upstream:
-  url: "https://bedrock-runtime.us-east-1.amazonaws.com"
-  model_id: "BEDROCK_MODEL_ID"  # TODO: From aws-design-ai.json
-  auth:
-    type: "aws_sigv4"
-    service: "bedrock"
-    region: "us-east-1"  # TODO: From preferences.json target_region
-  notes:
-    - "Requires AWS credentials configured on the gateway"
-    - "For Kong: use kong-plugin-aws-lambda or custom SigV4 plugin"
-    - "For Apigee: use AWS Lambda proxy or custom policy"
-    - "Bedrock uses the Converse API: POST /model/{modelId}/converse"
-```
-
-**Populate from design artifacts:**
-
-- Replace `BEDROCK_MODEL_ID` with actual model IDs from `aws-design-ai.json`
-- Set region from `preferences.json` → `design_constraints.target_region`
+- Upstream URL: `https://bedrock-runtime.{region}.amazonaws.com`
+- Auth: AWS SigV4 signing for the `bedrock` service
+- Note: Converse API endpoint is `POST /model/{modelId}/converse`
+- Include gateway-specific notes (Kong plugin, Apigee policy)
 
 ---
 
 ## Step 3C: Generate Evaluation Artifacts (If User Opted In)
 
-**Skip this step if** the user did not opt into model evaluation in `generate-ai.md` Part 0.
+Skip if the user did not opt into model evaluation in `generate-ai.md` Part 0.
 
-### Evaluation Prompt Dataset (`eval-prompts.jsonl`)
+**`eval-prompts.jsonl`**: Generate 10-20 domain-specific prompts in JSONL format (`{"prompt": "...", "referenceResponse": "", "category": "..."}`). Base prompts on `ai-workload-profile.json` → `models[].usage_context`. Include function-calling prompts if `capabilities_summary.function_calling` is true, retrieval prompts if RAG patterns were detected. Include 2-3 edge case prompts.
 
-Generate a JSONL file with 10-20 domain-specific prompts based on `ai-workload-profile.json` → `models[].usage_context`:
-
-```jsonl
-{"prompt": "TODO: Domain-specific prompt 1 based on usage_context", "referenceResponse": "", "category": "TODO: task-type"}
-{"prompt": "TODO: Domain-specific prompt 2 based on usage_context", "referenceResponse": "", "category": "TODO: task-type"}
-{"prompt": "TODO: Edge case prompt that has caused problems", "referenceResponse": "", "category": "edge-case"}
-```
-
-**Customization rules:**
-
-- Read `models[].usage_context` for domain hints (e.g., "recommendation engine" → include product recommendation prompts)
-- Read `integration.capabilities_summary` — if `function_calling: true`, include prompts that trigger tool use
-- Read `integration.capabilities_summary` — if `embeddings: true`, include prompts for retrieval-augmented contexts
-- Include at least 2-3 edge case prompts
-
-### Evaluation Job Script (`run-evaluation.sh`)
-
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-
-# Run Bedrock Model Evaluation Job
-# Generated by GCP to AWS Migration Advisor.
-#
-# Prerequisites:
-#   1. AWS account with Bedrock access enabled for target models
-#   2. S3 bucket for eval data (created below)
-#   3. IAM role with Bedrock and S3 permissions
-#
-# Usage: ./run-evaluation.sh [--execute]
-
-DRY_RUN=true
-[[ "${1:-}" == "--execute" ]] && DRY_RUN=false
-
-AWS_REGION="us-east-1"  # TODO: From preferences.json
-BUCKET_NAME="bedrock-eval-$(date +%Y%m%d)-$$"
-# TODO: Populate from aws-design-ai.json bedrock_models[].aws_model_id
-MODEL_IDS=(
-    "BEDROCK_MODEL_ID_1"
-    "BEDROCK_MODEL_ID_2"
-)
-
-echo "=== Bedrock Model Evaluation ==="
-echo "Region: $AWS_REGION"
-echo "Models: ${MODEL_IDS[*]}"
-echo "Mode: $([ "$DRY_RUN" = true ] && echo 'DRY RUN' || echo 'EXECUTE')"
-
-if [ "$DRY_RUN" = true ]; then
-    echo ""
-    echo "[DRY RUN] Steps that would be executed:"
-    echo "  1. Create S3 bucket: $BUCKET_NAME"
-    echo "  2. Upload eval-prompts.jsonl to s3://$BUCKET_NAME/prompts/"
-    echo "  3. Create evaluation job comparing: ${MODEL_IDS[*]}"
-    echo "  4. Wait for completion (~15-30 minutes)"
-    echo "  5. Download results from s3://$BUCKET_NAME/results/"
-    echo ""
-    echo "Run with --execute to perform these steps."
-else
-    # Step 1: Create S3 bucket
-    echo "Creating S3 bucket: $BUCKET_NAME"
-    aws s3 mb "s3://$BUCKET_NAME" --region "$AWS_REGION"
-
-    # Step 2: Upload prompts
-    echo "Uploading evaluation prompts..."
-    aws s3 cp eval-prompts.jsonl "s3://$BUCKET_NAME/prompts/eval-prompts.jsonl"
-
-    # Step 3: Create evaluation job
-    echo "Creating evaluation job..."
-    # Build model inference config
-    MODELS_JSON=""
-    for MODEL_ID in "${MODEL_IDS[@]}"; do
-        MODELS_JSON="$MODELS_JSON{\"bedrockModel\":{\"modelIdentifier\":\"arn:aws:bedrock:$AWS_REGION::foundation-model/$MODEL_ID\"}},"
-    done
-    MODELS_JSON="[${MODELS_JSON%,}]"
-
-    aws bedrock create-evaluation-job \
-        --job-name "migration-eval-$(date +%Y%m%d%H%M)" \
-        --role-arn "TODO: IAM role ARN with Bedrock + S3 permissions" \
-        --inference-config "{\"models\": $MODELS_JSON}" \
-        --output-data-config "{\"s3Uri\": \"s3://$BUCKET_NAME/results/\"}" \
-        --evaluation-config "{\"automated\":{\"datasetMetricConfigs\":[{\"taskType\":\"General\",\"dataset\":{\"name\":\"migration-prompts\",\"datasetLocation\":{\"s3Uri\":\"s3://$BUCKET_NAME/prompts/eval-prompts.jsonl\"}},\"metricNames\":[\"Builtin.Accuracy\",\"Builtin.Robustness\"]}]}}" \
-        --region "$AWS_REGION"
-
-    echo "Evaluation job created. Check status in Bedrock console → Model evaluation."
-    echo "Results will be in: s3://$BUCKET_NAME/results/"
-fi
-```
-
-**Populate from design artifacts:**
-
-- Replace `BEDROCK_MODEL_ID_*` with model IDs from `aws-design-ai.json`
-- Set region from `preferences.json`
-- Set IAM role ARN (user must provide or use the role from `setup_bedrock.sh`)
+**`run-evaluation.sh`**: Dry-run by default. Creates S3 bucket, uploads prompts, calls `aws bedrock create-evaluation-job` with model IDs from `aws-design-ai.json`, downloads results. Use the same model IDs and region as `setup_bedrock.sh`.
 
 ---
 
 ## Step 4: Self-Check
 
-After generating all files, verify:
+Verify all generated artifacts:
 
-### Provider Adapter
-
-- [ ] Correct language selected based on `ai-workload-profile.json`
-- [ ] All model IDs populated from `aws-design-ai.json`
-- [ ] Only capabilities present in `capabilities_summary` have methods generated
-- [ ] Feature flag (`AI_PROVIDER` env var) controls provider selection
-- [ ] Both providers implement the same interface
-- [ ] Error handling present for API calls
-- [ ] Logging configured
-
-### Test Comparison Harness
-
-- [ ] Always Python regardless of adapter language
-- [ ] Includes domain-specific test prompts from `usage_context`
-- [ ] Tests all capabilities (generate, stream, embed) that the workload uses
-- [ ] Produces structured JSON output with latency and quality metrics
-- [ ] Pass criteria match `generation-ai.json` success_criteria
-
-### Bedrock Setup Script
-
-- [ ] Correct model IDs from design
-- [ ] Correct region from preferences
-- [ ] IAM role follows least privilege
-- [ ] Dry-run mode by default
-- [ ] Verification step included
-- [ ] Infrastructure coordination notes if both tracks run
-
-### Gateway Configuration (if generated)
-
-- [ ] Correct gateway type matches `ai_constraints.ai_gateway`
-- [ ] Model IDs populated from `aws-design-ai.json`
-- [ ] Region set from `preferences.json`
-- [ ] Auth/credentials instructions included
-
-### Evaluation Artifacts (if generated)
-
-- [ ] `eval-prompts.jsonl` has 10-20 domain-specific prompts
-- [ ] Prompts reference `models[].usage_context` for domain relevance
-- [ ] `run-evaluation.sh` has correct model IDs and region
-- [ ] Dry-run mode by default
+- [ ] Provider adapter (or gateway config) uses actual model IDs from `aws-design-ai.json` — no placeholders
+- [ ] Only capabilities present in `capabilities_summary` have methods/tests generated
+- [ ] Feature flag (`AI_PROVIDER` env var) controls provider selection in adapter
+- [ ] Test harness includes domain-specific prompts from `usage_context`
+- [ ] Test harness produces structured JSON output with latency and quality metrics
+- [ ] Setup script has correct region from `preferences.json`
+- [ ] Setup script IAM role follows least privilege
+- [ ] All scripts default to dry-run mode
+- [ ] Evaluation artifacts (if generated) have correct model IDs and region
+- [ ] No hardcoded credentials in any file
 
 ## Phase Completion
 
-Report the list of generated files to the parent orchestrator. **Do NOT update `.phase-status.json`** — the parent `generate.md` handles phase completion.
+Report generated files to the parent orchestrator. **Do NOT update `.phase-status.json`** — the parent `generate.md` handles phase completion.
 
 Output:
 

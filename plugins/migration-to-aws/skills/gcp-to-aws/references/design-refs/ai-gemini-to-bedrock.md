@@ -4,7 +4,7 @@
 
 This file is loaded by `design-ai.md` when `ai-workload-profile.json` has `summary.ai_source` = `"gemini"` or `"both"`. It provides model mapping tables with pricing and honest competitive analysis for Gemini → Bedrock migration decisions.
 
-All pricing should be verified via AWS Pricing MCP or `references/shared/pricing-fallback.json`.
+All pricing should be verified via AWS Pricing MCP or `references/shared/pricing-cache.md`.
 
 ---
 

@@ -13,7 +13,7 @@
 The parent `estimate.md` selects the pricing mode before loading this file. Use whichever mode was selected:
 
 - **Live (MCP Server)**: Real-time pricing from AWS API, accuracy ±5-10%
-- **Fallback (Cached)**: Uses `pricing-fallback.json`, accuracy ±15-25%
+- **Fallback (Cached)**: Uses `shared/pricing-cache.md`, accuracy ±5-25%
 
 Note: Even with live pricing, billing-only estimates carry wider overall ranges (±30-40%) because we lack source configuration (CPU, memory, disk, scaling).
 

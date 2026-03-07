@@ -6,24 +6,14 @@
 
 ## Pricing Mode
 
-The parent `estimate.md` determines MCP availability before loading this file.
+The parent `estimate.md` determines pricing source before loading this file.
 
 **Price lookup order for each AWS service in `aws-design.json`:**
 
-1. **`shared/cached_prices.json` (primary)** — Read the file once. Look up each service by key. If found, use the price directly. No MCP call needed. Accuracy: ±5-10%. Set `pricing_source: "cached"`.
-2. **MCP with recipes (secondary)** — If a service is NOT in cached_prices.json and MCP is available, use the Pricing Recipes table below. Set `pricing_source: "live"`.
-3. **`shared/pricing-fallback.json` (tertiary)** — If neither cache nor MCP has the price. Set `pricing_source: "fallback"`. Accuracy: ±15-25%.
-4. **Conservative estimate** — Service not in any source. Set `pricing_source: "estimated"`.
+1. **`shared/pricing-cache.md` (primary)** — Read once. Look up each service by table. If found, use the price directly. No MCP call needed. Set `pricing_source: "cached"`.
+2. **MCP with recipes (secondary)** — If a service is NOT in pricing-cache.md and MCP is available, use the Pricing Recipes table below. Set `pricing_source: "live"`.
 
-For typical migrations (Fargate, Aurora/RDS, Aurora Serverless v2, S3, ALB, NAT Gateway, Lambda, Secrets Manager, CloudWatch, ElastiCache, DynamoDB), ALL prices are in `cached_prices.json`. Zero MCP calls needed.
-
-### Cached Prices Staleness Check
-
-Read `cached_prices.json` → `metadata.last_updated`. Calculate days since update:
-
-- If <= 90 days: Use cached prices, note: "Using cached rates from [last_updated] (±5-10% accuracy)"
-- If > 90 days and MCP available: Prefer MCP for all services (cached prices may be stale)
-- If > 90 days and MCP unavailable: Use cached prices with warning: "Cached prices are >90 days old; accuracy may be degraded"
+For typical migrations (Fargate, Aurora/RDS, Aurora Serverless v2, S3, ALB, NAT Gateway, Lambda, Secrets Manager, CloudWatch, ElastiCache, DynamoDB), ALL prices are in `pricing-cache.md`. Zero MCP calls needed.
 
 ## Step 0: Validate Design Output
 
@@ -41,7 +31,7 @@ If all validations pass, proceed to Part 1.
 
 ## Pricing Recipes (MCP Fallback Only)
 
-Only use these recipes when a service is NOT in `cached_prices.json` and MCP is available.
+Only use these recipes when a service is NOT in `pricing-cache.md` and MCP is available.
 Do NOT call get_pricing_service_codes, get_pricing_service_attributes, or get_pricing_attribute_values — go directly to get_pricing.
 
 | AWS Service          | service_code      | filters                                                                                                              | output_options                                                                                                                                     |

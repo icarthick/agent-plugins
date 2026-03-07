@@ -13,7 +13,7 @@ The parent `estimate.md` selects the pricing mode before loading this file. Use 
 
 ### Cached Bedrock Pricing Fallback Table
 
-If MCP is unavailable, use these rates (from `pricing-fallback.json`):
+If MCP is unavailable, use these rates (from `shared/pricing-cache.md`):
 
 | Model               | Model ID                                   | Input (per 1M) | Output (per 1M) | Tier      |
 | ------------------- | ------------------------------------------ | -------------- | --------------- | --------- |
@@ -32,7 +32,7 @@ If MCP is unavailable, use these rates (from `pricing-fallback.json`):
 
 ### Source Provider Pricing Reference
 
-For migration cost comparison (from `pricing-fallback.json` → `source_provider_pricing`):
+For migration cost comparison (from `shared/pricing-cache.md` → Source Provider Pricing):
 
 **Gemini (Standard tier):**
 

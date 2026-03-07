@@ -6,36 +6,32 @@
 
 Before running any sub-estimate file, determine the pricing source.
 
-### Step 0a: Check Cached Prices
+### Step 0a: Load Pricing Cache
 
-Read `shared/cached_prices.json`. Check `metadata.last_updated`:
+Read `shared/pricing-cache.md`. Check the `Last updated` date in the header:
 
-- If file exists and <= 90 days old: **Cached prices are the primary source.** No MCP calls needed for services listed in the cache. Proceed to Step 1.
-- If file exists but > 90 days old: Cached prices are stale. Attempt MCP (Step 0b) for fresh prices; use stale cache as fallback.
-- If file missing: Attempt MCP (Step 0b).
+- If <= 90 days old: **Cached prices are the primary source.** No MCP calls needed for services listed in the cache. Proceed to Step 1.
+- If > 90 days old: Cache is stale. Attempt MCP (Step 0b) for fresh prices; use stale cache as fallback.
 
-### Step 0b: MCP Availability Check (only if cached prices stale or missing)
+### Step 0b: MCP Availability Check (only if cache stale or service not listed)
 
 Attempt to reach awspricing with **up to 2 retries** (3 total attempts):
 
 1. **Attempt 1**: Call `get_pricing_service_codes()`
 2. **If timeout/error**: Wait 1 second, retry (Attempt 2)
 3. **If still fails**: Wait 2 seconds, retry (Attempt 3)
-4. **If all 3 attempts fail**: Proceed to fallback
+4. **If all 3 attempts fail**: Use cached prices with staleness warning
 
 ### Pricing Hierarchy
 
 Each sub-estimate file uses this lookup order per service:
 
-1. **`shared/cached_prices.json`** — Pre-fetched live prices (±5-10% accuracy). Set `pricing_source: "cached"`.
+1. **`shared/pricing-cache.md`** — Cached prices (±5-25% accuracy). Set `pricing_source: "cached"`.
 2. **MCP API** — Real-time pricing using recipes in sub-estimate files (±5-10% accuracy). Set `pricing_source: "live"`.
-3. **`shared/pricing-fallback.json`** — Broad coverage static cache (±15-25% accuracy). Set `pricing_source: "fallback"`.
 
-If using fallback, check staleness:
+If cache is > 90 days old and MCP is unavailable:
 
-- Read `metadata.last_updated`
-- If > 90 days: Add warning: "Cached pricing data is >90 days old; accuracy may be significantly degraded"
-- If <= 90 days: Add note: "Using cached rates (±15-25% accuracy)"
+- Add warning: "Cached pricing data is >90 days old; accuracy may be significantly degraded"
 - **Display to user**: Add visible warning with staleness notice
 
 ## Step 1: Prerequisites
@@ -89,8 +85,7 @@ Output to user: "Cost estimation complete. Proceeding to Phase 5: Execution Plan
 
 ## Reference Files
 
-- `shared/cached_prices.json` — Pre-fetched live AWS pricing (±5-10%, primary source)
-- `shared/pricing-fallback.json` — Broad coverage static cache (±15-25%, tertiary fallback)
+- `shared/pricing-cache.md` — Cached AWS + source provider pricing (±5-25%, primary source)
 
 ## Scope Boundary
 

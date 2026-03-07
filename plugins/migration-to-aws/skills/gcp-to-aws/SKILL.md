@@ -135,7 +135,7 @@ Replace `MMDD-HHMM` with the actual migration ID and set each phase to its corre
 
 - Provides `get_pricing`, `get_pricing_service_codes`, `get_pricing_service_attributes` tools
 - Only needed during Estimate phase. Discover and Design do not require it.
-- Fallback: if unavailable, uses `references/shared/pricing-fallback.json` (cached 2026 rates, ±15-25% accuracy)
+- Fallback: if unavailable, uses `references/shared/pricing-cache.md` (cached 2026 rates, ±5-25% accuracy)
 
 ---
 
@@ -205,8 +205,7 @@ gcp-to-aws/
 │       ├── schema-discover-ai.md               # ai-workload-profile schema (loaded by discover-app-code.md)
 │       ├── schema-discover-billing.md          # billing-profile schema (loaded by discover-billing.md)
 │       ├── schema-estimate-infra.md            # estimation-infra.json schema (loaded by estimate-infra.md at write time)
-│       ├── cached_prices.json                  # Pre-fetched live AWS pricing (±5-10%, primary source)
-│       └── pricing-fallback.json               # Broad coverage static cache (±15-25%, tertiary fallback)
+│       └── pricing-cache.md                    # Cached AWS + source provider pricing (±5-25%, primary source)
 │
 ├── assets/
 │   ├── main.tf.template                        # Terraform provider/backend boilerplate
@@ -220,7 +219,7 @@ gcp-to-aws/
 | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | No GCP sources found (no `.tf`, no app code, no billing data) | Stop. Output: "No GCP sources detected. Provide at least one source type (Terraform files, application code, or billing exports) and try again." |
 | `.phase-status.json` missing phase gate                       | Stop. Output: "Cannot enter Phase X: Phase Y-1 not completed. Start from Phase Y or resume Phase Y-1."                                           |
-| awspricing unavailable after 3 attempts                       | Display user warning about ±15-25% accuracy. Use `pricing-fallback.json`. Add `pricing_source: fallback` to estimation.json.                     |
+| awspricing unavailable after 3 attempts                       | Display user warning about ±5-25% accuracy. Use `pricing-cache.md`. Add `pricing_source: "cached"` to estimation.json.                           |
 | User does not answer all Q1-8                                 | Offer Mode C (defaults) or Mode D (free text). Phase 2 completes either way.                                                                     |
 | `aws-design.json` missing required clusters                   | Stop Phase 4. Output: "Re-run Phase 3 to generate missing cluster designs."                                                                      |
 
