@@ -59,478 +59,128 @@ Do NOT call get_pricing_service_codes, get_pricing_service_attributes, or get_pr
 
 **Batching rule:** If MCP calls are needed, group up to 4 requests in parallel per turn.
 
+---
+
 ## Part 1: Calculate Current GCP Costs
 
-Determine your current GCP monthly infrastructure costs from the best available source.
+Determine the current GCP monthly infrastructure costs. Use the best available source:
 
-### Source Priority
+1. **`billing-profile.json` (preferred)** — Use actual billing data as the GCP baseline. Highest confidence (±5%).
+2. **`gcp-resource-inventory.json` (fallback)** — Estimate costs from discovered resource configurations. Wider range (±20-30%).
+3. **`preferences.json` → `gcp_monthly_spend`** — User-provided monthly spend from clarification.
+4. **Conservative default** — If none of the above: use `AWS monthly balanced × 1.25`.
 
-1. **`billing-profile.json` (preferred)** — If this file exists, use actual billing data as the GCP baseline. This is real spend data and provides the highest confidence baseline.
-2. **`gcp-resource-inventory.json` (fallback)** — If no billing data is available, estimate costs from discovered resource configurations.
-3. **`preferences.json` `gcp_monthly_spend`** — If the user provided their monthly GCP spend during clarification.
-4. **Conservative default** — If none of the above: use `AWS monthly balanced * 1.25` (assume 25% GCP premium over AWS balanced estimate).
+Present the GCP baseline as a total and per-service breakdown, noting which source was used.
 
-### If billing-profile.json exists (preferred)
-
-Use the actual spend data as the authoritative GCP cost baseline:
-
-```
-FROM billing-profile.json:
-  total_monthly_spend: $[amount]
-
-Per-service breakdown:
-  [service 1]: $[monthly_cost]
-  [service 2]: $[monthly_cost]
-  ...
-
-Source: Actual billing data (high confidence)
-```
-
-### If no billing data (estimate from inventory)
-
-Calculate from discovered services in `gcp-resource-inventory.json`:
-
-```
-FROM gcp-resource-inventory.json resources:
-
-Compute (Cloud Run):
-  - [N] instances x [vCPU] vCPU x [mem]GB x 730 hours/month
-  - Estimated cost: $[calc]/month
-
-Database (Cloud SQL):
-  - [instance_tier] instance x 730 hours
-  - Storage: [size]GB x $0.23/GB
-  - Estimated cost: $[calc]/month
-
-Storage (Cloud Storage):
-  - [size] GB x $0.020/GB (Standard)
-  - [size] GB x $0.004/GB (Coldline archive)
-  - Estimated cost: $[calc]/month
-
-Networking (Load Balancer):
-  - HTTP(S) Load Balancer
-  - Estimated cost: $[calc]/month
-
-Total Current GCP Cost: $[total]/month
-```
-
-**Note:** Inventory-based estimates carry wider confidence ranges (±20-30%) compared to billing-based baselines (±5%).
+---
 
 ## Part 2: Calculate Projected AWS Costs
 
-Using the architecture from `aws-design.json`, calculate costs for 3 tiers. Track `pricing_source` per service.
+For each service in `aws-design.json`, calculate monthly cost using rates from `pricing-cache.md`. Track `pricing_source` per service.
 
-Handle 3 cost tiers (to show optimization range):
+Calculate 3 cost tiers to show the optimization range:
 
-- **Premium**: Latest generation, highest availability (e.g., db.r6g, Fargate Spot disabled)
-- **Balanced**: Standard generation, typical setup (e.g., db.t4g, Fargate on-demand)
-- **Optimized**: Cost-minimized (e.g., db.t4g with reserved, Fargate Spot 70%)
+| Tier          | Description                             | Examples                                                            |
+| ------------- | --------------------------------------- | ------------------------------------------------------------------- |
+| **Premium**   | Latest generation, highest availability | db.r6g instances, Fargate Spot disabled, Multi-AZ everything        |
+| **Balanced**  | Standard generation, typical setup      | db.t4g instances, Fargate on-demand, Single-AZ where acceptable     |
+| **Optimized** | Cost-minimized with trade-offs          | db.t4g with reserved pricing, Fargate Spot 70%, S3-IA for cold data |
 
-### A. Compute Costs
+**Per-service calculation approach:**
 
-**Fargate (mapped from Cloud Run):**
+| Domain            | Formula                                                                               | Key inputs from aws-design.json                             |
+| ----------------- | ------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Compute (Fargate) | (vCPU × vCPU rate + memory GB × memory rate) × 730 hours × instance count             | `aws_config.cpu`, `aws_config.memory`                       |
+| Compute (Lambda)  | requests × request rate + (requests × duration × memory GB) × GB-second rate          | Estimated from usage patterns                               |
+| Database (Aurora) | instance rate × 730 hours × instance count + storage GB × storage rate + I/O estimate | `aws_config.instance_class`, `aws_config.allocated_storage` |
+| Database (RDS)    | instance rate × 730 hours × instance count + storage GB × storage rate                | `aws_config.instance_class`, `aws_config.allocated_storage` |
+| Storage (S3)      | GB × per-GB rate + request estimates                                                  | `aws_config.storage_gb` or source `gcp_config`              |
+| Networking (ALB)  | fixed monthly + LCU estimate                                                          | From compute service count                                  |
+| Networking (NAT)  | fixed monthly × count + GB processed × data rate                                      | From VPC design                                             |
+| Supporting        | Per-unit rates × quantities (secrets, log GB, metrics)                                | Inferred from service count                                 |
 
-```
-Configuration (from aws-design.json):
-  - [vCPU] vCPU + [mem]GB memory
-  - 730 hours/month (24/7)
-  - [N] instances (high availability)
+Show calculation breakdown per service: rate × quantity = cost. Present all 3 tiers side-by-side.
 
-Calculation:
-  vCPU cost:    [vCPU] vCPU x $0.04048/hour x 730 hours = $[calc]
-  Memory cost:  [mem] GB x $0.004445/hour x 730 hours = $[calc]
-  Per instance: $[calc]/month
-  [N] instances: $[total]/month
+---
 
-AWS Fargate Total: $[total]/month
-```
+## Part 3: Cost Comparison
 
-#### Alternative: Lambda (if stateless services)
+Present a side-by-side comparison:
 
-```
-Configuration:
-  - [N]M requests/month
-  - [mem]MB memory
-  - [duration] second average
+- GCP current monthly total
+- AWS Premium / Balanced / Optimized monthly totals
+- Difference (savings or increase) per tier vs GCP
+- Per-service breakdown for the Balanced tier
 
-Calculation:
-  Request cost: [N]M x $0.0000002 = $[calc]
-  Compute cost: [N]M x [duration]s x [mem_GB]GB = [X]K GB-seconds
-              [X]K x $0.0000166667 = $[calc]
+---
 
-AWS Lambda Total: $[total]/month
-```
+## Part 4: One-Time Migration Costs
 
-### B. Database Costs
+Calculate one-time costs in 3 categories:
 
-**Aurora PostgreSQL Multi-AZ (mapped from Cloud SQL):**
+**Development & Testing** — baseline hours at $150/hour:
 
-```
-Configuration (from aws-design.json):
-  - [instance_type] x [N] (primary + standby for HA)
-  - [size]GB storage
-  - Multi-AZ automatic backups
+| Component              | Hours |
+| ---------------------- | ----- |
+| Architecture design    | 16    |
+| Code migration/updates | 40    |
+| Testing & validation   | 24    |
+| Data migration         | 16    |
+| Deployment & cutover   | 16    |
 
-Calculation:
-  Instance cost:  [instance_type] = $[rate]/hour x [N] instances x 730 hours
-                                  = $[calc]
-  Storage cost:   [size]GB x $0.1/GB/month = $[calc]
-  I/O cost:       ~$0.2/million requests x [N]M = $[calc]
+Adjust based on `preferences.json` → `complexity_level`: low = -30%, medium = baseline, high = +50%.
 
-AWS Aurora Total: $[total]/month
-```
+**Infrastructure Setup** — ~$1,000 (account setup $0, data transfer $500-1,000, initial testing $50-200).
 
-#### Alternative: RDS Multi-AZ (if simpler database)
+**Training & Documentation** — ~$4,000 (AWS training $2,000, documentation $1,000, runbooks $1,000).
 
-```
-Configuration:
-  - [instance_type] x [N] (Multi-AZ)
-  - [size]GB storage
+---
 
-Calculation:
-  Instance cost:  $[rate]/hour x [N] x 730 = $[calc]
-  Storage cost:   [size]GB x $0.23/GB = $[calc]
-  Backup cost:    ~$[calc]
+## Part 5: ROI Analysis
 
-AWS RDS Total: $[total]/month
-```
+Calculate payback period for Balanced and Optimized tiers:
 
-### C. Storage Costs
+- `payback_months = one_time_total / monthly_savings`
+- If AWS is more expensive: note "No payback from cloud costs alone — justify with operational savings"
 
-**S3 with Tiering (mapped from Cloud Storage):**
+**Include operational savings estimate:**
 
-```
-Configuration (from aws-design.json):
-  - Active data: [size] GB in S3 Standard
-  - Archive data: [size] GB in S3 Intelligent-Tiering
+- Estimate engineering hours saved per month from managed services (Fargate vs self-managed, RDS vs self-hosted DB)
+- Calculate: `payback_with_ops = one_time_total / (cloud_savings + ops_savings)`
 
-Calculation:
-  Standard:       [size] GB x $0.023/GB = $[calc]
-  Intelligent:    [size] GB x $0.0125/GB (average) = $[calc]
-  Requests:       [N]K puts x $0.005/1K = $[calc]
-                  [N]M gets x $0.0004/1K = $[calc]
+**Non-cost benefits to present:** operational efficiency, global reach, service breadth, enterprise integration, vendor diversification, scaling flexibility (auto-scaling, spot instances, savings plans).
 
-AWS S3 Total: $[total]/month
-```
+---
 
-### D. Networking Costs
+## Part 6: Cost Optimization Opportunities
 
-**Application Load Balancer:**
+Present applicable optimizations with estimated savings:
 
-```
-Configuration (from aws-design.json):
-  - [N] ALB
-  - ~[N]M requests/month
+| Optimization                       | Savings Range | Applies To                       | When                                    |
+| ---------------------------------- | ------------- | -------------------------------- | --------------------------------------- |
+| Reserved Instances / Savings Plans | 40-60%        | Fargate, RDS, Aurora             | Post-migration (after validating usage) |
+| Compute Savings Plans              | 20-50%        | Fargate, Lambda                  | Post-migration                          |
+| S3 Intelligent-Tiering / S3-IA     | 38-50%        | S3 storage                       | During migration                        |
+| Spot Instances                     | 60-90%        | Batch/non-critical EC2 workloads | If batch jobs exist                     |
 
-Calculation:
-  Hourly charge:   $0.0225/hour x 730 hours = $16.43
-  LCU charge:      [N]M requests = [X] LCUs x $0.006/hour x 730 = $[calc]
+For each applicable optimization, calculate the before and after monthly cost.
 
-AWS ALB Total: $[total]/month
-```
+---
 
-**NAT Gateway (if VPC with private subnets):**
+## Part 7: Recommendation
 
-```
-Configuration:
-  - [N] NAT Gateway(s)
-  - [size] GB data processed/month
+Present 3 paths:
 
-Calculation:
-  NAT cost:   $32 x [N] = $[calc]
-  Data cost:  [size] GB x $0.045 = $[calc]
+1. **Migrate with Optimizations (Best ROI)** — optimized service choices, monthly cost, 5-year TCO savings
+2. **Phased Migration (Lower Risk)** — cluster-by-cluster per design evaluation order, validate each before proceeding
+3. **Stay on GCP (Lowest Cost)** — only if AWS is more expensive and costs are the sole metric
 
-AWS NAT Gateway Total: $[total]/month
-```
+Include migrate/stay decision factors:
 
-### E. Supporting Services
+- **Migrate if:** operational efficiency matters, AWS-specific services needed, batch workloads (Spot savings), long-term AWS strategy, growing infrastructure
+- **Stay if:** cost is the only metric and AWS is more expensive, team deeply experienced with GCP, no need for AWS-specific services
 
-**Secrets Manager:**
-
-```
-Configuration:
-  - [N] secrets (DB password, API keys, etc.)
-  - [N] secret retrievals/month
-
-Calculation:
-  Secrets:         [N] x $0.40/month = $[calc]
-  Retrievals:      [N] x $0.05/million = negligible
-
-AWS Secrets Manager: $[total]/month
-```
-
-**CloudWatch (Logs + Metrics):**
-
-```
-Configuration:
-  - [size]GB of logs/month
-  - [N] custom metrics
-
-Calculation:
-  Log ingestion:   [size]GB x $0.50 = $[calc]
-  Log storage:     [size]GB x $0.03/GB = $[calc]
-  Metrics:         [N] x $0.30 = $[calc]
-
-AWS CloudWatch: $[total]/month
-```
-
-## Part 3: Total Cost Comparison
-
-### AWS Architecture Total
-
-```
-Service                          Monthly Cost
------------------------------------------------
-Fargate (compute)               $[calc]
-Aurora/RDS (database)           $[calc]
-S3 (storage)                    $[calc]
-ALB (networking)                $[calc]
-NAT Gateway                     $[calc]
-Secrets Manager                 $[calc]
-CloudWatch                      $[calc]
------------------------------------------------
-TOTAL AWS (Base):               $[total]/month
-
-------- COST OPTIMIZATION OPTIONS -------
-
-Switch Fargate -> Lambda:       -$[calc] -> $[adjusted]
-Switch Aurora -> RDS:           -$[calc] -> $[adjusted]
-All optimizations:              $[lowest_total]/month
-```
-
-## Part 4: Current vs Projected Cost
-
-### Side-by-Side Comparison
-
-```
-CURRENT GCP          | $[total]/month (Cloud Run, Cloud SQL, Storage, LB, Other)
-
-PROJECTED AWS Options:
-                     | Compute   | Database  | Storage  | Net+Other | TOTAL     | vs GCP
-Option A (Premium)   | Fargate   | Aurora    | S3       | ALB+CW    | $[total]  | [+/-]$[diff]
-Option B (Balanced)  | Lambda    | RDS       | S3       | ALB+CW    | $[total]  | [+/-]$[diff]
-Option C (Optimized) | Lambda    | RDS       | S3-IA    | ALB+CW    | $[total]  | [+/-]$[diff]
-```
-
-## Part 5: One-Time Migration Costs
-
-In addition to monthly costs, migration requires one-time effort:
-
-### Development & Testing
-
-```
-Component              | Hours | Rate  | Cost
------------------------+-------+-------+----------
-Architecture design    | 16    | $150  | $2,400
-Code migration/updates | 40    | $150  | $6,000
-Testing & validation   | 24    | $150  | $3,600
-Data migration         | 16    | $150  | $2,400
-Deployment & cutover   | 16    | $150  | $2,400
------------------------+-------+-------+----------
-TOTAL Development      |       |       | $16,800
-```
-
-Adjust based on complexity from `preferences.json`:
-
-- `complexity_level = "low"` -> Reduce hours by 30%
-- `complexity_level = "medium"` -> Use baseline hours
-- `complexity_level = "high"` -> Increase hours by 50%
-
-### Infrastructure Setup
-
-```
-Component                   | Cost
-----------------------------+---------
-AWS account setup           | $0 (free)
-Data transfer (GCP -> AWS)  | $500-1,000
-Initial testing             | $50-200
-----------------------------+---------
-TOTAL Infrastructure        | ~$1,000
-```
-
-### Training & Documentation
-
-```
-Component              | Cost
------------------------+---------
-Team AWS training      | $2,000
-Documentation          | $1,000
-Runbooks & guides      | $1,000
------------------------+---------
-TOTAL Training         | $4,000
-```
-
-**Total One-Time Migration Cost: ~$21,800** (Adjust total based on complexity scaling above.)
-
-## Part 6: ROI Analysis
-
-### Payback Period Calculation
-
-### Scenario: Balanced Option
-
-```
-Monthly Savings:        $[GCP total] - $[AWS balanced] = $[savings or cost]/month
-One-Time Cost:          $[one_time_total]
-Payback Period:         $[one_time_total] / $[monthly savings] = [N] months
-
-If AWS is cheaper:
-  Result: Payback in [N] months
-
-If AWS is more expensive:
-  No payback from cloud costs alone -- justify with operational savings
-```
-
-### Scenario: Cost-Optimized Option
-
-```
-Monthly Savings:        $[GCP total] - $[AWS optimized] = $[savings]/month
-One-Time Cost:          $[one_time_total]
-Payback Period:         $[one_time_total] / $[monthly savings] = [N] months
-```
-
-### Non-Cost Benefits
-
-Present these alongside the financial analysis:
-
-- **Operational efficiency** — AWS managed services (Fargate, RDS) require less operational overhead
-- **Better global reach** — More AWS regions available for expansion
-- **Service breadth** — Access to broader AWS service catalog
-- **Enterprise integration** — Better integration with enterprise tools
-- **Vendor diversification** — Reduces single-vendor risk
-- **Scaling flexibility** — Auto-scaling, spot instances, savings plans
-
-## Part 7: Hidden Savings
-
-While direct cloud costs may or may not justify migration, operational savings often do:
-
-```
-GCP Operational Overhead:     [N] engineers managing GCP infra  = $[cost]/year
-AWS with Managed Services:    [N-1] engineers managing AWS      = $[cost]/year
-Operational Savings:          $[diff]/year = $[monthly]/month
-
-Payback (with ops savings):   $[one_time_total] / ($[cloud_savings] + $[ops_savings]) = [N] months
-
-Additional Business Value:
-  - Better global reach ([N] AWS regions vs [N] GCP regions)
-  - More service options for future workloads
-  - Better integration with enterprise tools
-  - Reduced vendor lock-in risk
-```
-
-## Part 8: Cost Optimization Opportunities
-
-If proceeding with migration, here are ways to save:
-
-### 1. Use Reserved Instances (40-60% Savings)
-
-```
-Before (On-Demand):
-  Fargate: $[cost]/month x 12 months = $[annual]/year
-  RDS:     $[cost]/month x 12 months = $[annual]/year
-  Total:   $[annual_total]/year
-
-After (1-Year Reserved):
-  Fargate: $[cost] x 40% discount = $[calc]/month = $[annual]/year
-  RDS:     $[cost] x 40% discount = $[calc]/month = $[annual]/year
-  Total:   $[annual_total]/year (save $[diff] = 40%)
-```
-
-### 2. Move Data to S3-IA Earlier (38-50% Storage Savings)
-
-```
-Before (All S3 Standard):
-  [size] GB Standard  = $[cost]/month
-  Total: $[total]/month
-
-After (Tiering with IA):
-  [size] GB Standard  = $[cost]/month
-  [size] GB S3-IA     = $[cost]/month
-  Total: $[total]/month (save $[diff]/month = [N]%)
-```
-
-### 3. Use Spot Instances for Batch (60-90% Savings)
-
-If you have batch jobs:
-
-```
-On-Demand EC2: $[rate]/hour
-Spot EC2:      $[rate]/hour (70% discount)
-
-Monthly batch job ([N] hours):
-  On-Demand: [N] x $[rate] = $[cost]
-  Spot:      [N] x $[rate] = $[cost] (save $[diff]/month)
-```
-
-### 4. Enable Compute Savings Plans (20-50% Savings)
-
-AWS Savings Plans cover Fargate and Lambda:
-
-```
-On-Demand: $[cost]/month
-Savings Plan (1-year): $[cost] x 25% discount = $[calc]/month (save $[diff])
-```
-
-## Part 9: Financial Summary
-
-### Executive Summary
-
-```
-                              Direct Cloud    With Ops Savings    With All Optimizations
-Current GCP:                  $[total]/mo     $[total]/mo         $[total]/mo
-Projected AWS:                $[total]/mo     $[total]/mo         $[total]/mo
-Monthly Difference:           [+/-]$[diff]    [+/-]$[diff]        [+/-]$[diff]
-Annual Benefit:               ~$[annual]      ~$[annual]          ~$[annual]
-Payback Period:               ~[N] months     ~[N] months         ~[N] months
-5-Year Savings:               ~$[total]       ~$[total]           ~$[total]
-```
-
-## Part 10: Recommendation
-
-### When to Migrate
-
-**MIGRATE IF:**
-
-- You value operational efficiency (fast payback with ops savings)
-- Your team wants to use AWS-specific services
-- You have batch workloads (use Spot for 60-90% savings)
-- Long-term AWS strategy aligns with business
-- Your infrastructure is growing (leverage AWS scale)
-
-**STAY ON GCP IF:**
-
-- Cloud costs are your only metric and AWS is more expensive
-- Team is highly experienced with GCP
-- Lowest possible spend is paramount
-- No need for AWS-specific services
-
-### Recommended Path
-
-### 1. Migrate with Optimizations (Best ROI)
-
-```
-Path: [optimized service choices based on design]
-Monthly Cost: $[total]
-Operational Savings: $[monthly]
-5-Year TCO: $[savings] savings
-Timeline: [N] weeks
-```
-
-### 2. Phased Migration (Lower Risk)
-
-```
-Path: Migrate cluster-by-cluster per design evaluation order
-Risk: Lower (validate each cluster before proceeding)
-Decision: Proceed to next cluster after validation
-```
-
-### 3. Stay on GCP (Lowest Cost)
-
-```
-Path: Keep current GCP infrastructure
-Monthly Cost: $[total]
-Risk: Higher cost if scale increases
-Decision: Only if costs are non-negotiable
-```
+---
 
 ## Output
 
@@ -561,16 +211,3 @@ The Execute phase (`execute.md`) uses `estimation-infra.json` as follows:
 6. **`financial_summary.payback_with_ops_months`** — Timeline pressure for realizing ROI
 
 The execution plan should reference the cost estimates to set per-cluster cost monitoring thresholds and validate that actual AWS spend aligns with projections after each cluster migration.
-
-## Key Metrics Summary
-
-| Metric                    | Value          | Note                                            |
-| ------------------------- | -------------- | ----------------------------------------------- |
-| Current GCP Cost          | $[total]/month | From billing-profile.json or inventory estimate |
-| AWS Cost (Premium)        | $[total]/month | Full-featured, no optimizations                 |
-| AWS Cost (Balanced)       | $[total]/month | Balanced performance and cost                   |
-| AWS Cost (Optimized)      | $[total]/month | Maximum savings with trade-offs                 |
-| One-Time Migration        | $[total]       | Development + infrastructure + training         |
-| Payback Period (Cloud)    | [N] months     | Based on cloud cost difference alone            |
-| Payback Period (With Ops) | [N] months     | Including operational efficiency gains          |
-| 5-Year Savings            | $[total]       | With optimizations and operational efficiency   |
