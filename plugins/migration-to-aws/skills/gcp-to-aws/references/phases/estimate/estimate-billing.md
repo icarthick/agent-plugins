@@ -31,7 +31,7 @@ Read from `$MIGRATION_DIR/`:
 **From `aws-design-billing.json`:**
 
 - `services[]` — GCP services with AWS mappings and confidence levels
-- `metadata.design_source` — should be `"billing_only"`
+- `metadata.design_source` — must be `"billing_only"`
 
 **From `billing-profile.json`:**
 

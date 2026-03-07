@@ -70,7 +70,7 @@ All resources with fields:
 
 **Output**: ONE cluster per resource type (not per resource)
 
-**Reasoning**: Identical workloads of the same GCP service type migrate together, share operational characteristics, and should be managed as a unit.
+**Reasoning**: Identical workloads of the same GCP service type migrate together, share operational characteristics, and are managed as a unit.
 
 **Mark all resources of this type as clustered; remove from unassigned pool.**
 

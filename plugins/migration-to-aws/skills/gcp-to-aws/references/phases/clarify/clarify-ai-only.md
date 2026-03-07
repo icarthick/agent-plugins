@@ -23,7 +23,7 @@ Produces the same `preferences.json` output but with `design_constraints` limite
 
 Present all questions at once. User can answer each, skip individual ones (use defaults), or say "use all defaults."
 
-### Q1 — AI framework or orchestration layer (select all that apply)
+## Q1 — AI framework or orchestration layer (select all that apply)
 
 Same decision logic, auto-detect signals, and interpretation as Q14 in `clarify-ai.md`.
 
@@ -33,7 +33,7 @@ Auto-detect: No framework → A, LiteLLM/OpenRouter/Kong/Apigee → B, LangChain
 
 Interpret → `ai_framework` array. Default: auto-detect, fallback `["direct"]`.
 
-### Q2 — What matters most for your AI application?
+## Q2 — What matters most for your AI application?
 
 > A) Best quality/reasoning | B) Fastest speed | C) Lowest cost | D) Specialized capability (→ Q10) | E) Balanced | F) I don't know
 
@@ -47,13 +47,13 @@ Interpret → `ai_framework` array. Default: auto-detect, fallback `["direct"]`.
 
 Interpret → `ai_priority`. Default: E → `"balanced"`.
 
-### Q3 — Monthly AI spend on OpenAI or Gemini?
+## Q3 — Monthly AI spend on OpenAI or Gemini?
 
 > A) < $500 | B) $500–$2K | C) $2K–$10K | D) > $10K | E) Don't know
 
 Interpret → `ai_monthly_spend`. Default: B → `"$500-$2K"`.
 
-### Q4 — Cross-cloud API call concerns
+## Q4 — Cross-cloud API call concerns
 
 Unique to AI-only: infrastructure stays on GCP while AI calls route to AWS.
 
@@ -68,7 +68,7 @@ Unique to AI-only: infrastructure stays on GCP while AI calls route to AWS.
 
 Interpret → `cross_cloud`. Default: B → `"latency-acceptable"`.
 
-### Q5 — Current model in use?
+## Q5 — Current model in use?
 
 Establishes baseline Bedrock recommendation. Override hierarchy: Q10 special features > Q2 priority > Q7/Q8 volume/latency > Q5 baseline.
 
@@ -89,7 +89,7 @@ Override examples: GPT-4 + Q2=cost → Haiku; Flash + Q10=extended thinking → 
 
 Interpret → `ai_model_baseline`. Default: auto-detect, fallback Q2 priority-based.
 
-### Q6 — Vision or text only?
+## Q6 — Vision or text only?
 
 > A) Text only | B) Vision required | C) Audio/Video inputs
 
@@ -101,7 +101,7 @@ Interpret → `ai_model_baseline`. Default: auto-detect, fallback Q2 priority-ba
 
 Interpret → `ai_vision`. Default: A → no constraint.
 
-### Q7 — Monthly AI usage volume
+## Q7 — Monthly AI usage volume
 
 > A) < 1M tokens | B) 1–10M | C) 10–100M | D) > 100M | E) Don't know
 
@@ -114,7 +114,7 @@ Interpret → `ai_vision`. Default: A → no constraint.
 
 Interpret → `ai_token_volume`: A → `"low"`, B → `"medium"`, C → `"high"`, D → `"very_high"`. Default: B → `"medium"`.
 
-### Q8 — Response speed importance
+## Q8 — Response speed importance
 
 Present with concrete anchors: Critical = autocomplete/live chat; Important = chat assistant; Flexible = reports/batch.
 
@@ -128,7 +128,7 @@ Present with concrete anchors: Critical = autocomplete/live chat; Important = ch
 
 Interpret → `ai_latency`. Default: B → `"important"`.
 
-### Q9 — AI task complexity
+## Q9 — AI task complexity
 
 Present with concrete examples: Simple = classify/extract/summarize; Moderate = analyze+JSON/few-shot; Complex = multi-turn reasoning/tool use/agentic.
 
@@ -142,7 +142,7 @@ Present with concrete examples: Simple = classify/extract/summarize; Moderate = 
 
 Interpret → `ai_complexity`. Default: B → `"moderate"`.
 
-### Q10 — Specialized features needed
+## Q10 — Specialized features needed
 
 Same decision logic as Q17 in `clarify-ai.md`.
 

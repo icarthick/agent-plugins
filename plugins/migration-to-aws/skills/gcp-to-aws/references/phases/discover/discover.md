@@ -24,7 +24,7 @@ Multiple artifacts can be produced in a single run — they are not mutually exc
 3. Create `.migration/.gitignore` file (if not already present) with exact content:
 
    ```
-   # Auto-generated migration state (temporary, should not be committed)
+   # Auto-generated migration state (temporary, do not commit)
    *
    !.gitignore
    ```
@@ -137,7 +137,7 @@ Output to user: "Discover phase complete. Discovered X total resources across Y 
 3. `ai-workload-profile.json` — from discover-app-code.md
 4. `billing-profile.json` — from discover-billing.md
 
-**No other files should be created:**
+**No other files must be created:**
 
 - No README.md
 - No discovery-summary.md

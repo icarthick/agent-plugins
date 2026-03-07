@@ -210,4 +210,4 @@ The Execute phase (`execute.md`) uses `estimation-infra.json` as follows:
 5. **`recommendation.next_steps`** — Prerequisites for starting execution
 6. **`financial_summary.payback_with_ops_months`** — Timeline pressure for realizing ROI
 
-The execution plan should reference the cost estimates to set per-cluster cost monitoring thresholds and validate that actual AWS spend aligns with projections after each cluster migration.
+The execution plan references the cost estimates to set per-cluster cost monitoring thresholds and validate that actual AWS spend aligns with projections after each cluster migration.

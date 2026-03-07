@@ -6,7 +6,7 @@ This file is loaded by `design-ai.md` when `ai-workload-profile.json` has `summa
 
 Many GCP-hosted applications use OpenAI's API rather than Vertex AI. This guide covers that migration path.
 
-All pricing should be verified via AWS Pricing MCP or `references/shared/pricing-cache.md`. Uses OpenAI Standard tier pricing.
+Verify all pricing via AWS Pricing MCP or `references/shared/pricing-cache.md`. Uses OpenAI Standard tier pricing.
 
 ---
 

@@ -49,7 +49,7 @@ If any required file is missing: **STOP**. Output: "Missing required artifact: [
 
 > **For a more accurate migration plan, provide Terraform files and re-run discovery.**
 > This billing-only plan is suitable for initial budgeting and stakeholder discussions,
-> but should be refined with IaC discovery before executing the actual migration.
+> but must be refined with IaC discovery before executing the actual migration.
 
 ## Part 2: Conservative Timeline
 
