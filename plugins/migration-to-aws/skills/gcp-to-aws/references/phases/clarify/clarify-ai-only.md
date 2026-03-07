@@ -2,7 +2,7 @@
 
 **Standalone flow** — Used when ONLY `ai-workload-profile.json` exists (no infrastructure or billing artifacts). Infrastructure stays on GCP; only AI/LLM calls move to AWS Bedrock.
 
-This file replaces the category-based question system for AI-only migrations. It produces the same `preferences.json` output but with `design_constraints` limited to region and compliance, and `ai_constraints` fully populated.
+Produces the same `preferences.json` output but with `design_constraints` limited to region and `ai_constraints` fully populated.
 
 ---
 
@@ -16,404 +16,173 @@ This file replaces the category-based question system for AI-only migrations. It
 > **Capabilities in use:** [from `integration.capabilities_summary` where true]
 > **Integration pattern:** [from `integration.pattern`] via [from `integration.primary_sdk`]
 > **Gateway/router:** [from `integration.gateway_type`, or "None (direct SDK)"]
-> **Frameworks:** [from `integration.frameworks`, or "None"]
 
 ---
 
 ## Step 2: Ask Questions (Q1–Q10)
 
-Present all questions at once with a progress indicator. Questions use their own numbering (Q1–Q10), independent of the full migration numbering.
+Present all questions at once. User can answer each, skip individual ones (use defaults), or say "use all defaults."
 
-```
-I have a few questions to tailor your AI migration plan.
-You can answer each, skip individual ones (I'll use sensible defaults),
-or say "use all defaults" to proceed.
-```
+### Q1 — AI framework or orchestration layer (select all that apply)
 
----
+Same decision logic, auto-detect signals, and interpretation as Q14 in `clarify-ai.md`.
 
-### AI Framework & Orchestration (Q1)
+Auto-detect: No framework → A, LiteLLM/OpenRouter/Kong/Apigee → B, LangChain/LangGraph → C, CrewAI/AutoGen → D, OpenAI Agents SDK → E, MCP/A2A → F, Vapi/Bland.ai/Retell → G.
 
-Always asked first. The orchestration layer determines the entire migration approach — gateway config change, provider swap, or full agent migration.
+> A) No framework — direct API calls | B) LLM router/gateway | C) LangChain / LangGraph | D) Multi-agent framework | E) OpenAI Agents SDK | F) MCP/A2A | G) Voice platform
 
----
-
-### Q1 — What AI framework or orchestration layer are you using? (select all that apply)
-
-Same decision logic, auto-detect signals, combination logic, and interpretation as Q14 in `clarify-ai.md`. Refer to that file for full details.
-
-**Auto-detect signals** — scan application code before asking:
-
-- No AI framework imports, raw HTTP calls → A
-- LiteLLM, OpenRouter, PortKey, Helicone, Kong, Apigee → B
-- LangChain/LangGraph/LlamaIndex → C
-- CrewAI, AutoGen, custom multi-agent → D
-- OpenAI Agents SDK / Swarm → E
-- MCP / A2A protocol → F
-- Vapi, Bland.ai, Retell, Whisper → G
-
-> How your AI calls reach the model determines migration effort.
->
-> A) No framework — direct API calls
-> B) LLM router/gateway (LiteLLM, OpenRouter, PortKey, Kong, Apigee)
-> C) LangChain / LangGraph
-> D) Multi-agent framework (CrewAI, AutoGen, custom)
-> E) OpenAI Agents SDK / custom agent loop
-> F) MCP servers or A2A protocol
-> G) Voice/conversational agent platform (Vapi, Retell, Bland.ai)
-
-Interpret: same as Q14 in `clarify-ai.md` → `ai_framework` array.
-
-Default: _(auto-detect)_ — fall back to `["direct"]`.
-
----
-
-### Priority & Cost (Q2–Q3)
-
-Top-level filters for model selection and credits eligibility.
-
----
+Interpret → `ai_framework` array. Default: auto-detect, fallback `["direct"]`.
 
 ### Q2 — What matters most for your AI application?
 
-Same decision logic as Q16 in `clarify-ai.md`.
+> A) Best quality/reasoning | B) Fastest speed | C) Lowest cost | D) Specialized capability (→ Q10) | E) Balanced | F) I don't know
 
-**Context for user:** When asking, help the user think about their actual priority rather than defaulting to "best quality":
+| Answer   | Model Impact                                          |
+| -------- | ----------------------------------------------------- |
+| Quality  | Claude Sonnet 4.6 primary; Opus 4.6 for hardest tasks |
+| Speed    | Claude Haiku 4.5; also Nova Micro/Lite                |
+| Cost     | Claude Haiku 4.5 or Nova Micro                        |
+| Special  | Deferred to Q10                                       |
+| Balanced | Claude Sonnet 4.6                                     |
 
-- **Best quality/reasoning** — accuracy and depth matter most; you'd pay more or wait longer for better answers (e.g., legal analysis, complex code generation, medical summarization)
-- **Fastest speed** — response time is the primary constraint; users are waiting in real-time (e.g., chat UI, autocomplete, live suggestions)
-- **Lowest cost** — volume is high and budget is tight; good-enough quality at scale (e.g., classification, tagging, bulk summarization)
-- **Specialized capability** — you rely on a specific feature like vision, function calling, or extended thinking (covered in Q10)
-- **Balanced** — no single dimension dominates; you want a solid all-rounder
+Interpret → `ai_priority`. Default: E → `"balanced"`.
 
-> This determines our model selection strategy.
->
-> A) Best quality/reasoning
-> B) Fastest speed
-> C) Lowest cost
-> D) Specialized capability (covered in Q10)
-> E) Balanced
-> F) I don't know
+### Q3 — Monthly AI spend on OpenAI or Gemini?
 
-| Answer                 | Recommendation Impact                                                                                                        |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Best quality/reasoning | Claude Sonnet 4.6 (latest, highest reasoning in Sonnet family) — primary; Claude Opus 4.6 for most demanding reasoning tasks |
-| Fastest speed          | Claude Haiku 4.5 — lowest latency in Claude family; also consider Amazon Nova Micro/Lite for cost-optimized speed            |
-| Lowest cost            | Claude Haiku 4.5 or Amazon Nova Micro — lowest cost per token                                                                |
-| Specialized capability | Deferred to Q10 to determine which model                                                                                     |
-| Balanced               | Claude Sonnet 4.6 as default balanced recommendation                                                                         |
+> A) < $500 | B) $500–$2K | C) $2K–$10K | D) > $10K | E) Don't know
 
-Interpret: same as Q16 → `ai_priority`.
-
-Default: E — `ai_priority: "balanced"`.
-
----
-
-### Q3 — Approximately how much are you spending on OpenAI or Gemini per month?
-
-Same decision logic as Q15 in `clarify-ai.md` — credits eligibility and cost baseline.
-
-> AI spend helps me calculate migration credits eligibility and establish a Bedrock cost baseline.
->
-> A) < $500/month
-> B) $500–$2,000/month
-> C) $2,000–$10,000/month
-> D) > $10,000/month
-> E) I don't know
-
-Interpret: same as Q15 → `ai_monthly_spend`.
-
-Default: B — `ai_monthly_spend: "$500-$2K"`.
-
----
-
-### Cross-Cloud Architecture (Q4)
-
-Unique to AI-only migrations where infrastructure stays on GCP while AI calls route to AWS.
-
----
+Interpret → `ai_monthly_spend`. Default: B → `"$500-$2K"`.
 
 ### Q4 — Cross-cloud API call concerns
 
-**Rationale:** AI-only migrations keep infrastructure on GCP while moving AI calls to AWS Bedrock. Cross-region API calls add latency and potential egress costs that may affect the recommendation. This question is unique to AI-only migrations.
+Unique to AI-only: infrastructure stays on GCP while AI calls route to AWS.
 
-**Context for user:** Explain the tradeoff concretely:
+> A) Latency critical — AI in hot path | B) Latency acceptable — async/users can wait | C) Concerned about egress costs | D) Want to test first — parallel running
 
-- **Yes — latency critical** — AI calls are in the hot path and every 20–50ms matters (e.g., real-time chat, autocomplete, live transcription)
-- **No — latency acceptable** — AI calls are async or users expect a brief wait (e.g., background processing, batch jobs, report generation)
-- **Concerned about egress costs** — sending large payloads (images, documents, audio) between GCP and AWS
-- **Want to test first** — run both providers in parallel before committing
+| Answer           | Impact                                         |
+| ---------------- | ---------------------------------------------- |
+| Latency critical | VPC endpoint; closest region to GCP deployment |
+| Acceptable       | Standard endpoint; region by cost              |
+| Egress concerned | PrivateLink; egress cost analysis              |
+| Test first       | Phased migration; parallel running guidance    |
 
-> Since your infrastructure stays on GCP, AI calls to Bedrock will cross cloud boundaries. This affects latency and data transfer costs.
->
-> A) Yes — latency critical, AI calls are in the hot path
-> B) No — latency acceptable, async or users can wait
-> C) Concerned about egress costs for large payloads
-> D) Want to test first — run both providers in parallel
+Interpret → `cross_cloud`. Default: B → `"latency-acceptable"`.
 
-| Answer                 | Recommendation Impact                                                                                                     |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Latency critical       | VPC endpoint for Bedrock strongly recommended; us-east-1 or closest region to GCP deployment; latency benchmarks included |
-| Latency acceptable     | Standard Bedrock endpoint; region selected for cost/availability                                                          |
-| Concerned about egress | AWS PrivateLink for Bedrock recommended; egress cost analysis included                                                    |
-| Want to test first     | Phased migration plan; parallel running guidance included                                                                 |
+### Q5 — Current model in use?
 
-Interpret:
+Establishes baseline Bedrock recommendation. Override hierarchy: Q10 special features > Q2 priority > Q7/Q8 volume/latency > Q5 baseline.
 
-```
-A -> cross_cloud: "latency-critical" — VPC endpoint; closest region to GCP
-B -> cross_cloud: "latency-acceptable" — Standard endpoint; region by cost
-C -> cross_cloud: "egress-concerned" — PrivateLink; egress analysis
-D -> cross_cloud: "test-first" — Phased migration; parallel running
-```
+> A) Gemini Flash | B) Gemini Pro | C) GPT-3.5 Turbo | D) GPT-4/4 Turbo | E) GPT-4o | F) GPT-5/5.x | G) o-series | H) Other/Multiple | I) Don't know
 
-Default: B — `cross_cloud: "latency-acceptable"`.
+| Source         | Baseline Recommendation           | Pricing Context                    |
+| -------------- | --------------------------------- | ---------------------------------- |
+| Gemini Flash   | Claude Haiku 4.5 ($1/$5)          | Strong savings                     |
+| Gemini Pro     | Claude Sonnet 4.6 ($3/$15)        | Comparable tier                    |
+| GPT-3.5 Turbo  | Claude Haiku 4.5 ($1/$5)          | Faster and cheaper                 |
+| GPT-4/4 Turbo  | Claude Sonnet 4.6 ($3/$15)        | Major savings (GPT-4T: $10/$30)    |
+| GPT-4o         | Claude Sonnet 4.6 ($3/$15)        | Modest savings on output           |
+| GPT-5/5.x      | Claude Sonnet 4.6 ($3/$15)        | Savings story is quality, not cost |
+| GPT-5 flagship | Claude Opus 4.6 ($5/$25)          | Cheaper than GPT-5 Pro ($15/$120)  |
+| o-series       | Sonnet 4.6 with extended thinking | o1 $15/$60 → significant savings   |
 
----
+Override examples: GPT-4 + Q2=cost → Haiku; Flash + Q10=extended thinking → Sonnet; GPT-4o + Q10=speech → Nova Sonic.
 
-### Model & Modality (Q5–Q6)
+Interpret → `ai_model_baseline`. Default: auto-detect, fallback Q2 priority-based.
 
-Establish the baseline model recommendation and whether multimodal capabilities are needed.
+### Q6 — Vision or text only?
 
----
+> A) Text only | B) Vision required | C) Audio/Video inputs
 
-### Q5 — Which model are you currently using?
+| Answer      | Impact                                                   |
+| ----------- | -------------------------------------------------------- |
+| Text only   | Full model catalog                                       |
+| Vision      | Claude Sonnet family required; Haiku excluded for vision |
+| Audio/Video | Nova Reel/Sonic; Claude excluded for audio/video input   |
 
-**Rationale:** The source model establishes the baseline Bedrock recommendation — a like-for-like capability match. This is a starting point only; answers to Q2 (priority), Q7 (volume), Q8 (latency), Q9 (complexity), and Q10 (special features) can all override this baseline.
-
-**Override hierarchy:**
-
-1. Q10 special features — hard overrides (e.g., speech-to-speech forces Nova Sonic regardless of source model)
-2. Q2 priority — adjusts up or down within the Claude family (e.g., "lowest cost" downgrades Sonnet → Haiku even if source model was GPT-4)
-3. Q7/Q8 volume and latency — may adjust toward provisioned throughput or faster models
-4. Q5 source model — baseline only, used when no overrides apply
-
-> The model you're currently using helps me recommend the closest Bedrock equivalent.
->
-> A) Gemini Flash (1.5/2.0/2.5 Flash)
-> B) Gemini Pro (1.5/2.5/3 Pro)
-> C) GPT-3.5 Turbo
-> D) GPT-4 / GPT-4 Turbo
-> E) GPT-4o
-> F) GPT-5 / GPT-5.x
-> G) o-series (o1, o3)
-> H) Other / Multiple models
-> I) I don't know
-
-| Source Model              | Baseline Bedrock Recommendation                                       | Pricing Context                                                  |
-| ------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| Gemini Flash variants     | Claude Haiku 4.5 ($1/$5) — speed and cost optimized                   | Strong savings vs Gemini Flash pricing                           |
-| Gemini Pro variants       | Claude Sonnet 4.6 ($3/$15) — quality match                            | Comparable pricing tier                                          |
-| GPT-3.5 Turbo             | Claude Haiku 4.5 ($1/$5) — cost-equivalent                            | Haiku is faster and cheaper                                      |
-| GPT-4 / GPT-4 Turbo       | Claude Sonnet 4.6 ($3/$15) — quality equivalent                       | Major savings: GPT-4 Turbo is $10/$30 vs Sonnet $3/$15           |
-| GPT-4o                    | Claude Sonnet 4.6 ($3/$15) — performance equivalent                   | Modest savings on output; input slightly higher on Bedrock       |
-| GPT-5 / GPT-5.x           | Claude Sonnet 4.6 ($3/$15) — performance equivalent                   | GPT-5 is $1.25/$10 — savings story is quality/features, not cost |
-| GPT-5 (flagship use case) | Claude Opus 4.6 ($5/$25) — flagship-to-flagship                       | Opus still cheaper than GPT-5 Pro ($15/$120)                     |
-| o-series (o1, o3)         | Claude Sonnet 4.6 with extended thinking; Opus 4.6 for most demanding | o1 is $15/$60 — significant savings with Sonnet 4.6 at $3/$15    |
-
-**Example overrides:**
-
-- GPT-4 user (baseline: Sonnet 4.6) + Q2=lowest cost → **Haiku 4.5**
-- Gemini Flash user (baseline: Haiku 4.5) + Q10=extended thinking → **Sonnet 4.6 with extended thinking**
-- GPT-4o user (baseline: Sonnet 4.6) + Q10=real-time speech → **Nova Sonic** (Claude has no speech capability)
-- GPT-3.5 user (baseline: Haiku 4.5) + Q9=complex reasoning → **Sonnet 4.6** (task complexity overrides cost-equivalent mapping)
-- GPT-5 user (baseline: Opus 4.6) + Q2=balanced → **Sonnet 4.6** (priority overrides flagship-to-flagship mapping)
-
-Interpret: same as Q19 in `clarify-ai.md` → `ai_model_baseline`.
-
-Default: _(auto-detect)_ — fall back to Q2 priority-based selection.
-
----
-
-### Q6 — Do you need vision or just text?
-
-**Rationale:** Vision capability narrows the model selection to multimodal-capable models only.
-
-> Vision capability limits which models are available.
->
-> A) Text only
-> B) Vision required
-> C) Audio/Video inputs needed
-
-| Answer             | Recommendation Impact                                                                 |
-| ------------------ | ------------------------------------------------------------------------------------- |
-| Text only          | Full model catalog available; cheapest/fastest text model per Q2 priority             |
-| Vision required    | Claude Sonnet family (multimodal) required; Haiku excluded for vision tasks           |
-| Audio/Video inputs | Amazon Nova Reel (video) or Nova Sonic (audio); Claude excluded for audio/video input |
-
-Interpret: same as Q20 → `ai_vision`.
-
-Default: A — no constraint (text only).
-
----
-
-### Workload Characteristics (Q7–Q10)
-
-These questions refine the model recommendation based on actual usage patterns — volume, latency, complexity, and specialized features can all override the baseline from Q5.
-
----
+Interpret → `ai_vision`. Default: A → no constraint.
 
 ### Q7 — Monthly AI usage volume
 
-**Rationale:** Volume determines whether on-demand or provisioned throughput is more cost-effective.
+> A) < 1M tokens | B) 1–10M | C) 10–100M | D) > 100M | E) Don't know
 
-> Volume determines pricing strategy — on-demand vs provisioned throughput.
->
-> A) Low (< 1M tokens/month)
-> B) Medium (1–10M tokens/month)
-> C) High (10–100M tokens/month)
-> D) Very high (> 100M tokens/month)
-> E) I don't know
+| Answer    | Impact                                             |
+| --------- | -------------------------------------------------- |
+| Low       | On-demand; no provisioned throughput               |
+| Medium    | On-demand with prompt caching analysis             |
+| High      | Provisioned throughput analysis; prompt caching    |
+| Very high | Provisioned throughput required; capacity planning |
 
-| Answer    | Recommendation Impact                                                                  |
-| --------- | -------------------------------------------------------------------------------------- |
-| Low       | On-demand pricing; no provisioned throughput needed                                    |
-| Medium    | On-demand with prompt caching analysis                                                 |
-| High      | Provisioned throughput analysis; prompt caching strongly recommended                   |
-| Very high | Provisioned throughput required for cost control; dedicated capacity planning included |
+Interpret → `ai_token_volume`. Default: B → `"1M-10M"`.
 
-Interpret:
+### Q8 — Response speed importance
 
-```
-A -> ai_token_volume: "<1M" — On-demand; no provisioned throughput
-B -> ai_token_volume: "1M-10M" — On-demand; prompt caching analysis
-C -> ai_token_volume: "10M-100M" — Provisioned throughput analysis; prompt caching
-D -> ai_token_volume: ">100M" — Provisioned throughput required; capacity planning
-E -> same as default (B)
-```
+Present with concrete anchors: Critical = autocomplete/live chat; Important = chat assistant; Flexible = reports/batch.
 
-Default: B — `ai_token_volume: "1M-10M"`.
+> A) Critical (< 500ms) | B) Important (< 2s) | C) Flexible (2–10s)
 
----
+| Answer    | Impact                                                       |
+| --------- | ------------------------------------------------------------ |
+| Critical  | Haiku/Nova Micro; streaming required; provisioned throughput |
+| Important | Sonnet 4.6 with streaming; standard on-demand                |
+| Flexible  | Any model; batch inference for cost savings                  |
 
-### Q8 — How important is response speed?
+Interpret → `ai_latency`. Default: B → `"important"`.
 
-**Rationale:** Latency requirements can override cost and quality preferences from Q2.
+### Q9 — AI task complexity
 
-**Context for user:** When asking, anchor each option in a real scenario:
+Present with concrete examples: Simple = classify/extract/summarize; Moderate = analyze+JSON/few-shot; Complex = multi-turn reasoning/tool use/agentic.
 
-- **Critical (< 500ms)** — users are staring at a loading spinner; every millisecond matters (e.g., autocomplete, live chat, real-time transcription)
-- **Important (< 2s)** — users expect a quick response but a brief pause is acceptable (e.g., chat assistant, search augmentation, inline suggestions)
-- **Flexible (2–10s)** — users submit a request and can wait; background or async is fine (e.g., report generation, batch analysis, email drafting)
+> A) Simple | B) Moderate | C) Complex
 
-> Latency requirements can override cost and quality preferences.
->
-> A) Critical (< 500ms)
-> B) Important (< 2s)
-> C) Flexible (2–10s)
+| Answer   | Impact                                                              |
+| -------- | ------------------------------------------------------------------- |
+| Simple   | Haiku/Nova Micro sufficient; significant cost savings               |
+| Moderate | Sonnet 4.6 recommended; Haiku may suffice with prompt engineering   |
+| Complex  | Sonnet 4.6 required; extended thinking considered; Opus for hardest |
 
-| Answer             | Recommendation Impact                                                                             |
-| ------------------ | ------------------------------------------------------------------------------------------------- |
-| Critical (< 500ms) | Claude Haiku 4.5 or Nova Micro; streaming required; provisioned throughput for consistent latency |
-| Important (< 2s)   | Claude Sonnet 4.6 with streaming; standard on-demand acceptable                                   |
-| Flexible (2–10s)   | Any model; batch inference considered for cost savings at high volume                             |
-
-Interpret: same as Q21 → `ai_latency`.
-
-Default: B — `ai_latency: "important"`.
-
----
-
-### Q9 — How complex are your AI tasks?
-
-**Rationale:** Task complexity determines whether a cheaper/faster model can handle the workload or whether a more capable model is required.
-
-**Context for user:** When asking, give concrete examples so the user doesn't over- or under-estimate:
-
-- **Simple** — single-step tasks with short prompts: classify this text, extract these fields, summarize this paragraph
-- **Moderate** — multi-step prompts with examples or structured output: analyze this document and return JSON, generate content following a template, few-shot classification
-- **Complex** — multi-turn reasoning, tool use, or long chain-of-thought: agentic workflows, code generation with debugging loops, research tasks that require planning and iteration
-
-> Task complexity determines whether cheaper models can handle your workload.
->
-> A) Simple (classification, short summaries, extraction)
-> B) Moderate (analysis, structured content, few-shot)
-> C) Complex (multi-step reasoning, tool use, agentic workflows)
-
-| Answer   | Recommendation Impact                                                                       |
-| -------- | ------------------------------------------------------------------------------------------- |
-| Simple   | Claude Haiku 4.5 or Nova Micro sufficient; significant cost savings vs larger models        |
-| Moderate | Claude Sonnet 4.6 recommended; Haiku may suffice with prompt engineering                    |
-| Complex  | Claude Sonnet 4.6 required; extended thinking considered; Claude Opus 4.6 for hardest tasks |
-
-Interpret: same as Q22 → `ai_complexity`.
-
-Default: B — `ai_complexity: "moderate"`.
-
----
+Interpret → `ai_complexity`. Default: B → `"moderate"`.
 
 ### Q10 — Specialized features needed
 
 Same decision logic as Q17 in `clarify-ai.md`.
 
-> Some features are only available in specific models. What's your most critical specialized requirement?
->
-> A) Function calling / Tool use
-> B) Ultra-long context (> 300K tokens)
-> C) Extended thinking / Chain-of-thought
-> D) Prompt caching
-> E) RAG optimization
-> F) Agentic workflows
-> G) Real-time speed (< 500ms)
-> H) Multimodal with image generation
-> I) Real-time conversational speech
-> J) None — standard features sufficient
+> A) Function calling | B) Ultra-long context (> 300K) | C) Extended thinking | D) Prompt caching | E) RAG optimization | F) Agentic workflows | G) Real-time speed | H) Image generation | I) Conversational speech | J) None
 
-Interpret: same as Q17 → `ai_critical_feature`.
-
-Default: J — no additional override.
+Interpret → `ai_critical_feature`. Default: J → no override.
 
 ---
 
 ## Step 3: Write preferences.json
 
-Write `$MIGRATION_DIR/preferences.json` with AI-only structure:
+Write `$MIGRATION_DIR/preferences.json`:
 
-```json
-{
-  "metadata": {
-    "timestamp": "<ISO timestamp>",
-    "migration_type": "ai-only",
-    "discovery_artifacts": ["ai-workload-profile.json"],
-    "questions_asked": ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7", "Q8", "Q9", "Q10"],
-    "questions_defaulted": [],
-    "questions_skipped_extracted": [],
-    "questions_skipped_not_applicable": []
-  },
-  "design_constraints": {
-    "target_region": { "value": "us-east-1", "chosen_by": "derived" }
-  },
-  "ai_constraints": {
-    "ai_framework": { "value": ["langchain"], "chosen_by": "extracted" },
-    "ai_priority": { "value": "balanced", "chosen_by": "user" },
-    "ai_monthly_spend": { "value": "$500-$2K", "chosen_by": "user" },
-    "cross_cloud": { "value": "latency-acceptable", "chosen_by": "user" },
-    "ai_model_baseline": { "value": "claude-sonnet-4-6", "chosen_by": "derived" },
-    "ai_vision": { "value": "text-only", "chosen_by": "user" },
-    "ai_token_volume": { "value": "1M-10M", "chosen_by": "user" },
-    "ai_latency": { "value": "important", "chosen_by": "user" },
-    "ai_complexity": { "value": "moderate", "chosen_by": "user" },
-    "ai_critical_feature": { "value": "none", "chosen_by": "user" },
-    "ai_capabilities_required": {
-      "value": ["text_generation", "streaming"],
-      "chosen_by": "derived"
-    }
-  }
-}
-```
+**Schema — AI-only structure:**
 
-### Schema Notes (AI-Only)
+| Field                      | Path                                      | Notes                                       |
+| -------------------------- | ----------------------------------------- | ------------------------------------------- |
+| `migration_type`           | `metadata.migration_type`                 | `"ai-only"` — downstream skips infra phases |
+| `discovery_artifacts`      | `metadata.discovery_artifacts`            | `["ai-workload-profile.json"]`              |
+| `questions_asked`          | `metadata.questions_asked`                | Array of Q1-Q10 asked                       |
+| `questions_defaulted`      | `metadata.questions_defaulted`            | Array of Q IDs where defaults used          |
+| `target_region`            | `design_constraints.target_region`        | Derived from GCP region or cross-cloud pref |
+| `ai_framework`             | `ai_constraints.ai_framework`             | From Q1                                     |
+| `ai_priority`              | `ai_constraints.ai_priority`              | From Q2                                     |
+| `ai_monthly_spend`         | `ai_constraints.ai_monthly_spend`         | From Q3                                     |
+| `cross_cloud`              | `ai_constraints.cross_cloud`              | From Q4 (unique to AI-only)                 |
+| `ai_model_baseline`        | `ai_constraints.ai_model_baseline`        | From Q5                                     |
+| `ai_vision`                | `ai_constraints.ai_vision`                | From Q6                                     |
+| `ai_token_volume`          | `ai_constraints.ai_token_volume`          | From Q7                                     |
+| `ai_latency`               | `ai_constraints.ai_latency`               | From Q8                                     |
+| `ai_complexity`            | `ai_constraints.ai_complexity`            | From Q9                                     |
+| `ai_critical_feature`      | `ai_constraints.ai_critical_feature`      | From Q10                                    |
+| `ai_capabilities_required` | `ai_constraints.ai_capabilities_required` | Derived from `capabilities_summary`         |
 
-1. `metadata.migration_type` is `"ai-only"` — downstream phases use this to skip infrastructure design/estimation.
-2. `design_constraints` is minimal — only `target_region` (derived from GCP deployment region or cross-cloud latency preference).
-3. `ai_constraints.cross_cloud` is unique to AI-only migrations — not present in full migration preferences.
-4. `ai_constraints.ai_token_volume` uses different tiers than full migration Q18 — more granular for AI-only cost analysis.
-5. All other schema rules from `clarify.md` apply (value/chosen_by fields, no nulls, derived capabilities).
+Each `ai_constraints` field uses `{ "value": ..., "chosen_by": "user"|"extracted"|"derived" }` format. No nulls. All schema rules from `clarify.md` apply.
 
 ---
 
 ## Step 4: Update Phase Status
 
-Use the Phase Status Update Protocol (Bash `cat` heredoc) to write `.phase-status.json` with `phases.clarify` set to `"completed"` — **in the same turn** as the output message below.
+Use the Phase Status Update Protocol to write `.phase-status.json` with `phases.clarify` set to `"completed"` — in the same turn as the output message.
 
-Output to user: "Clarification complete. Proceeding to Phase 3: Design AI Migration Architecture."
+Output: "Clarification complete. Proceeding to Phase 3: Design AI Migration Architecture."
