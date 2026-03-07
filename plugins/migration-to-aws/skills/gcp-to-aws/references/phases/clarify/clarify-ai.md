@@ -166,7 +166,7 @@ Interpret → `ai_critical_feature`. Default: J → no override.
 | Medium volume + balanced      | On-demand Claude Sonnet or Haiku depending on Q16; Savings Plans analysis                                     |
 | High volume + cost critical   | **Provisioned throughput strongly recommended**; Claude Haiku or Nova Micro; prompt caching analysis included |
 
-Interpret → `ai_volume_cost`. Default: A → `"low-quality"`.
+Interpret → `ai_token_volume`: A → `"low"`, B → `"medium"`, C → `"high"`. Default: A → `"low"`.
 
 ---
 

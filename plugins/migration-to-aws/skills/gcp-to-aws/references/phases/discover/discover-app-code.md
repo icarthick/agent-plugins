@@ -3,9 +3,7 @@
 > Self-contained application code discovery sub-file. Scans for source code, detects GCP SDK imports, infers resources, flags AI signals, and if AI confidence >= 70%, extracts detailed AI workload information and generates `ai-workload-profile.json`.
 > If no source code files are found, exits cleanly with no output.
 
-<!-- TODO: Dead-end case — if app code is the only data source and no AI is detected
-     (confidence < 70%), this file produces no artifacts. The user must provide
-     additional data (Terraform or billing) to proceed with migration planning. -->
+**Dead-end handling:** If this file exits without producing artifacts (no source code found, or AI confidence < 70%), report to the parent orchestrator: what signals were found (if any), the confidence level, and that the user should provide Terraform files or billing exports to proceed with migration planning.
 
 **Execute ALL steps in order. Do not skip or optimize.**
 
@@ -127,7 +125,7 @@ Before finalizing AI detection, verify signals are genuine:
 - **Vector database alone is not AI** — Require embeddings library imports (langchain, llama-index). A Firestore/Datastore by itself is a regular database.
 - **Dead/commented-out code excluded** — Only count active code.
 
-**Exit gate:** If overall AI confidence < 70%, **exit cleanly**. Record the signals found and confidence for reference, but do not generate `ai-workload-profile.json`. The inferred resources from Steps 1-2 remain available for other sub-files (e.g., discover-iac.md may use them for evidence merge).
+**Exit gate:** If overall AI confidence < 70%, **exit cleanly**. Do not generate `ai-workload-profile.json`. Report to the parent orchestrator: signals found, confidence level, and reason for not generating the AI profile. The inferred resources from Steps 1-2 remain available for other sub-files (e.g., discover-iac.md may use them for evidence merge). If no other sub-discoverer produces artifacts, the parent orchestrator will inform the user to provide Terraform files or billing exports.
 
 **If confidence >= 70%**, continue to Steps 5-8 below.
 

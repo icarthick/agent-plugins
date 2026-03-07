@@ -264,7 +264,7 @@ Apply the interpret rule for every answered question (defined in each category f
     "ai_monthly_spend": { "value": "$500-$2K", "chosen_by": "user" },
     "ai_priority": { "value": "balanced", "chosen_by": "user" },
     "ai_critical_feature": { "value": "function-calling", "chosen_by": "user" },
-    "ai_volume_cost": { "value": "low-quality", "chosen_by": "user" },
+    "ai_token_volume": { "value": "low", "chosen_by": "user" },
     "ai_model_baseline": { "value": "claude-sonnet-4-6", "chosen_by": "derived" },
     "ai_vision": { "value": "text-only", "chosen_by": "user" },
     "ai_latency": { "value": "important", "chosen_by": "user" },
@@ -314,7 +314,7 @@ Apply the interpret rule for every answered question (defined in each category f
 | Q15 — AI spend          | B ($500–$2K)         | `ai_monthly_spend: "$500-$2K"`                    |
 | Q16 — AI priority       | E (balanced)         | `ai_priority: "balanced"`                         |
 | Q17 — Critical feature  | J (none)             | no additional override                            |
-| Q18 — Volume + cost     | A (low + quality)    | `ai_volume_cost: "low-quality"`                   |
+| Q18 — Volume + cost     | A (low + quality)    | `ai_token_volume: "low"`                          |
 | Q19 — Current model     | _(auto-detect)_      | `ai_model_baseline` from code detection           |
 | Q20 — Vision            | A (text only)        | no constraint                                     |
 | Q21 — AI latency        | B (important)        | `ai_latency: "important"`                         |

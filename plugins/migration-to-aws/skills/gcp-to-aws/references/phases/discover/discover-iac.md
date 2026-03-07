@@ -228,18 +228,7 @@ Include top-level `creation_order` array:
 ]
 ```
 
-### 7c: Write discovery-log.md (Optional)
-
-Human-readable summary with:
-
-- Scan summary (files found by type, resources extracted)
-- Resource classification (primary count, secondary count, tier breakdown)
-- AI signal detection results
-- Clustering results (cluster count, largest cluster)
-- Dependency analysis (depth levels, longest chains)
-- Issues flagged (if any)
-
-### 7d: Validate Output Files
+### 7c: Validate Output Files
 
 1. Confirm `$MIGRATION_DIR/gcp-resource-inventory.json` exists and is valid JSON
 2. Confirm `$MIGRATION_DIR/gcp-resource-clusters.json` exists and is valid JSON

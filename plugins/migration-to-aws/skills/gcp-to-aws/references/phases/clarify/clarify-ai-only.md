@@ -112,7 +112,7 @@ Interpret → `ai_vision`. Default: A → no constraint.
 | High      | Provisioned throughput analysis; prompt caching    |
 | Very high | Provisioned throughput required; capacity planning |
 
-Interpret → `ai_token_volume`. Default: B → `"1M-10M"`.
+Interpret → `ai_token_volume`: A → `"low"`, B → `"medium"`, C → `"high"`, D → `"very_high"`. Default: B → `"medium"`.
 
 ### Q8 — Response speed importance
 
