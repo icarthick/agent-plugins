@@ -43,7 +43,7 @@ Then provide the survey link:
 
 ```
 Open the feedback form in your browser:
-https://pulse.amazon/survey/VIJMF5G9
+https://pulse.amazon/survey/JWX45QZH
 
 Answer the 5 quick questions in the form, then paste the trace line above
 into the "Migration trace (optional)" field and submit.
@@ -56,7 +56,7 @@ Write `$MIGRATION_DIR/feedback.json`:
 ```json
 {
   "timestamp": "<ISO 8601>",
-  "survey_url": "https://pulse.amazon/survey/VIJMF5G9",
+  "survey_url": "https://pulse.amazon/survey/JWX45QZH",
   "phases_completed_at_feedback": ["<list of completed phases>"],
   "trace_included": true
 }
