@@ -30,9 +30,11 @@ For each entry in `billing-profile.json` → `services[]`:
 
 ---
 
-## Step 2: Fast-Path Lookup Only
+## Step 2: Service Lookup
 
-For each billing service, attempt a fast-path lookup:
+For each billing service, attempt lookup in order:
+
+**2a. Fast-path lookup:**
 
 1. Look up `gcp_service_type` in `design-refs/fast-path.md` → Direct Mappings table
 2. If found: assign AWS service
@@ -41,24 +43,44 @@ For each billing service, attempt a fast-path lookup:
    - If `top_skus` mention "MySQL" → specify "RDS Aurora MySQL"
    - If `top_skus` mention "CPU Allocation" → indicates compute (Fargate)
    - If `top_skus` mention "Storage" → check if object storage (S3) or block storage (EBS)
-4. If not found in fast-path: add to `unknowns[]`
 
-**No rubric evaluation** — without IaC config, there is insufficient data for the 6-criteria rubric. Fast-path only.
+**2b. Billing heuristic lookup (if not in fast-path):**
+
+Look up `gcp_service_type` in the table below. These are default mappings for common GCP services when no configuration data is available. The IaC path uses the full rubric in category files and may select a different AWS target based on actual configuration.
+
+| `gcp_service_type`               | Billing Name         | Default AWS Target | Alternatives (chosen by IaC path) |
+| -------------------------------- | -------------------- | ------------------ | --------------------------------- |
+| `google_cloud_run_service`       | Cloud Run            | Fargate            | Lambda, EC2                       |
+| `google_cloudfunctions_function` | Cloud Functions      | Lambda             | Fargate                           |
+| `google_compute_instance`        | Compute Engine       | EC2                | Fargate, ASG                      |
+| `google_container_cluster`       | GKE                  | EKS                | ECS, Fargate                      |
+| `google_app_engine_application`  | App Engine           | Fargate            | Amplify, Lambda                   |
+| `google_firestore_database`      | Firestore            | DynamoDB           | —                                 |
+| `google_bigquery_dataset`        | BigQuery             | Athena             | Redshift                          |
+| `google_compute_forwarding_rule` | Cloud Load Balancing | ALB                | NLB                               |
+| `google_compute_backend_service` | Cloud Load Balancing | ALB Target Groups  | NLB                               |
+| `google_pubsub_topic`            | Pub/Sub              | SNS                | SQS, SNS FIFO                     |
+| `google_pubsub_subscription`     | Pub/Sub              | SQS                | SNS Subscription                  |
+| `google_cloud_tasks_queue`       | Cloud Tasks          | SQS                | EventBridge                       |
+
+If found: assign the Default AWS Target. Set rationale to: "Billing heuristic: [GCP service] → [AWS service]. Provide Terraform files for configuration-aware mapping."
+
+**2c. If not found in either table:** proceed to Step 3.
+
+**No rubric evaluation** — without IaC config, there is insufficient data for the 6-criteria rubric.
 
 ---
 
 ## Step 3: Flag Unknowns
 
-For each service not found in fast-path:
+For each service not found in fast-path or billing heuristic table:
 
 1. Record in `unknowns[]` with:
    - `gcp_service` — Display name
    - `gcp_service_type` — Resource type
    - `monthly_cost` — How much is spent on this service
-   - `reason` — "No IaC configuration available; billing name does not match any fast-path entry"
+   - `reason` — "No IaC configuration available; service does not match any fast-path or billing heuristic entry"
    - `suggestion` — "Provide Terraform files for accurate mapping, or manually specify the AWS equivalent"
-
-<!-- TODO: Add heuristic mapping for common billing-only services (Cloud Armor → WAF, Cloud Scheduler → EventBridge, etc.) -->
 
 ---
 
