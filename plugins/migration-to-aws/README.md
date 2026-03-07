@@ -12,6 +12,12 @@ This plugin guides you through migrating GCP infrastructure to AWS by:
 4. **Estimate** - Calculate monthly costs and ROI
 5. **Generate** - Generate Terraform, migration scripts, AI adapters, and documentation
 
+## Skills
+
+| Skill | Description |
+|-------|-------------|
+| `gcp-to-aws` | Migrate GCP workloads to AWS via a 5-phase guided process |
+
 ## Usage
 
 Invoke the skill with migration-related phrases:

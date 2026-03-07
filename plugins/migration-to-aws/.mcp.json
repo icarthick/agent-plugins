@@ -10,6 +10,7 @@
       ],
       "command": "uvx",
       "env": {
+        "AWS_REGION": "us-east-1",
         "FASTMCP_LOG_LEVEL": "ERROR"
       },
       "timeout": 120000,

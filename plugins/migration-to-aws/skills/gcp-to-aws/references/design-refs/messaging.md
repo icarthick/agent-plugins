@@ -49,7 +49,7 @@ Apply in order:
 - Criterion 1 (Eliminators): PASS (retention not critical for broadcast)
 - Criterion 2 (Operational Model): SNS (pub/sub)
 - → **AWS: SNS Topic (Standard)**
-- Note: SNS does not support message retention like GCP Pub/Sub. If retention is critical, consider SQS instead.
+- Note: SNS does not support message retention like GCP Pub/Sub. If retention is critical, use SQS instead.
 - Confidence: `inferred`
 
 ### Example 2: Pub/Sub Topic (exactly-once)

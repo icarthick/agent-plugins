@@ -112,7 +112,7 @@ EOF
 
 Replace `MMDD-HHMM` with the actual migration ID and set each phase to its correct status at that point.
 
-**The only time `.phase-status.json` should be Read is during session resume** (Step 0 of discover.md when checking for existing runs) or the feedback prerequisite check.
+**Read `.phase-status.json` ONLY during session resume** (Step 0 of discover.md when checking for existing runs) or the feedback prerequisite check.
 
 ---
 
@@ -259,7 +259,7 @@ When invoked, the agent **MUST follow this exact sequence**:
 
 6. **Update phase status**: Use the Phase Status Update Protocol (Bash `cat` heredoc, no Read) in the same turn as the phase's final output message.
 
-7. **Feedback checkpoint**: After a phase completes, check if feedback should be offered. This runs **before** advancing to the next phase.
+7. **Feedback checkpoint**: After a phase completes, check if feedback is due (see rules below). This runs **before** advancing to the next phase.
 
    - **After Discover** (if `phases.feedback` is `"pending"`): Output to user:
      "Would you like to share quick feedback (5 optional questions + anonymized usage data) to help improve this tool? Your data never includes resource names, file paths, or account IDs.
