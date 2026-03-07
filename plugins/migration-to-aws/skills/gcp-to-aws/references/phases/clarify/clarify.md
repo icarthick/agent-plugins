@@ -106,7 +106,7 @@ Record extracted values. Questions whose answers are fully determined by extract
 2. Check inventory `metadata.source` — if `"billing"` with assumed configs, Category B is active.
 3. Check for compute resources — if present, Category C is active. Within C, skip Q8 if no GKE present. Skip Q10/Q11 if no Cloud Run present.
 4. Check for database resources — if present, Category D is active.
-5. Category E is disabled by default. Do not activate unless user opts in.
+5. Category E is disabled by default. After presenting all other categories, offer opt-in: "Would you also like HA upgrade and right-sizing recommendations based on your billing data?" If user declines or does not respond, apply Category E defaults (no HA upgrades, no right-sizing).
 6. Check for `ai-workload-profile.json` — if present, Category F is active.
 
 **If no IaC, billing data, or code is available** (empty discovery): only Category A is active. All service-specific categories are skipped.
@@ -135,7 +135,7 @@ Apply these before presenting questions:
 - **Q5 = "Yes, multi-cloud required"** — Immediately record `compute: "eks"`. Skip Q8 (Kubernetes sentiment) — all container workloads resolve to EKS.
 - **Q10/Q11 N/A** — Cloud Run not present, auto-skip.
 - **Q12/Q13 N/A** — Cloud SQL not present, auto-skip.
-- **Q14 auto-detected** — If `integration.gateway_type` and `integration.frameworks` fully resolve the framework, skip Q14 and use extracted value.
+- **Q14 auto-detected** — If `integration.gateway_type` is non-null OR `integration.frameworks` is non-empty in `ai-workload-profile.json`, skip Q14. Set `ai_framework` from the detected values with `chosen_by: "extracted"`.
 
 ---
 

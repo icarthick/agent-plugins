@@ -16,7 +16,7 @@ Sort clusters by `creation_order_depth` (lowest first, representing foundational
 
 ## Step 2: Two-Pass Mapping per Cluster
 
-For each cluster:
+For each cluster, process `primary_resources` first, then `secondary_resources` (as classified during discover phase — see `gcp-resource-clusters.json`).
 
 ### Pass 1: Fast-Path Lookup
 

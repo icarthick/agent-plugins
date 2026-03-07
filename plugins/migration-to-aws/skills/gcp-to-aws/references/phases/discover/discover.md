@@ -84,7 +84,7 @@ When Terraform is present, billing data is supplementary — only service-level 
    - Extracts top 3 SKU descriptions per service by cost
    - Scans service and SKU descriptions (case-insensitive) for AI keywords: `vertex ai`, `ai platform`, `bigquery ml`, `generative ai`, `gemini`, `document ai`, `vision ai`, `speech-to-text`, `natural language`, `dialogflow`, `translation`
    - Outputs JSON to stdout matching the schema in step 4
-3. Run the script. Try `python3` first, then `python` if not found, then the appropriate runtime for the language chosen. If no runtime is available, fall back to loading `references/phases/discover/discover-billing.md`.
+3. Run the script: try `python3 _extract_billing.py` first. If `python3` is not found, try `python _extract_billing.py`. If neither is available, delete the script and fall back to loading `references/phases/discover/discover-billing.md`.
 4. Write the script's JSON output to `$MIGRATION_DIR/billing-profile.json` with this exact schema:
 
    ```json
