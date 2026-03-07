@@ -6,12 +6,12 @@
 
 ## Eliminators (Hard Blockers)
 
-| GCP Service     | AWS     | Blocker                                                                              |
-| --------------- | ------- | ------------------------------------------------------------------------------------ |
-| Cloud Run       | Lambda  | Execution time >15 min → use Fargate                                                 |
-| Cloud Run       | Fargate | GPU workload or >16 vCPU or >120 GB memory → use EC2                                 |
+| GCP Service     | AWS     | Blocker                                                                         |
+| --------------- | ------- | ------------------------------------------------------------------------------- |
+| Cloud Run       | Lambda  | Execution time >15 min → use Fargate                                            |
+| Cloud Run       | Fargate | GPU workload or >16 vCPU or >120 GB memory → use EC2                            |
 | Cloud Functions | Lambda  | Python version not supported (e.g., Python 2.7) → use custom runtime on Fargate |
-| GKE             | EKS     | Custom CRI incompatible → manual workaround or ECS                                   |
+| GKE             | EKS     | Custom CRI incompatible → manual workaround or ECS                              |
 
 ## Signals (Decision Criteria)
 

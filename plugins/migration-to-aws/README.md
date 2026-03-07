@@ -14,8 +14,8 @@ This plugin guides you through migrating GCP infrastructure to AWS by:
 
 ## Skills
 
-| Skill | Description |
-|-------|-------------|
+| Skill        | Description                                               |
+| ------------ | --------------------------------------------------------- |
 | `gcp-to-aws` | Migrate GCP workloads to AWS via a 5-phase guided process |
 
 ## Usage

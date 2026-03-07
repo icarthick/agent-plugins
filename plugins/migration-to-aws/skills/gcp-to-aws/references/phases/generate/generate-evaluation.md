@@ -13,6 +13,7 @@
 Present user with the following prerequisite information:
 
 > Bedrock model evaluation requires an AWS account with model access enabled.
+>
 > - Anthropic models (Claude): Complete the one-time First Time Use (FTU) form in the Bedrock console Model catalog. Access is granted immediately.
 > - All other providers (Nova, Llama, Mistral): Access is enabled by default.
 > - First-time third-party model invocation triggers a background subscription (up to 15 min). The IAM role needs `aws-marketplace:Subscribe`, `aws-marketplace:Unsubscribe`, and `aws-marketplace:ViewSubscriptions` permissions.
@@ -25,11 +26,11 @@ If the user does not have an AWS account, note this and return to `generate-ai.m
 
 Present user with three options:
 
-| Path | When to use | Method |
-|------|-------------|--------|
-| **A** | No labeled reference answers (most common) | Automatic evaluation with model-as-judge — a judge model scores outputs on defined criteria |
-| **B** | Reference answers exist for each prompt | Automatic evaluation with built-in metrics — Bedrock scores outputs against reference answers |
-| **C** | Team wants to review outputs directly | Human evaluation — reviewers rate responses via Likert scale or preference ranking |
+| Path  | When to use                                | Method                                                                                        |
+| ----- | ------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| **A** | No labeled reference answers (most common) | Automatic evaluation with model-as-judge — a judge model scores outputs on defined criteria   |
+| **B** | Reference answers exist for each prompt    | Automatic evaluation with built-in metrics — Bedrock scores outputs against reference answers |
+| **C** | Team wants to review outputs directly      | Human evaluation — reviewers rate responses via Likert scale or preference ranking            |
 
 Record the selected path for use in subsequent steps.
 
@@ -155,28 +156,28 @@ Job completion typically takes 15-30 minutes. Present the user with what to chec
 
 ## Cost Reference
 
-| Scenario | Estimated Cost |
-|----------|---------------|
-| Small eval (20 prompts, 3 models) | ~$1-5 |
-| Medium eval (100 prompts, 3 models) | ~$5-25 |
-| With model-as-judge | Add ~50% for judge model tokens |
+| Scenario                            | Estimated Cost                  |
+| ----------------------------------- | ------------------------------- |
+| Small eval (20 prompts, 3 models)   | ~$1-5                           |
+| Medium eval (100 prompts, 3 models) | ~$5-25                          |
+| With model-as-judge                 | Add ~50% for judge model tokens |
 
 ---
 
 ## Model ID Reference
 
-| Model | Bedrock Model ID |
-|-------|-----------------|
-| Claude Sonnet 4.6 | `anthropic.claude-sonnet-4-6` |
+| Model             | Bedrock Model ID                            |
+| ----------------- | ------------------------------------------- |
+| Claude Sonnet 4.6 | `anthropic.claude-sonnet-4-6`               |
 | Claude Sonnet 4.5 | `anthropic.claude-sonnet-4-5-20250929-v1:0` |
-| Claude Haiku 4.5 | `anthropic.claude-haiku-4-5-20251001-v1:0` |
-| Claude Opus 4.6 | `anthropic.claude-opus-4-6-v1` |
-| Llama 4 Maverick | `meta.llama4-maverick-17b-instruct-v1:0` |
-| Llama 4 Scout | `meta.llama4-scout-17b-instruct-v1:0` |
-| Nova Pro | `amazon.nova-pro-v1:0` |
-| Nova Lite | `amazon.nova-lite-v1:0` |
-| Nova Micro | `amazon.nova-micro-v1:0` |
-| Llama 3.3 70B | `meta.llama3-3-70b-instruct-v1:0` |
-| Mistral Large 3 | `mistral.mistral-large-3-675b-instruct` |
+| Claude Haiku 4.5  | `anthropic.claude-haiku-4-5-20251001-v1:0`  |
+| Claude Opus 4.6   | `anthropic.claude-opus-4-6-v1`              |
+| Llama 4 Maverick  | `meta.llama4-maverick-17b-instruct-v1:0`    |
+| Llama 4 Scout     | `meta.llama4-scout-17b-instruct-v1:0`       |
+| Nova Pro          | `amazon.nova-pro-v1:0`                      |
+| Nova Lite         | `amazon.nova-lite-v1:0`                     |
+| Nova Micro        | `amazon.nova-micro-v1:0`                    |
+| Llama 3.3 70B     | `meta.llama3-3-70b-instruct-v1:0`           |
+| Mistral Large 3   | `mistral.mistral-large-3-675b-instruct`     |
 
 Model IDs may omit the version suffix per the AWS model catalog. Always verify current IDs via the Bedrock console or AWS documentation — IDs change with new versions. For CLI/SDK use, wrap in the full ARN: `arn:aws:bedrock:REGION::foundation-model/MODEL_ID`.
