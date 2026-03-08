@@ -74,10 +74,10 @@ Verify all pricing via AWS Pricing MCP or `references/shared/pricing-cache.md`. 
 
 OpenAI's open-source models are available directly on Bedrock, enabling migration without switching model families:
 
-| OpenAI Model | Price (in/out per 1M) | Bedrock gpt-oss | Bedrock Price | Notes                                  |
-| ------------ | --------------------- | --------------- | ------------- | -------------------------------------- |
-| GPT-4o Mini  | $0.15 / $0.60         | gpt-oss-120b    | $0.15 / $0.60 | Same cost, runs on AWS infrastructure  |
-| GPT-5 Nano   | $0.05 / $0.40         | gpt-oss-20b     | $0.07 / $0.30 | Similar budget tier on AWS             |
+| OpenAI Model | Price (in/out per 1M) | Bedrock gpt-oss | Bedrock Price | Notes                                 |
+| ------------ | --------------------- | --------------- | ------------- | ------------------------------------- |
+| GPT-4o Mini  | $0.15 / $0.60         | gpt-oss-120b    | $0.15 / $0.60 | Same cost, runs on AWS infrastructure |
+| GPT-5 Nano   | $0.05 / $0.40         | gpt-oss-20b     | $0.07 / $0.30 | Similar budget tier on AWS            |
 
 This path avoids model-family risk: the application stays on OpenAI-architecture models while consolidating on AWS infrastructure.
 
