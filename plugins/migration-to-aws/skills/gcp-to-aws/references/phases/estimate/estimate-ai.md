@@ -13,7 +13,7 @@ The parent `estimate.md` selects the pricing mode before loading this file.
 1. **`shared/pricing-cache.md` (primary)** — Look up Bedrock model pricing and source provider pricing by table. Set `pricing_source: "cached"`.
 2. **MCP (secondary)** — If a model is NOT in pricing-cache.md and MCP is available, query `get_pricing("AmazonBedrock", "us-east-1")` with model filter. Set `pricing_source: "live"`.
 
-For typical migrations (Claude, Llama, Nova, Titan Embeddings, Gemini, OpenAI), ALL prices are in `pricing-cache.md`. Zero MCP calls needed.
+For typical migrations (Claude, Llama, Nova, Mistral, DeepSeek, Gemma, OpenAI gpt-oss, Gemini source pricing), ALL prices are in `pricing-cache.md`. Zero MCP calls needed.
 
 ## Prerequisites
 
@@ -30,7 +30,7 @@ Read from `$MIGRATION_DIR/`:
 Determine current Vertex AI spending from the best available source:
 
 1. **Billing data (preferred)** — Use `current_costs.monthly_ai_spend` from `ai-workload-profile.json`
-2. **Estimated from token volume** — Use `ai_constraints.ai_token_volume.value` from `preferences.json` with Vertex AI pricing from `pricing-cache.md`. Apply 60/40 input/output ratio if actual ratio unknown.
+2. **Estimated from token volume** — Use `ai_constraints.ai_token_volume.value` from `preferences.json` with Gemini pricing from `pricing-cache.md` (under "Source Provider Pricing"). Apply 60/40 input/output ratio if actual ratio unknown.
 3. **Neither available** — Note in output and present model comparison at multiple volume tiers so user can find their range.
 
 ---
@@ -138,7 +138,7 @@ Write `estimation-ai.json` to `$MIGRATION_DIR/`.
 | ---------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------- |
 | `phase`                      | string | `"estimate"`                                                                                                        |
 | `timestamp`                  | string | ISO 8601                                                                                                            |
-| `pricing_mode`               | string | `"live"` or `"fallback"`                                                                                            |
+| `pricing_source`             | string | `"cached"`, `"live"`, or `"fallback"`                                                                               |
 | `accuracy_confidence`        | string | `"±5-10%"` or `"±15-25%"`                                                                                           |
 | `current_costs`              | object | `source`, `gcp_monthly_ai_spend`, `services[]`                                                                      |
 | `token_volume`               | object | `source`, `monthly_input_tokens`, `monthly_output_tokens`, ratio                                                    |

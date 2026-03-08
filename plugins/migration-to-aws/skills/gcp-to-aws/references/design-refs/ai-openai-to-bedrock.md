@@ -14,8 +14,8 @@ Verify all pricing via AWS Pricing MCP or `references/shared/pricing-cache.md`. 
 
 **It is no longer "Bedrock is always cheaper."** It depends on the model.
 
-- **OpenAI cheaper:** GPT-5.2 (65%), GPT-5.1/5 (58%), GPT-4.1 (33%), GPT-4o (17%), o3 (33%), o4-mini/o3-mini/o1-mini (63%)
-- **Bedrock cheaper:** Nova Lite vs Mini models (85-88%), Nova Micro vs Nano (30-65%), Nova Premier vs Pro models (92-98%)
+- **OpenAI cheaper:** GPT-5.2 (65%), GPT-5.1/5 (58%), GPT-4.1 (33%), GPT-4o (17%), o4-mini/o3-mini/o1-mini (63%)
+- **Bedrock cheaper:** Nova Lite vs Mini models (85-88%), Nova Micro vs Nano (30-65%), Nova Premier vs Pro models (89-98%), DeepSeek-R1 vs o3 (33%)
 
 ---
 
@@ -32,10 +32,10 @@ Verify all pricing via AWS Pricing MCP or `references/shared/pricing-cache.md`. 
 
 ### Pro Models (Extended Reasoning)
 
-| OpenAI Model | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price | Winner              |
-| ------------ | --------------------- | ------------------ | ------------- | ------------------- |
-| GPT-5.2 Pro  | $21.00 / $168.00      | Nova Premier       | $2.40 / $9.60 | Bedrock 94% cheaper |
-| GPT-5 Pro    | $15.00 / $120.00      | Nova Premier       | $2.40 / $9.60 | Bedrock 92% cheaper |
+| OpenAI Model | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price  | Winner              |
+| ------------ | --------------------- | ------------------ | -------------- | ------------------- |
+| GPT-5.2 Pro  | $21.00 / $168.00      | Nova Premier       | $2.50 / $12.50 | Bedrock 92% cheaper |
+| GPT-5 Pro    | $15.00 / $120.00      | Nova Premier       | $2.50 / $12.50 | Bedrock 89% cheaper |
 
 ### GPT-4.1 Series
 
@@ -56,10 +56,10 @@ Verify all pricing via AWS Pricing MCP or `references/shared/pricing-cache.md`. 
 
 | OpenAI Model                | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price  | Winner              |
 | --------------------------- | --------------------- | ------------------ | -------------- | ------------------- |
-| o1-pro                      | $150.00 / $600.00     | Nova Premier       | $2.40 / $9.60  | Bedrock 98% cheaper |
-| o3-pro                      | $20.00 / $80.00       | Nova Premier       | $2.40 / $9.60  | Bedrock 88% cheaper |
-| o1                          | $15.00 / $60.00       | Nova Premier       | $2.40 / $9.60  | Bedrock 84% cheaper |
-| o3                          | $2.00 / $8.00         | Claude Sonnet 4.6  | $3.00 / $15.00 | OpenAI 33% cheaper  |
+| o1-pro                      | $150.00 / $600.00     | Nova Premier       | $2.50 / $12.50 | Bedrock 98% cheaper |
+| o3-pro                      | $20.00 / $80.00       | Nova Premier       | $2.50 / $12.50 | Bedrock 85% cheaper |
+| o1                          | $15.00 / $60.00       | Nova Premier       | $2.50 / $12.50 | Bedrock 80% cheaper |
+| o3                          | $2.00 / $8.00         | DeepSeek-R1        | $1.35 / $5.40  | Bedrock 33% cheaper |
 | o4-mini / o3-mini / o1-mini | $1.10 / $4.40         | Claude Sonnet 4.6  | $3.00 / $15.00 | OpenAI 63% cheaper  |
 
 ### Legacy Models
@@ -70,17 +70,30 @@ Verify all pricing via AWS Pricing MCP or `references/shared/pricing-cache.md`. 
 | GPT-4         | $30.00 / $60.00       | Claude Sonnet 4.6  | $3.00 / $15.00 | Bedrock 90% cheaper                          |
 | GPT-3.5 Turbo | $0.50 / $1.50         | Llama 4 Maverick   | $0.24 / $0.97  | Bedrock 35-52% cheaper + much better quality |
 
+### OpenAI Models on Bedrock (gpt-oss)
+
+OpenAI's open-source models are available directly on Bedrock, enabling migration without switching model families:
+
+| OpenAI Model | Price (in/out per 1M) | Bedrock gpt-oss | Bedrock Price | Notes                                  |
+| ------------ | --------------------- | --------------- | ------------- | -------------------------------------- |
+| GPT-4o Mini  | $0.15 / $0.60         | gpt-oss-120b    | $0.15 / $0.60 | Same cost, runs on AWS infrastructure  |
+| GPT-5 Nano   | $0.05 / $0.40         | gpt-oss-20b     | $0.07 / $0.30 | Similar budget tier on AWS             |
+
+This path avoids model-family risk: the application stays on OpenAI-architecture models while consolidating on AWS infrastructure.
+
 ---
 
 ## Migration Decision Framework
 
 **Migrate to Bedrock if:**
 
-- Using Pro/expensive models (o1-pro, GPT-5.2 Pro) → 92-98% savings
+- Using Pro/expensive models (o1-pro, GPT-5.2 Pro) → 80-98% savings
 - Using Mini/Nano models at high volume → 60-88% savings
 - Using legacy GPT-4/3.5 → 70-97% savings
 - Need AWS infrastructure integration
 - Need prompt caching (Claude only, 90% savings on cached content)
+- Using o3 for reasoning → DeepSeek-R1 on Bedrock is 33% cheaper
+- Want to stay on OpenAI models → gpt-oss on Bedrock (same models, AWS infrastructure)
 
 **Consider staying on OpenAI if:**
 
@@ -126,7 +139,7 @@ Tier by complexity: simple → Nova Micro/Llama 4 Scout (60%), moderate → Llam
 
 ### Pro models → Nova Premier
 
-92-98% savings. Strong migration case at any volume.
+80-98% savings. Strong migration case at any volume.
 
 ---
 

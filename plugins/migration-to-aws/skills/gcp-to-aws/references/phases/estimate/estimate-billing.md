@@ -156,7 +156,7 @@ Write `estimation-billing.json`.
   "timestamp": "[ISO 8601]",
   "metadata": {
     "estimate_source": "billing_only",
-    "pricing_mode": "live|fallback",
+    "pricing_source": "cached|live|fallback",
     "confidence_note": "Estimates have wider ranges due to billing-only source"
   },
   "accuracy_confidence": "±30-40%",

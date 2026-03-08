@@ -41,10 +41,13 @@ Gemini 3.1 Pro Preview (Feb 19, 2026) has shifted the landscape. Be honest with 
 | Claude Haiku 4.5  | Simple + fast                | Medium     | High   | 200K    |
 | Llama 4 Maverick  | Cost-effective + multimodal  | Medium     | High   | 1M      |
 | Llama 4 Scout     | Ultra-long context, cheapest | Medium     | Medium | 10M     |
+| Nova 2 Pro        | AWS flagship, multimodal     | High       | High   | 1M      |
+| Nova 2 Lite       | AWS mid-tier, long context   | Medium     | High   | 1M      |
 | Nova Pro          | AWS balanced                 | Medium     | High   | 300K    |
-| Nova Lite         | AWS fast                     | Medium     | High   | 300K    |
-| Nova Micro        | AWS fastest                  | Low        | High   | 128K    |
-| Nova Premier      | Most capable AWS-native      | High       | Medium | —       |
+| Nova Lite         | AWS fast + cheapest          | Medium     | High   | 300K    |
+| Nova Micro        | AWS fastest, text-only       | Low        | High   | 128K    |
+| Nova Premier      | Complex reasoning            | High       | Medium | 1M      |
+| DeepSeek-R1       | Chain-of-thought reasoning   | High       | Medium | 128K    |
 | Mistral Large 3   | EU/Multilingual              | High       | Medium | 256K    |
 
 ---
@@ -62,6 +65,8 @@ Gemini 3.1 Pro Preview (Feb 19, 2026) has shifted the landscape. Be honest with 
 | Gemini 3 Pro           | $0.50 / $3.00         | Nova Pro           | $0.80 / $3.20  | Gemini 20% cheaper  |
 | Gemini 2.5 Pro         | $1.25 / $10.00        | Claude Sonnet 4.6  | $3.00 / $15.00 | Gemini 68% cheaper  |
 | Gemini 2.5 Pro         | $1.25 / $10.00        | Nova Pro           | $0.80 / $3.20  | Bedrock 62% cheaper |
+| Gemini 3.1 Pro Preview | $2.00 / $12.00        | Nova 2 Pro         | $1.38 / $11.00 | Bedrock 14% cheaper |
+| Gemini 2.5 Pro         | $1.25 / $10.00        | Nova 2 Pro         | $1.38 / $11.00 | Similar pricing     |
 
 ### Gemini Flash/Lite Tier
 
@@ -102,7 +107,8 @@ Gemini Flash → **Nova Micro** (<200ms, text-only, cheapest), **Haiku 4.5** (<4
 
 ### Balanced
 
-- Gemini 2.5 Pro → **Nova Pro** (-62% cost) or **Claude Sonnet 4.6** (+68% cost, stronger agentic reliability)
+- Gemini 3.1 Pro → **Nova 2 Pro** (-14% cost, AWS-native) or **Claude Sonnet 4.6** (+31% cost, stronger agentic reliability)
+- Gemini 2.5 Pro → **Nova 2 Pro** (+10% cost, AWS-native) or **Nova Pro** (-62% cost)
 - Gemini 3 Pro → **Llama 4 Maverick** (-63%), **Nova Pro** (+20%)
 
 ---
@@ -137,8 +143,10 @@ Gemini Flash → **Nova Micro** (<200ms, text-only, cheapest), **Haiku 4.5** (<4
 | ------------------------------- | ------- | ------------------------------ | ------- | ---------- |
 | Gemini 3.1 Pro Preview ($2/$12) | $1,200  | Claude Sonnet 4.6 ($3/$15)     | $1,575  | +31%       |
 | Gemini 3.1 Pro Preview ($2/$12) | $1,200  | Claude Opus 4.6 ($5/$25)       | $2,625  | +119%      |
+| Gemini 3.1 Pro Preview ($2/$12) | $1,200  | Nova 2 Pro ($1.38/$11.00)      | $1,032  | -14%       |
 | Gemini 3 Pro ($0.50/$3.00)      | $300    | Llama 4 Maverick ($0.24/$0.97) | $109    | -63%       |
 | Gemini 3 Pro ($0.50/$3.00)      | $300    | Llama 4 Scout ($0.17/$0.66)    | $75     | -75%       |
+| Gemini 2.5 Pro ($1.25/$10)      | $938    | Nova 2 Pro ($1.38/$11.00)      | $1,032  | +10%       |
 | Gemini 2.5 Pro ($1.25/$10)      | $938    | Nova Pro ($0.80/$3.20)         | $360    | -62%       |
 | Gemini 2.5 Flash ($0.30/$2.50)  | $233    | Nova Lite ($0.06/$0.24)        | $27     | -88%       |
 | Gemini 2.0 Flash ($0.10/$0.40)  | $45     | Nova Micro ($0.035/$0.14)      | $16     | -64%       |
