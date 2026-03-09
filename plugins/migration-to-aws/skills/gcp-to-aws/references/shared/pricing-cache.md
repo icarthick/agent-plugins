@@ -317,29 +317,32 @@ Serverless inference: $0.0000200 per second per GB memory.
 
 ## Bedrock Models (On-Demand)
 
-Prices per 1M tokens. Prompt caching available for Claude models (90% reduction on cached portions).
+Prices per 1M tokens. Prompt caching available for Claude models (90% reduction on cached portions). Long Context variants activate automatically when input exceeds 200K tokens — 2x input price, 1.5x output price.
 
-| Model             | Model ID                                 | Provider  | Input $/1M | Output $/1M | Context | Tier      |
-| ----------------- | ---------------------------------------- | --------- | ---------- | ----------- | ------- | --------- |
-| Claude Sonnet 4.6 | anthropic.claude-sonnet-4-6              | Anthropic | 3.00       | 15.00       | 200K    | flagship  |
-| Claude Opus 4.6   | anthropic.claude-opus-4-6-v1             | Anthropic | 5.00       | 25.00       | 200K    | premium   |
-| Claude Haiku 4.5  | anthropic.claude-haiku-4-5-20251001-v1:0 | Anthropic | 1.00       | 5.00        | 200K    | fast      |
-| Llama 4 Maverick  | meta.llama4-maverick-17b-instruct-v1:0   | Meta      | 0.24       | 0.97        | 1M      | mid       |
-| Llama 4 Scout     | meta.llama4-scout-17b-instruct-v1:0      | Meta      | 0.17       | 0.66        | 10M     | efficient |
-| Llama 3.3 70B     | meta.llama3-3-70b-instruct-v1:0          | Meta      | 0.72       | 0.72        | 128K    | mid       |
-| Nova 2 Lite       | amazon.nova-2-lite-v1:0                  | Amazon    | 0.33       | 2.75        | 1M      | mid       |
-| Nova 2 Pro        | amazon.nova-2-pro-v1:0                   | Amazon    | 1.38       | 11.00       | 1M      | flagship  |
-| Nova Pro          | amazon.nova-pro-v1:0                     | Amazon    | 0.80       | 3.20        | 300K    | mid       |
-| Nova Lite         | amazon.nova-lite-v1:0                    | Amazon    | 0.06       | 0.24        | 300K    | fast      |
-| Nova Micro        | amazon.nova-micro-v1:0                   | Amazon    | 0.035      | 0.14        | 128K    | budget    |
-| Nova Premier      | amazon.nova-premier-v1:0                 | Amazon    | 2.50       | 12.50       | 1M      | reasoning |
-| Mistral Large 3   | mistral.mistral-large-3-675b-instruct    | Mistral   | 0.50       | 1.50        | 256K    | flagship  |
-| DeepSeek-R1       | deepseek.r1-v1:0                         | DeepSeek  | 1.35       | 5.40        | 128K    | reasoning |
-| gpt-oss-20b       | openai.gpt-oss-20b-1:0                   | OpenAI    | 0.07       | 0.30        | 128K    | budget    |
-| gpt-oss-120b      | openai.gpt-oss-120b-1:0                  | OpenAI    | 0.15       | 0.60        | 128K    | efficient |
-| Gemma 3 4B IT     | google.gemma-3-4b-it                     | Google    | 0.04       | 0.08        | 128K    | budget    |
-| Gemma 3 12B IT    | google.gemma-3-12b-it                    | Google    | 0.09       | 0.29        | 128K    | budget    |
-| Gemma 3 27B IT    | google.gemma-3-27b-it                    | Google    | 0.23       | 0.38        | 128K    | efficient |
+| Model                            | Model ID                                 | Provider  | Input $/1M | Output $/1M | Context | Tier      |
+| -------------------------------- | ---------------------------------------- | --------- | ---------- | ----------- | ------- | --------- |
+| Claude Sonnet 4.6                | anthropic.claude-sonnet-4-6              | Anthropic | 3.00       | 15.00       | 200K    | flagship  |
+| Claude Sonnet 4.6 — Long Context | anthropic.claude-sonnet-4-6              | Anthropic | 6.00       | 22.50       | >200K   | flagship  |
+| Claude Opus 4.6                  | anthropic.claude-opus-4-6-v1             | Anthropic | 5.00       | 25.00       | 200K    | premium   |
+| Claude Opus 4.6 — Long Context   | anthropic.claude-opus-4-6-v1             | Anthropic | 10.00      | 37.50       | >200K   | premium   |
+| Claude Haiku 4.5                 | anthropic.claude-haiku-4-5-20251001-v1:0 | Anthropic | 1.00       | 5.00        | 200K    | fast      |
+| Llama 4 Maverick                 | meta.llama4-maverick-17b-instruct-v1:0   | Meta      | 0.24       | 0.97        | 1M      | mid       |
+| Llama 4 Scout                    | meta.llama4-scout-17b-instruct-v1:0      | Meta      | 0.17       | 0.66        | 10M     | efficient |
+| Llama 3.3 70B                    | meta.llama3-3-70b-instruct-v1:0          | Meta      | 0.72       | 0.72        | 128K    | mid       |
+| Llama 3.2 90B                    | meta.llama3-2-90b-instruct-v1:0          | Meta      | 0.72       | 0.72        | 128K    | mid       |
+| Nova 2 Lite                      | amazon.nova-2-lite-v1:0                  | Amazon    | 0.33       | 2.75        | 1M      | mid       |
+| Nova 2 Pro                       | amazon.nova-2-pro-v1:0                   | Amazon    | 1.38       | 11.00       | 1M      | flagship  |
+| Nova Pro                         | amazon.nova-pro-v1:0                     | Amazon    | 0.80       | 3.20        | 300K    | mid       |
+| Nova Lite                        | amazon.nova-lite-v1:0                    | Amazon    | 0.06       | 0.24        | 300K    | fast      |
+| Nova Micro                       | amazon.nova-micro-v1:0                   | Amazon    | 0.035      | 0.14        | 128K    | budget    |
+| Nova Premier                     | amazon.nova-premier-v1:0                 | Amazon    | 2.50       | 12.50       | 1M      | reasoning |
+| Mistral Large 3                  | mistral.mistral-large-3-675b-instruct    | Mistral   | 0.50       | 1.50        | 256K    | flagship  |
+| DeepSeek-R1                      | deepseek.r1-v1:0                         | DeepSeek  | 1.35       | 5.40        | 128K    | reasoning |
+| gpt-oss-20b                      | openai.gpt-oss-20b-1:0                   | OpenAI    | 0.07       | 0.30        | 128K    | budget    |
+| gpt-oss-120b                     | openai.gpt-oss-120b-1:0                  | OpenAI    | 0.15       | 0.60        | 128K    | efficient |
+| Gemma 3 4B IT                    | google.gemma-3-4b-it                     | Google    | 0.04       | 0.08        | 128K    | budget    |
+| Gemma 3 12B IT                   | google.gemma-3-12b-it                    | Google    | 0.09       | 0.29        | 128K    | budget    |
+| Gemma 3 27B IT                   | google.gemma-3-27b-it                    | Google    | 0.23       | 0.38        | 128K    | efficient |
 
 ---
 

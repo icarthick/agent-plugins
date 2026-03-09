@@ -137,18 +137,18 @@ Interpret → `ai_priority`. Default: E → `"balanced"`.
 > I) Real-time conversational speech
 > J) None — standard features are sufficient
 
-| Answer                               | Recommendation Impact                                                                                                                        |
-| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Function calling / Tool use          | Claude Sonnet 4.6 — best-in-class tool use on Bedrock via structured JSON tool schemas; supports parallel tool calls and multi-turn tool use |
-| Ultra-long context (> 300K tokens)   | Claude Sonnet 4.6 — supports 1M token context window (beta); no chunking strategy required for most use cases                                |
-| Extended thinking / Chain-of-thought | Claude Sonnet 4.6 with extended thinking mode; Claude Opus 4.6 for most complex reasoning                                                    |
-| Prompt caching                       | Claude Sonnet 4.6 with prompt caching enabled; cost savings analysis included                                                                |
-| RAG optimization                     | Amazon Bedrock Knowledge Bases recommended alongside model; Titan Embeddings for vector store                                                |
-| Agentic workflows                    | Claude Sonnet 4.6 with Bedrock Agents; multi-agent orchestration guidance included                                                           |
-| Real-time speed (< 500ms)            | Claude Haiku 4.5 or Nova Micro; streaming response guidance included                                                                         |
-| Multimodal with image generation     | Claude Sonnet 4.6 (vision) + Amazon Nova Canvas or Titan Image Generator for generation                                                      |
-| Real-time conversational speech      | Amazon Nova Sonic recommended for speech-to-speech; latency guidance included                                                                |
-| None                                 | Default recommendation from Q16 priority stands                                                                                              |
+| Answer                               | Recommendation Impact                                                                                                                                                        |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Function calling / Tool use          | Claude Sonnet 4.6 — best-in-class tool use on Bedrock via structured JSON tool schemas; supports parallel tool calls and multi-turn tool use                                 |
+| Ultra-long context (> 300K tokens)   | Claude Sonnet/Opus 4.6 Long Context (>200K, 2x input price); or Llama 4 Scout (10M), Llama 4 Maverick (1M), Nova 2 Pro/Lite (1M) for natively long context at standard price |
+| Extended thinking / Chain-of-thought | Claude Sonnet 4.6 with extended thinking mode; Claude Opus 4.6 for most complex reasoning                                                                                    |
+| Prompt caching                       | Claude Sonnet 4.6 with prompt caching enabled; cost savings analysis included                                                                                                |
+| RAG optimization                     | Amazon Bedrock Knowledge Bases recommended alongside model; Titan Embeddings for vector store                                                                                |
+| Agentic workflows                    | Claude Sonnet 4.6 with Bedrock Agents; multi-agent orchestration guidance included                                                                                           |
+| Real-time speed (< 500ms)            | Claude Haiku 4.5 or Nova Micro; streaming response guidance included                                                                                                         |
+| Multimodal with image generation     | Claude Sonnet 4.6 (vision) + Amazon Nova Canvas or Titan Image Generator for generation                                                                                      |
+| Real-time conversational speech      | Amazon Nova Sonic recommended for speech-to-speech; latency guidance included                                                                                                |
+| None                                 | Default recommendation from Q16 priority stands                                                                                                                              |
 
 Interpret → `ai_critical_feature`. Default: J → no override.
 
@@ -207,11 +207,11 @@ Interpret → `ai_model_baseline`. Default: auto-detect from code, fallback Q16 
 > B) Vision required — model must process images
 > C) Audio/Video inputs needed
 
-| Answer             | Recommendation Impact                                                                 |
-| ------------------ | ------------------------------------------------------------------------------------- |
-| Text only          | Full model catalog available; cheapest/fastest text model per Q16 priority            |
-| Vision required    | Claude Sonnet family (multimodal) required; Haiku excluded for vision tasks           |
-| Audio/Video inputs | Amazon Nova Reel (video) or Nova Sonic (audio); Claude excluded for audio/video input |
+| Answer             | Recommendation Impact                                                                    |
+| ------------------ | ---------------------------------------------------------------------------------------- |
+| Text only          | Full model catalog available; cheapest/fastest text model per Q16 priority               |
+| Vision required    | Claude Sonnet or Haiku (both support multimodal vision); Nova Micro excluded (text-only) |
+| Audio/Video inputs | Amazon Nova Reel (video) or Nova Sonic (audio); Claude excluded for audio/video input    |
 
 Interpret → `ai_vision`. Default: A → no constraint.
 

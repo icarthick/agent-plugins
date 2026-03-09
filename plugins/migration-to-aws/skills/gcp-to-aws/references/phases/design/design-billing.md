@@ -154,8 +154,6 @@ Write to `$MIGRATION_DIR/aws-design-billing.json`:
 }
 ```
 
-<!-- TODO: Add cost comparison column once Estimate phase supports billing-only designs -->
-
 ## Output Validation Checklist
 
 - `metadata.design_source` is `"billing_only"`

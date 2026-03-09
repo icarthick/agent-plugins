@@ -15,7 +15,7 @@ Gemini 3.1 Pro Preview (Feb 19, 2026) has shifted the landscape. Be honest with 
 - Gemini 3.1 Pro leads 13/16 Google-reported benchmarks and 6/10 on the Artificial Analysis Intelligence Index
 - ARC-AGI-2: 77.1% (2.5x jump over Gemini 3 Pro), SWE-Bench: 80.6% (tied with Opus 4.6 at 80.8%)
 - Costs $2/$12 per 1M tokens — less than half of Opus 4.6 ($5/$25), cheaper than Sonnet 4.6 ($3/$15)
-- 114 tokens/sec — faster than any Bedrock model at this quality tier
+- ~119 tokens/sec — faster than any Bedrock model at this quality tier
 
 **Where Bedrock still wins:**
 

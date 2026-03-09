@@ -18,7 +18,7 @@
 
 - **PostgreSQL, MySQL, SQL Server** → Direct RDS mapping (fast-path)
 - **High availability required** → RDS Multi-AZ or Aurora (preferred)
-- **Dev/test sizing** → RDS Aurora Serverless v2 (min 0.5 ACU, ~$43/mo)
+- **Dev/test sizing** → RDS Aurora Serverless v2 (min 0.5 ACU, ~$43–58/mo depending on I/O mode)
 - **Production, always-on** → RDS Aurora Provisioned (or Serverless v2 if fluctuating)
 
 ### Firestore

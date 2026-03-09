@@ -57,7 +57,7 @@ Overall assessment = weakest across all models. If any `"recommend_stay"`, flag 
 
 ## Part 1B: Volume-Based Strategy
 
-If `ai_token_volume` is `"high"` (10-100M/day) or `"very_high"` (>100M/day), generate a `tiered_strategy`:
+If `ai_token_volume` is `"high"`, generate a `tiered_strategy`:
 
 | Tier | Traffic | Model Selection              | Use Cases                                            |
 | ---- | ------- | ---------------------------- | ---------------------------------------------------- |

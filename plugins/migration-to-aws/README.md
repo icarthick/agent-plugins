@@ -27,6 +27,8 @@ Invoke the skill with migration-related phrases:
 - "Move off Google Cloud"
 - "Migrate Cloud SQL to RDS"
 - "GCP to AWS migration plan"
+- "Migrate our Vertex AI workloads to Bedrock"
+- "Estimate the cost of moving from GCP to AWS"
 
 ## Scope (v1.0)
 
@@ -53,7 +55,7 @@ The plugin uses state files (`.migration/[MMDD-HHMM]/`) to track migration progr
 
 - `.phase-status.json` - Current phase and status
 - `gcp-resource-inventory.json` - Discovered GCP resources
-- `clarified.json` - User requirements
+- `preferences.json` - User requirements
 - `aws-design.json` - Mapped AWS services
 - `estimation-infra.json` / `estimation-ai.json` / `estimation-billing.json` - Cost analysis
 - `generation-infra.json` / `generation-ai.json` / `generation-billing.json` - Migration plans

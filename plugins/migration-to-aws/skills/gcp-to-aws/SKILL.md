@@ -49,13 +49,15 @@ This is the execution controller. After completing each phase, consult this tabl
 
 **Phase gate checks**: If prior phase incomplete, do not advance (e.g., cannot enter estimate without completed design).
 
+**Feedback checkpoints**: Feedback is not a sequential phase — it is offered at two interleaved checkpoints (after Discover and after Estimate). See the **Feedback Checkpoints** section below for details.
+
 ---
 
 ## State Validation
 
 When reading `$MIGRATION_DIR/.phase-status.json`, validate before proceeding:
 
-1. **Multiple sessions**: If multiple directories exist under `.migration/`, STOP. Output: "Multiple migration sessions detected. Pick one to continue: [list]"
+1. **Multiple sessions**: If multiple directories exist under `.migration/`, list them with their phase status and ask: [A] Resume latest, [B] Start fresh, [C] Cancel.
 2. **Invalid JSON**: If `.phase-status.json` fails to parse, STOP. Output: "State file corrupted (invalid JSON). Delete the file and restart the current phase."
 3. **Unrecognized phase**: If `phases` object contains a phase not in {discover, clarify, design, estimate, generate, feedback}, STOP. Output: "Unrecognized phase: [value]. Valid phases: discover, clarify, design, estimate, generate, feedback."
 4. **Unrecognized status**: If any `phases.*` value is not in {pending, in_progress, completed}, STOP. Output: "Unrecognized status: [value]. Valid values: pending, in_progress, completed."
@@ -135,7 +137,7 @@ Replace `MMDD-HHMM` with the actual migration ID and set each phase to its corre
 
 - Provides `get_pricing`, `get_pricing_service_codes`, `get_pricing_service_attributes` tools
 - Only needed during Estimate phase. Discover and Design do not require it.
-- Fallback: if unavailable, uses `references/shared/pricing-cache.md` (cached 2026 rates, ±5-25% accuracy)
+- Primary pricing source: `references/shared/pricing-cache.md` (cached 2026 rates, ±5-10% for infrastructure, ±15-25% for AI models). MCP is secondary — used only for services not found in the cache.
 
 ---
 
@@ -220,7 +222,7 @@ gcp-to-aws/
 | No GCP sources found (no `.tf`, no app code, no billing data) | Stop. Output: "No GCP sources detected. Provide at least one source type (Terraform files, application code, or billing exports) and try again." |
 | `.phase-status.json` missing phase gate                       | Stop. Output: "Cannot enter Phase X: Phase Y-1 not completed. Start from Phase Y or resume Phase Y-1."                                           |
 | awspricing unavailable after 3 attempts                       | Display user warning about ±5-25% accuracy. Use `pricing-cache.md`. Add `pricing_source: "cached"` to estimation.json.                           |
-| User does not answer all Q1-8                                 | Offer Mode C (defaults) or Mode D (free text). Phase 2 completes either way.                                                                     |
+| User skips questions or says "use all defaults"               | Apply documented defaults from each category file. Phase 2 completes either way.                                                                 |
 | `aws-design.json` missing required clusters                   | Stop Phase 4. Output: "Re-run Phase 3 to generate missing cluster designs."                                                                      |
 
 ## Defaults
@@ -262,17 +264,17 @@ When invoked, the agent **MUST follow this exact sequence**:
 
    - **After Discover** (if `phases.feedback` is `"pending"`): Output to user:
      "Would you like to share quick feedback (5 optional questions + anonymized usage data) to help improve this tool? Your data never includes resource names, file paths, or account IDs.
-     [N] Send feedback now
-     [L] Wait until after the Estimate phase"
-     - If user picks **N** → Load `references/phases/feedback/feedback.md`, execute it, then continue to Clarify.
-     - If user picks **L** → Continue to Clarify (feedback stays `"pending"`).
+     [A] Send feedback now
+     [B] Wait until after the Estimate phase"
+     - If user picks **A** → Load `references/phases/feedback/feedback.md`, execute it, then continue to Clarify.
+     - If user picks **B** → Continue to Clarify (feedback stays `"pending"`).
 
    - **After Estimate** (if `phases.feedback` is `"pending"`): Output to user:
      "Would you like to share quick feedback now? (5 optional questions + anonymized usage data)
-     [Y] Yes, share feedback
-     [N] No thanks, continue to Generate"
-     - If user picks **Y** → Load `references/phases/feedback/feedback.md`, execute it, then continue to Generate.
-     - If user picks **N** → Use the Phase Status Update Protocol to set `phases.feedback` to `"completed"`. Continue to Generate.
+     [A] Yes, share feedback
+     [B] No thanks, continue to Generate"
+     - If user picks **A** → Load `references/phases/feedback/feedback.md`, execute it, then continue to Generate.
+     - If user picks **B** → Use the Phase Status Update Protocol to set `phases.feedback` to `"completed"`. Continue to Generate.
 
    - **After Generate**: No feedback offer. If `phases.feedback` is still `"pending"`, use the Phase Status Update Protocol to set it to `"completed"` (user had two chances and chose to defer/skip).
 

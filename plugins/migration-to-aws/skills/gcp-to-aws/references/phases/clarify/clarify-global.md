@@ -121,7 +121,7 @@ Default: B — `gcp_monthly_spend: "$1K-$5K"`.
 
 **Rationale:** Funding stage is a primary qualifier for AWS credits programs. AWS Activate targets early-stage startups (pre-seed through Series A), while IW Migrate and MAP credits are available regardless of stage but scale with ARR. Combined with Q3 (GCP spend), this determines the specific credits program and tier.
 
-_Note: This question is designed for web experiences. In IDE/CLI mode, skip this question and apply default (no constraint)._
+_Skip this question. Apply default (no constraint). Credits program eligibility is inferred from Q3 (GCP spend) alone._
 
 > Funding stage helps me recommend the right AWS credits program for your migration.
 >
@@ -154,7 +154,7 @@ F -> funding_stage: "series-c-plus" — IW Migrate or MAP; Enterprise Support
 G -> same as default (skip)
 ```
 
-Default: _(skip in IDE mode)_ — no constraint.
+Default: Skip — no constraint.
 
 ---
 

@@ -39,15 +39,13 @@ Determine current Vertex AI spending from the best available source:
 
 Calculate the monthly Bedrock cost for **every viable model** at the user's token volume.
 
-**Token volume mapping** (from clarified answer):
+**Token volume mapping** (from `ai_token_volume` in `preferences.json`):
 
-| Answer     | Input tokens/month | Output tokens/month | Ratio |
-| ---------- | ------------------ | ------------------- | ----- |
-| A) < 10M   | 6M                 | 4M                  | 60/40 |
-| B) 10-100M | 60M                | 40M                 | 60/40 |
-| C) 100M-1B | 600M               | 400M                | 60/40 |
-| D) > 1B    | 1.2B               | 800M                | 60/40 |
-| E) Unsure  | Show all tiers     | --                  | --    |
+| `ai_token_volume` | Input tokens/month | Output tokens/month | Ratio |
+| ----------------- | ------------------ | ------------------- | ----- |
+| `"low"`           | 6M                 | 4M                  | 60/40 |
+| `"medium"`        | 60M                | 40M                 | 60/40 |
+| `"high"`          | 600M               | 400M                | 60/40 |
 
 If design or discover phase has more specific token estimates, use those instead.
 
@@ -138,7 +136,7 @@ Write `estimation-ai.json` to `$MIGRATION_DIR/`.
 | ---------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------- |
 | `phase`                      | string | `"estimate"`                                                                                                        |
 | `timestamp`                  | string | ISO 8601                                                                                                            |
-| `pricing_source`             | string | `"cached"`, `"live"`, or `"fallback"`                                                                               |
+| `pricing_source`             | string | `"cached"` or `"live"`                                                                                              |
 | `accuracy_confidence`        | string | `"±5-10%"` or `"±15-25%"`                                                                                           |
 | `current_costs`              | object | `source`, `gcp_monthly_ai_spend`, `services[]`                                                                      |
 | `token_volume`               | object | `source`, `monthly_input_tokens`, `monthly_output_tokens`, ratio                                                    |

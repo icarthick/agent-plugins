@@ -54,24 +54,24 @@ Multiple artifacts can be produced in a single run — they are not mutually exc
 
 Scan the project directory for each input type. Only load sub-discovery files when their input files are present.
 
-**2a. Check for Terraform files:**
+**1a. Check for Terraform files:**
 Glob for: `**/*.tf`, `**/*.tfvars`, `**/*.tfstate`, `**/.terraform.lock.hcl`
 
 - If found → Load `references/phases/discover/discover-iac.md`
 - If not found → Skip. Log: "No Terraform files found — skipping IaC discovery."
 
-**2b. Check for source code / dependency manifests:**
+**1b. Check for source code / dependency manifests:**
 Glob for: `**/*.py`, `**/*.js`, `**/*.ts`, `**/*.jsx`, `**/*.tsx`, `**/*.go`, `**/*.java`, `**/*.scala`, `**/*.kt`, `**/*.rs`, `**/requirements.txt`, `**/setup.py`, `**/pyproject.toml`, `**/Pipfile`, `**/package.json`, `**/go.mod`, `**/pom.xml`, `**/build.gradle`
 
 - If found → Load `references/phases/discover/discover-app-code.md`
 - If not found → Skip. Log: "No source code found — skipping app code discovery."
 
-**2c. Check for billing data:**
+**1c. Check for billing data:**
 Glob for: `**/*billing*.csv`, `**/*billing*.json`, `**/*cost*.csv`, `**/*cost*.json`, `**/*usage*.csv`, `**/*usage*.json`
 
 - If not found → Skip. Log: "No billing files found — skipping billing discovery."
-- If found AND **no** Terraform files from 2a → Load `references/phases/discover/discover-billing.md` (billing is the primary source — needs full processing for the billing-only design path).
-- If found AND Terraform files **were** found in 2a → Use lightweight extraction below. Do **not** load `discover-billing.md`.
+- If found AND **no** Terraform files from 1a → Load `references/phases/discover/discover-billing.md` (billing is the primary source — needs full processing for the billing-only design path).
+- If found AND Terraform files **were** found in 1a → Use lightweight extraction below. Do **not** load `discover-billing.md`.
 
 **Lightweight billing extraction (when IaC is the primary source):**
 
