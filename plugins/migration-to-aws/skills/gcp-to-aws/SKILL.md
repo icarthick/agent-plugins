@@ -241,7 +241,7 @@ When invoked, the agent **MUST follow this exact sequence**:
    - If exists: Determine current phase based on phase field and status value
 
 2. **Determine phase to execute**:
-   - If status is `in-progress`: Resume that phase (read corresponding reference file)
+   - If status is `in_progress`: Resume that phase (read corresponding reference file)
    - If status is `completed`: Advance to next phase (read next reference file)
    - Phase mapping for advancement:
      - discover (completed) → Execute clarify (read `references/phases/clarify/clarify.md`)

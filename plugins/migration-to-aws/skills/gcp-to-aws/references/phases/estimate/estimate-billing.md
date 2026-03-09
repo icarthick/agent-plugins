@@ -268,10 +268,10 @@ After writing `estimation-billing.json`, present a concise summary to the user:
 
 Keep it under 20 lines. The user can ask for details or re-read `estimation-billing.json` at any time.
 
-## Execute Phase Integration
+## Generate Phase Integration
 
-The Execute phase uses `estimation-billing.json`:
+The Generate phase uses `estimation-billing.json`:
 
 - Uses wide cost ranges for conservative timeline planning
 - Recommends IaC discovery as a prerequisite step
-- Documents unknowns as prerequisites per execution step
+- Documents unknowns as prerequisites per generation step

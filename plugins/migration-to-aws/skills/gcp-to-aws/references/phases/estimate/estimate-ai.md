@@ -174,9 +174,9 @@ After writing `estimation-ai.json`, present under 25 lines:
 5. Top 2-3 optimization opportunities with potential savings
 6. Optimized projection
 
-## Execute Phase Integration
+## Generate Phase Integration
 
-The Execute phase uses `estimation-ai.json`:
+The Generate phase uses `estimation-ai.json`:
 
 1. **`recommended_model`** — Which Bedrock model to provision and test
 2. **`one_time_costs`** — Budget for the migration effort

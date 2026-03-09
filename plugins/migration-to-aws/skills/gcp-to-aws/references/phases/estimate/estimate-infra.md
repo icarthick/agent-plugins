@@ -199,15 +199,15 @@ After writing `estimation-infra.json`, present a concise summary to the user:
 
 Keep it under 25 lines. The user can ask for details or re-read `estimation-infra.json` at any time.
 
-## Execute Phase Integration
+## Generate Phase Integration
 
-The Execute phase (`execute.md`) uses `estimation-infra.json` as follows:
+The Generate phase (`generate.md`) uses `estimation-infra.json` as follows:
 
 1. **`projected_costs.breakdown`** — Budget allocation per cluster migration phase
 2. **`one_time_costs`** — Total budget for the migration effort and resource planning
 3. **`optimization_opportunities`** — Which optimizations to implement and when (some during initial migration, some post-migration)
 4. **`cost_comparison`** — Set cost monitoring targets and alerts for each migrated cluster
-5. **`recommendation.next_steps`** — Prerequisites for starting execution
+5. **`recommendation.next_steps`** — Prerequisites for starting generation
 6. **`financial_summary.payback_with_ops_months`** — Timeline pressure for realizing ROI
 
-The execution plan references the cost estimates to set per-cluster cost monitoring thresholds and validate that actual AWS spend aligns with projections after each cluster migration.
+The generated artifacts reference the cost estimates to set per-cluster cost monitoring thresholds and validate that actual AWS spend aligns with projections after each cluster migration.

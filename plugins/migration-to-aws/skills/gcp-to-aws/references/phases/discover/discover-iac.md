@@ -55,7 +55,7 @@ Scan all `.tf` files for AI-relevant patterns. For each match, record the patter
 
 Record all signals for the `ai_detection` section in `gcp-resource-inventory.json`. If any signal has confidence >= 70%, set `has_ai_workload: true`.
 
-**Note:** This step only detects signals from Terraform. Full AI workload profiling (code analysis, billing data) will be handled by `discover-app-code.md` (v1.1).
+**Note:** This step only detects signals from Terraform. Full AI workload profiling (code analysis, billing data) is handled by `discover-app-code.md`.
 
 ## Step 2.5: Complexity Assessment
 

@@ -325,7 +325,7 @@ Prices per 1M tokens. Prompt caching available for Claude models (90% reduction 
 | Claude Opus 4.6   | anthropic.claude-opus-4-6-v1             | Anthropic | 5.00       | 25.00       | 200K    | premium   |
 | Claude Haiku 4.5  | anthropic.claude-haiku-4-5-20251001-v1:0 | Anthropic | 1.00       | 5.00        | 200K    | fast      |
 | Llama 4 Maverick  | meta.llama4-maverick-17b-instruct-v1:0   | Meta      | 0.24       | 0.97        | 1M      | mid       |
-| Llama 4 Scout     | meta.llama4-scout-17b-instruct-v1:0      | Meta      | 0.17       | 0.66        | 1M      | efficient |
+| Llama 4 Scout     | meta.llama4-scout-17b-instruct-v1:0      | Meta      | 0.17       | 0.66        | 10M     | efficient |
 | Llama 3.3 70B     | meta.llama3-3-70b-instruct-v1:0          | Meta      | 0.72       | 0.72        | 128K    | mid       |
 | Nova 2 Lite       | amazon.nova-2-lite-v1:0                  | Amazon    | 0.33       | 2.75        | 1M      | mid       |
 | Nova 2 Pro        | amazon.nova-2-pro-v1:0                   | Amazon    | 1.38       | 11.00       | 1M      | flagship  |
@@ -333,7 +333,7 @@ Prices per 1M tokens. Prompt caching available for Claude models (90% reduction 
 | Nova Lite         | amazon.nova-lite-v1:0                    | Amazon    | 0.06       | 0.24        | 300K    | fast      |
 | Nova Micro        | amazon.nova-micro-v1:0                   | Amazon    | 0.035      | 0.14        | 128K    | budget    |
 | Nova Premier      | amazon.nova-premier-v1:0                 | Amazon    | 2.50       | 12.50       | 1M      | reasoning |
-| Mistral Large 3   | mistral.mistral-large-3-675b-instruct    | Mistral   | 0.50       | 1.50        | 128K    | flagship  |
+| Mistral Large 3   | mistral.mistral-large-3-675b-instruct    | Mistral   | 0.50       | 1.50        | 256K    | flagship  |
 | DeepSeek-R1       | deepseek.r1-v1:0                         | DeepSeek  | 1.35       | 5.40        | 128K    | reasoning |
 | gpt-oss-20b       | openai.gpt-oss-20b-1:0                   | OpenAI    | 0.07       | 0.30        | 128K    | budget    |
 | gpt-oss-120b      | openai.gpt-oss-120b-1:0                  | OpenAI    | 0.15       | 0.60        | 128K    | efficient |
