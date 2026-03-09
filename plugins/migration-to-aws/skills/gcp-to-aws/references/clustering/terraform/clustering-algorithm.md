@@ -189,9 +189,11 @@ Each cluster includes:
 
 ## Determinism Guarantee
 
-Given same Terraform input, algorithm produces same cluster structure every run:
+Given the same classified resource inputs, the clustering algorithm produces the same cluster structure every run:
 
 1. Rules applied in fixed order
 2. Sequence counters increment deterministically
 3. Naming reflects source state, not random IDs
-4. No LLM-based decisions (all heuristics deterministic)
+4. All clustering heuristics are deterministic (no LLM-based decisions within the clustering algorithm itself)
+
+**Note:** Resource classification (see `classification-rules.md`) may use LLM inference as a fallback for resource types not in the hardcoded tables. If LLM-classified resources enter the pipeline, overall reproducibility depends on the LLM producing consistent classifications.

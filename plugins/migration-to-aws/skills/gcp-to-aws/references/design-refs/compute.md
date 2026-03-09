@@ -64,7 +64,7 @@ Apply in order; first match wins:
 - Criterion 1 (Eliminators): PASS (60s < 15min doesn't apply; stateless OK)
 - Criterion 2 (Operational Model): FARGATE preferred
 - → **AWS: Fargate (0.5 CPU, 1 GB memory)**
-- Confidence: `deterministic` (or `inferred` if variant from fast-path)
+- Confidence: `inferred` (rubric-based — Cloud Run is not in fast-path)
 
 ### Example 2a: Cloud Functions (event processor, short-running)
 
@@ -110,8 +110,8 @@ Apply in order; first match wins:
     "memory_mb": 1024,
     "region": "us-east-1"
   },
-  "confidence": "deterministic",
-  "rationale": "1:1 mapping; Cloud Run (stateless, <15min) → Fargate (always-on)",
+  "confidence": "inferred",
+  "rationale": "Rubric: Cloud Run (stateless, <15min) → Fargate (always-on, managed)",
   "rubric_applied": [
     "Eliminators: PASS",
     "Operational Model: Managed preferred",

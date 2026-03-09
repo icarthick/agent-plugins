@@ -8,7 +8,7 @@
 
 | GCP Service          | AWS            | Blocker                                                  |
 | -------------------- | -------------- | -------------------------------------------------------- |
-| Cloud Interconnect   | Direct Connect | Dedicated connection (6+ months setup) → use VPN as temp |
+| Cloud Interconnect   | Direct Connect | Dedicated connection (4-12 weeks setup) → use VPN as temp |
 | Cloud Load Balancing | ALB            | SSL certificate passthrough → NLB (L4, pass-through)     |
 | Cloud Load Balancing | NLB            | Host/path-based routing required → ALB (L7)              |
 
@@ -114,7 +114,7 @@ Apply in order:
     },
     "region": "us-east-1"
   },
-  "confidence": "deterministic",
-  "rationale": "GCP global HTTPS LB → AWS ALB (L7, host/path routing)"
+  "confidence": "inferred",
+  "rationale": "Rubric: GCP global HTTPS LB → AWS ALB (L7, host/path routing)"
 }
 ```

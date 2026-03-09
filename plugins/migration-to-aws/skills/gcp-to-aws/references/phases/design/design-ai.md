@@ -33,13 +33,13 @@ For each model in `models[]`, select the best-fit Bedrock model using the loaded
 
 **Apply user preference overrides from `ai_constraints`:**
 
-| Preference                            | Override                                          |
-| ------------------------------------- | ------------------------------------------------- |
-| `ai_priority = "cost"`                | Prefer "Winner" column; flag if source is cheaper |
-| `ai_priority = "quality"`             | Prefer Claude Sonnet/Opus regardless of cost      |
-| `ai_priority = "speed"`               | Prefer Claude Sonnet (fastest integration)        |
-| `ai_latency = "critical"`             | Prefer smaller/faster models (Haiku, Nova Lite)   |
-| `ai_latency = "flexible"`            | Any model; flag Batch API for 50% savings         |
+| Preference                | Override                                          |
+| ------------------------- | ------------------------------------------------- |
+| `ai_priority = "cost"`    | Prefer "Winner" column; flag if source is cheaper |
+| `ai_priority = "quality"` | Prefer Claude Sonnet/Opus regardless of cost      |
+| `ai_priority = "speed"`   | Prefer Claude Sonnet (fastest integration)        |
+| `ai_latency = "critical"` | Prefer smaller/faster models (Haiku, Nova Lite)   |
+| `ai_latency = "flexible"` | Any model; flag Batch API for 50% savings         |
 
 **Stay-or-migrate assessment per model:**
 

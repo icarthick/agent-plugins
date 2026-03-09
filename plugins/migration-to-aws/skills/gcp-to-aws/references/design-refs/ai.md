@@ -1,6 +1,6 @@
 # AI/ML Services Design Rubric
 
-**Applies to:** Vertex AI (traditional ML), Cloud Vision API, Cloud ML Engine
+**Applies to:** Vertex AI (traditional ML), Cloud Vision API, Cloud ML Engine (deprecated — now part of Vertex AI)
 
 ## LLM Routing
 
@@ -26,10 +26,10 @@ If the detected AI workload is LLM-based (generative models), load the source-sp
 - **Image classification, OCR** → AWS Rekognition (images) or Textract (OCR)
 - **Document understanding** → AWS Textract (more powerful for docs)
 
-### Cloud ML Engine
+### Cloud ML Engine (deprecated — legacy Terraform configs only)
 
 - **Model training** → SageMaker (managed training jobs)
-- **AutoML** → SageMaker Autopilot
+- **AutoML** → SageMaker Autopilot / Canvas
 
 ## 6-Criteria Rubric
 

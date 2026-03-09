@@ -162,7 +162,7 @@ Present applicable optimizations with estimated savings:
 
 | Optimization                       | Savings Range | Applies To                       | When                                    |
 | ---------------------------------- | ------------- | -------------------------------- | --------------------------------------- |
-| Reserved Instances / Savings Plans | 40-60%        | Fargate, RDS, Aurora             | Post-migration (after validating usage) |
+| Reserved Instances / Savings Plans | 40-60%        | RDS, Aurora                      | Post-migration (after validating usage) |
 | Compute Savings Plans              | 20-50%        | Fargate, Lambda                  | Post-migration                          |
 | S3 Intelligent-Tiering / S3-IA     | 38-50%        | S3 storage                       | During migration                        |
 | Spot Instances                     | 60-90%        | Batch/non-critical EC2 workloads | If batch jobs exist                     |

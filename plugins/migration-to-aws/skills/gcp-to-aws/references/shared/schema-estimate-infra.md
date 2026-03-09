@@ -113,7 +113,7 @@ Schema for `estimation-infra.json`, produced by `estimate-infra.md`.
       "payback_period_months": 2.6,
       "note": "Includes reduction in operational overhead from managed services"
     },
-    "five_year_total_savings": 484540,
+    "five_year_total_savings": 475000,
     "non_cost_benefits": [
       "Operational efficiency (fewer engineers needed for managed services)",
       "Better global reach (more AWS regions)",
@@ -127,7 +127,7 @@ Schema for `estimation-infra.json`, produced by `estimate-infra.md`.
   "optimization_opportunities": [
     {
       "opportunity": "Reserved Instances",
-      "target_services": ["Fargate", "RDS"],
+      "target_services": ["RDS", "Aurora"],
       "savings_monthly": 58,
       "savings_percent": "40%",
       "commitment": "1-year",
