@@ -1,6 +1,6 @@
 # Phase 2: Clarify Requirements
 
-**Phase 2 of 5** — Ask adaptive questions before design begins, then interpret answers into ready-to-apply design constraints.
+**Phase 2 of 6** — Ask adaptive questions before design begins, then interpret answers into ready-to-apply design constraints.
 
 The output — `preferences.json` — is consumed directly by Design and Estimate without any further interpretation.
 
@@ -80,7 +80,7 @@ Before generating questions, scan the inventory to extract values that are alrea
 1. **GCP regions** — Extract all GCP regions from the inventory. Map to the closest AWS region as a suggested default for Q1.
 2. **Resource types present** — Build a set of resource types: compute (Cloud Run, Cloud Functions, GKE, GCE), database (Cloud SQL, Spanner, Memorystore), storage (Cloud Storage), messaging (Pub/Sub).
 3. **Billing SKUs** — If `billing-profile.json` exists, check if any SKU reveals storage class, HA configuration, or other answerable questions.
-4. **Config confidence** — If inventory `metadata.source = "billing"`, identify resources with `config_confidence = "assumed"` for Category B questions.
+4. **Billing-only mode** — If `billing-profile.json` exists and `gcp-resource-inventory.json` does NOT exist, check `billing-profile.json → services[]` for Category B question matching.
 5. **AI framework detection** — If `ai-workload-profile.json` exists, check `integration.gateway_type` and `integration.frameworks` for auto-detection of Q14 answer.
 
 Record extracted values. Questions whose answers are fully determined by extraction will be skipped and the extracted value used directly with `chosen_by: "extracted"`.
@@ -91,19 +91,19 @@ Record extracted values. Questions whose answers are fully determined by extract
 
 ### Category Definitions and Firing Rules
 
-| Category | Name               | Firing Rule                                                                                     | Reference File        | Questions                                                                                                           |
-| -------- | ------------------ | ----------------------------------------------------------------------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| **A**    | Global/Strategic   | **Always fires**                                                                                | `clarify-global.md`   | Q1 (location), Q2 (compliance), Q3 (GCP spend), Q4 (funding stage), Q5 (multi-cloud), Q6 (uptime), Q7 (maintenance) |
-| **B**    | Configuration Gaps | Inventory with `metadata.source == "billing"` AND at least one `config_confidence == "assumed"` | `clarify-compute.md`  | Cloud SQL HA, Cloud Run count, Memorystore memory, Functions gen                                                    |
-| **C**    | Compute Model      | Compute resources present (Cloud Run, Cloud Functions, GKE, GCE)                                | `clarify-compute.md`  | Q8 (K8s sentiment), Q9 (WebSocket), Q10 (Cloud Run traffic), Q11 (Cloud Run spend)                                  |
-| **D**    | Database Model     | Database resources present (Cloud SQL, Spanner, Memorystore)                                    | `clarify-database.md` | Q12 (DB traffic pattern), Q13 (DB I/O)                                                                              |
-| **E**    | Migration Posture  | **Disabled by default** — requires explicit user opt-in                                         | _(inline below)_      | HA upgrades, right-sizing                                                                                           |
-| **F**    | AI/Bedrock         | `ai-workload-profile.json` exists                                                               | `clarify-ai.md`       | Q14–Q22                                                                                                             |
+| Category | Name               | Firing Rule                                                                    | Reference File        | Questions                                                                                                           |
+| -------- | ------------------ | ------------------------------------------------------------------------------ | --------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **A**    | Global/Strategic   | **Always fires**                                                               | `clarify-global.md`   | Q1 (location), Q2 (compliance), Q3 (GCP spend), Q4 (funding stage), Q5 (multi-cloud), Q6 (uptime), Q7 (maintenance) |
+| **B**    | Configuration Gaps | `billing-profile.json` exists AND `gcp-resource-inventory.json` does NOT exist | `clarify-compute.md`  | Cloud SQL HA, Cloud Run count, Memorystore memory, Functions gen                                                    |
+| **C**    | Compute Model      | Compute resources present (Cloud Run, Cloud Functions, GKE, GCE)               | `clarify-compute.md`  | Q8 (K8s sentiment), Q9 (WebSocket), Q10 (Cloud Run traffic), Q11 (Cloud Run spend)                                  |
+| **D**    | Database Model     | Database resources present (Cloud SQL, Spanner, Memorystore)                   | `clarify-database.md` | Q12 (DB traffic pattern), Q13 (DB I/O)                                                                              |
+| **E**    | Migration Posture  | **Disabled by default** — requires explicit user opt-in                        | _(inline below)_      | HA upgrades, right-sizing                                                                                           |
+| **F**    | AI/Bedrock         | `ai-workload-profile.json` exists                                              | `clarify-ai.md`       | Q14–Q22                                                                                                             |
 
 **Apply firing rules to determine which categories are active:**
 
 1. Category A is always active.
-2. Check inventory `metadata.source` — if `"billing"` with assumed configs, Category B is active.
+2. Check for billing-only mode — if `billing-profile.json` exists and `gcp-resource-inventory.json` does NOT, Category B is active.
 3. Check for compute resources — if present, Category C is active. Within C, skip Q8 if no GKE present. Skip Q10/Q11 if no Cloud Run present.
 4. Check for database resources — if present, Category D is active.
 5. Category E is disabled by default. After presenting all other categories, offer opt-in: "Would you also like HA upgrade and right-sizing recommendations based on your billing data?" If user declines or does not respond, apply Category E defaults (no HA upgrades, no right-sizing).

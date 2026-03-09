@@ -1,22 +1,23 @@
 # GCP-to-AWS Migration Plugin
 
-Migrate workloads from Google Cloud Platform to AWS with a 5-phase guided process.
+Migrate workloads from Google Cloud Platform to AWS with a 6-phase guided process.
 
 ## Overview
 
 This plugin guides you through migrating GCP infrastructure to AWS by:
 
 1. **Discover** - Scan Terraform files for GCP resources
-2. **Clarify** - Answer 8 questions about your migration requirements
+2. **Clarify** - Answer adaptive questions about your migration requirements
 3. **Design** - Map GCP services to equivalent AWS services
 4. **Estimate** - Calculate monthly costs and ROI
 5. **Generate** - Generate Terraform, migration scripts, AI adapters, and documentation
+6. **Feedback** - Collect optional feedback and migration trace (optional)
 
 ## Skills
 
 | Skill        | Description                                               |
 | ------------ | --------------------------------------------------------- |
-| `gcp-to-aws` | Migrate GCP workloads to AWS via a 5-phase guided process |
+| `gcp-to-aws` | Migrate GCP workloads to AWS via a 6-phase guided process |
 
 ## Usage
 

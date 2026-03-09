@@ -19,7 +19,7 @@ Recursively scan the entire target directory tree for source code and dependency
 - `**/*.js`, `**/*.ts`, `**/*.jsx`, `**/*.tsx` (JavaScript/TypeScript)
 - `**/*.go` (Go)
 - `**/*.java` (Java)
-- `**/*.scala`, `**/*.kotlin`, `**/*.rust` (Other)
+- `**/*.scala`, `**/*.kt`, `**/*.rs` (Other)
 
 **Dependency manifests:**
 

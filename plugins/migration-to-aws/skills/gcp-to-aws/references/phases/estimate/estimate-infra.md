@@ -128,7 +128,11 @@ Calculate one-time costs in 3 categories:
 | Data migration         | 16    |
 | Deployment & cutover   | 16    |
 
-Adjust based on `preferences.json` → `complexity_level`: low = -30%, medium = baseline, high = +50%.
+Adjust based on migration complexity derived from `aws-design.json`:
+
+- **Low** (-30%): ≤3 services, no database migration, no compliance constraints
+- **Medium** (baseline): 4–8 services, or includes database migration
+- **High** (+50%): >8 services, or includes database + compliance constraints, or multi-region
 
 **Infrastructure Setup** — ~$1,000 (account setup $0, data transfer $500-1,000, initial testing $50-200).
 

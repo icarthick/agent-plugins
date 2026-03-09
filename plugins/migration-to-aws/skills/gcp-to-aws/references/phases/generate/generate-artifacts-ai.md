@@ -13,11 +13,11 @@ Generate migration artifacts from the AI migration plan and design. Artifacts va
 - `ai-migration/setup_bedrock.sh` — Bedrock model access and IAM setup
 - `ai-migration/test_comparison.py` — A/B test harness (always Python)
 
-**Outputs (direct SDK users — `ai_gateway` = `"direct"`):**
+**Outputs (direct SDK users — `ai_framework` = `"direct"`):**
 
 - `ai-migration/provider_adapter.{py,js,go}` — Provider abstraction with feature flag
 
-**Outputs (gateway users — `ai_gateway` != `"direct"`):**
+**Outputs (gateway users — `ai_framework` != `"direct"`):**
 
 - `ai-migration/gateway_config.{yaml,py,json}` — Gateway-specific configuration snippet
 
@@ -40,7 +40,7 @@ If any required file is missing: **STOP**. Output: "Missing required artifact: [
 
 ## Step 0: Determine Artifact Path
 
-Check `preferences.json` → `ai_constraints.ai_gateway.value`:
+Check `preferences.json` → `ai_constraints.ai_framework.value`:
 
 - `"direct"` or absent → Generate provider adapter (Step 1) + setup (Step 3) + test harness (Step 2)
 - `"llm_router"`, `"api_gateway"`, `"voice_platform"`, or `"framework"` → Skip Step 1, generate gateway config (Step 3B) instead
@@ -104,7 +104,7 @@ Generate `ai-migration/setup_bedrock.sh`.
 
 ## Step 3B: Generate Gateway Configuration (Gateway Users Only)
 
-Skip if `ai_gateway` = `"direct"` or absent. Read `preferences.json` → `ai_constraints.ai_gateway.value` to determine format.
+Skip if `ai_framework` = `"direct"` or absent. Read `preferences.json` → `ai_constraints.ai_framework.value` to determine format.
 
 **`"llm_router"`** → Generate `gateway_config.yaml` (LiteLLM format):
 
@@ -173,7 +173,7 @@ Generated AI migration artifacts:
 - ai-migration/eval-prompts.jsonl              # If evaluation opted in
 - ai-migration/run-evaluation.sh               # If evaluation opted in
 
-Gateway type: [ai_gateway value]
+Gateway type: [ai_framework value]
 Language: [detected language]
 Models to migrate: [count] models
 Capabilities covered: [list from capabilities_summary]

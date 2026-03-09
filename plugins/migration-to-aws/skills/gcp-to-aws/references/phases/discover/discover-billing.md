@@ -82,7 +82,7 @@ Write `$MIGRATION_DIR/billing-profile.json` with the following structure:
   },
   "summary": {
     "total_monthly_spend": 0.00,
-    "total_services": 0,
+    "service_count": 0,
     "top_services_by_spend": []
   },
   "services": [

@@ -26,9 +26,9 @@ Present user with the option to validate recommended Bedrock models before proce
 
 ## Part 1: Fast-Track Timeline
 
-Check `preferences.json` → `ai_constraints.ai_gateway` to determine timeline:
+Check `preferences.json` → `ai_constraints.ai_framework` to determine timeline:
 
-**Gateway users (1-3 days)** — `ai_gateway` = `llm_router`, `api_gateway`, `voice_platform`, or `framework`:
+**Gateway users (1-3 days)** — `ai_framework` includes `llm_router`, `api_gateway`, `voice_platform`, or `framework`:
 
 | Gateway Type                      | Migration Action                                              | Effort            |
 | --------------------------------- | ------------------------------------------------------------- | ----------------- |
@@ -37,7 +37,7 @@ Check `preferences.json` → `ai_constraints.ai_gateway` to determine timeline:
 | Voice Platform (Vapi, Bland.ai)   | Check native Bedrock support, update dashboard                | Dashboard config  |
 | Framework (LangChain, LlamaIndex) | Swap provider import (e.g., `ChatBedrock` for `ChatVertexAI`) | 1-5 lines of code |
 
-**Direct SDK users (1-3 weeks)** — `ai_gateway` = `direct`:
+**Direct SDK users (1-3 weeks)** — `ai_framework` = `direct`:
 
 - **Week 1:** Enable Bedrock access, create IAM role, develop provider adapter with feature flag, unit test
 - **Week 2:** Deploy to staging, run A/B comparison, measure latency/quality/cost, tune prompts

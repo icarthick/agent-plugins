@@ -17,6 +17,8 @@ Read `$MIGRATION_DIR/billing-profile.json`. This file contains:
 
 Read `$MIGRATION_DIR/preferences.json` → `design_constraints` (target region, compliance, etc.).
 
+Also read `preferences.json` → `metadata.inventory_clarifications` (may be empty if user defaulted all Category B questions). These are billing-only configuration answers collected during Clarify.
+
 ---
 
 ## Step 1: Load Billing Services
@@ -66,6 +68,17 @@ Look up `gcp_service_type` in the table below. These are default mappings for co
 If found: assign the Default AWS Target. Set rationale to: "Billing heuristic: [GCP service] → [AWS service]. Provide Terraform files for configuration-aware mapping."
 
 **2c. If not found in either table:** proceed to Step 3.
+
+**2d. Enrich with Category B answers (if available):**
+
+After lookup, check `metadata.inventory_clarifications` for user-provided configuration data and merge into `aws_config`:
+
+- If `inventory_clarifications.cloud_sql_ha` exists → add `"high_availability": true/false` to the Cloud SQL / Aurora design entry
+- If `inventory_clarifications.cloud_run_count` exists → set `"service_count"` in the Cloud Run / Fargate design entry
+- If `inventory_clarifications.memorystore_memory` exists → set `"memory_gb"` in the Redis / ElastiCache design entry
+- If `inventory_clarifications.cloud_functions_gen` exists → note `"functions_generation"` in the Cloud Functions / Lambda design entry
+
+When a clarification is applied, add `"inventory_clarifications_applied": true` to the service's `aws_config`.
 
 **No rubric evaluation** — without IaC config, there is insufficient data for the 6-criteria rubric.
 
@@ -119,11 +132,13 @@ Write to `$MIGRATION_DIR/aws-design-billing.json`:
       "gcp_service_type": "google_sql_database_instance",
       "aws_service": "RDS Aurora PostgreSQL",
       "aws_config": {
-        "region": "us-east-1"
+        "region": "us-east-1",
+        "high_availability": false,
+        "inventory_clarifications_applied": true
       },
       "monthly_cost": 800.00,
       "confidence": "billing_inferred",
-      "rationale": "Fast-path: Cloud SQL → RDS Aurora. SKU hints: PostgreSQL engine.",
+      "rationale": "Fast-path: Cloud SQL → RDS Aurora. SKU hints: PostgreSQL engine. User confirmed single-zone (Category B).",
       "sku_hints": ["DB custom CORE", "DB custom RAM"]
     }
   ],

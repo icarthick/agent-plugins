@@ -14,8 +14,8 @@ Verify all pricing via AWS Pricing MCP or `references/shared/pricing-cache.md`. 
 
 **It is no longer "Bedrock is always cheaper."** It depends on the model.
 
-- **OpenAI cheaper:** GPT-5.2 (65%), GPT-5.1/5 (58%), GPT-4.1 (33%), GPT-4o (17%), o4-mini/o3-mini/o1-mini (63%)
-- **Bedrock cheaper:** Nova Lite vs Mini models (85-88%), Nova Micro vs Nano (30-65%), Nova Premier vs Pro models (89-98%), DeepSeek-R1 vs o3 (33%)
+- **OpenAI cheaper:** GPT-5.2 (50%), GPT-5.1/5 (40%), GPT-4.1 (43%), GPT-4o (29%), o4-mini/o3-mini/o1-mini (69%)
+- **Bedrock cheaper:** Nova Lite vs Mini models (85-86%), Nova Micro vs Nano (58-65%), Nova Premier vs Pro models (88-92%), DeepSeek-R1 vs o3 (32%)
 
 ---
 
@@ -23,34 +23,36 @@ Verify all pricing via AWS Pricing MCP or `references/shared/pricing-cache.md`. 
 
 ### Flagship (GPT-5 Series)
 
-| OpenAI Model    | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price  | Winner                 |
-| --------------- | --------------------- | ------------------ | -------------- | ---------------------- |
-| GPT-5.2         | $1.75 / $14.00        | Claude Opus 4.6    | $5.00 / $25.00 | OpenAI 65% cheaper     |
-| GPT-5.1 / GPT-5 | $1.25 / $10.00        | Claude Sonnet 4.6  | $3.00 / $15.00 | OpenAI 58% cheaper     |
-| GPT-5 Mini      | $0.25 / $2.00         | Nova Lite          | $0.06 / $0.24  | Bedrock 88% cheaper    |
-| GPT-5 Nano      | $0.05 / $0.40         | Nova Micro         | $0.035 / $0.14 | Bedrock 30-65% cheaper |
+Percentages below are blended savings using a 2:1 input-to-output token ratio.
+
+| OpenAI Model    | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price  | Winner              |
+| --------------- | --------------------- | ------------------ | -------------- | ------------------- |
+| GPT-5.2         | $1.75 / $14.00        | Claude Opus 4.6    | $5.00 / $25.00 | OpenAI 50% cheaper  |
+| GPT-5.1 / GPT-5 | $1.25 / $10.00        | Claude Sonnet 4.6  | $3.00 / $15.00 | OpenAI 40% cheaper  |
+| GPT-5 Mini      | $0.25 / $2.00         | Nova Lite          | $0.06 / $0.24  | Bedrock 86% cheaper |
+| GPT-5 Nano      | $0.05 / $0.40         | Nova Micro         | $0.035 / $0.14 | Bedrock 58% cheaper |
 
 ### Pro Models (Extended Reasoning)
 
 | OpenAI Model | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price  | Winner              |
 | ------------ | --------------------- | ------------------ | -------------- | ------------------- |
 | GPT-5.2 Pro  | $21.00 / $168.00      | Nova Premier       | $2.50 / $12.50 | Bedrock 92% cheaper |
-| GPT-5 Pro    | $15.00 / $120.00      | Nova Premier       | $2.50 / $12.50 | Bedrock 89% cheaper |
+| GPT-5 Pro    | $15.00 / $120.00      | Nova Premier       | $2.50 / $12.50 | Bedrock 88% cheaper |
 
 ### GPT-4.1 Series
 
 | OpenAI Model | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price  | Winner              |
 | ------------ | --------------------- | ------------------ | -------------- | ------------------- |
-| GPT-4.1      | $2.00 / $8.00         | Claude Sonnet 4.6  | $3.00 / $15.00 | OpenAI 33% cheaper  |
+| GPT-4.1      | $2.00 / $8.00         | Claude Sonnet 4.6  | $3.00 / $15.00 | OpenAI 43% cheaper  |
 | GPT-4.1 Mini | $0.40 / $1.60         | Nova Lite          | $0.06 / $0.24  | Bedrock 85% cheaper |
 | GPT-4.1 Nano | $0.10 / $0.40         | Nova Micro         | $0.035 / $0.14 | Bedrock 65% cheaper |
 
 ### GPT-4o Series
 
-| OpenAI Model | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price  | Winner                 |
-| ------------ | --------------------- | ------------------ | -------------- | ---------------------- |
-| GPT-4o       | $2.50 / $10.00        | Claude Sonnet 4.6  | $3.00 / $15.00 | OpenAI 17% cheaper     |
-| GPT-4o Mini  | $0.15 / $0.60         | Nova Lite          | $0.06 / $0.24  | Bedrock 60-88% cheaper |
+| OpenAI Model | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price  | Winner              |
+| ------------ | --------------------- | ------------------ | -------------- | ------------------- |
+| GPT-4o       | $2.50 / $10.00        | Claude Sonnet 4.6  | $3.00 / $15.00 | OpenAI 29% cheaper  |
+| GPT-4o Mini  | $0.15 / $0.60         | Nova Lite          | $0.06 / $0.24  | Bedrock 60% cheaper |
 
 ### Reasoning Models (o-series)
 
@@ -58,17 +60,17 @@ Verify all pricing via AWS Pricing MCP or `references/shared/pricing-cache.md`. 
 | --------------------------- | --------------------- | ------------------ | -------------- | ------------------- |
 | o1-pro                      | $150.00 / $600.00     | Nova Premier       | $2.50 / $12.50 | Bedrock 98% cheaper |
 | o3-pro                      | $20.00 / $80.00       | Nova Premier       | $2.50 / $12.50 | Bedrock 85% cheaper |
-| o1                          | $15.00 / $60.00       | Nova Premier       | $2.50 / $12.50 | Bedrock 80% cheaper |
-| o3                          | $2.00 / $8.00         | DeepSeek-R1        | $1.35 / $5.40  | Bedrock 33% cheaper |
-| o4-mini / o3-mini / o1-mini | $1.10 / $4.40         | Claude Sonnet 4.6  | $3.00 / $15.00 | OpenAI 63% cheaper  |
+| o1                          | $15.00 / $60.00       | Nova Premier       | $2.50 / $12.50 | Bedrock 81% cheaper |
+| o3                          | $2.00 / $8.00         | DeepSeek-R1        | $1.35 / $5.40  | Bedrock 32% cheaper |
+| o4-mini / o3-mini / o1-mini | $1.10 / $4.40         | Claude Sonnet 4.6  | $3.00 / $15.00 | OpenAI 69% cheaper  |
 
 ### Legacy Models
 
-| OpenAI Model  | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price  | Winner                                       |
-| ------------- | --------------------- | ------------------ | -------------- | -------------------------------------------- |
-| GPT-4 Turbo   | $10.00 / $30.00       | Claude Sonnet 4.6  | $3.00 / $15.00 | Bedrock 70-80% cheaper                       |
-| GPT-4         | $30.00 / $60.00       | Claude Sonnet 4.6  | $3.00 / $15.00 | Bedrock 90% cheaper                          |
-| GPT-3.5 Turbo | $0.50 / $1.50         | Llama 4 Maverick   | $0.24 / $0.97  | Bedrock 35-52% cheaper + much better quality |
+| OpenAI Model  | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price  | Winner                                    |
+| ------------- | --------------------- | ------------------ | -------------- | ----------------------------------------- |
+| GPT-4 Turbo   | $10.00 / $30.00       | Claude Sonnet 4.6  | $3.00 / $15.00 | Bedrock 58% cheaper                       |
+| GPT-4         | $30.00 / $60.00       | Claude Sonnet 4.6  | $3.00 / $15.00 | Bedrock 82% cheaper                       |
+| GPT-3.5 Turbo | $0.50 / $1.50         | Llama 4 Maverick   | $0.24 / $0.97  | Bedrock 42% cheaper + much better quality |
 
 ### OpenAI Models on Bedrock (gpt-oss)
 
@@ -81,23 +83,25 @@ OpenAI's open-source models are available directly on Bedrock, enabling migratio
 
 This path avoids model-family risk: the application stays on OpenAI-architecture models while consolidating on AWS infrastructure.
 
+_Percentages are blended savings using a 2:1 input-to-output token ratio. Actual savings depend on your input/output ratio._
+
 ---
 
 ## Migration Decision Framework
 
 **Migrate to Bedrock if:**
 
-- Using Pro/expensive models (o1-pro, GPT-5.2 Pro) → 80-98% savings
-- Using Mini/Nano models at high volume → 60-88% savings
-- Using legacy GPT-4/3.5 → 70-97% savings
+- Using Pro/expensive models (o1-pro, GPT-5.2 Pro) → 85-98% savings
+- Using Mini/Nano models at high volume → 58-86% savings
+- Using legacy GPT-4/3.5 → 42-82% savings
 - Need AWS infrastructure integration
 - Need prompt caching (Claude only, 90% savings on cached content)
-- Using o3 for reasoning → DeepSeek-R1 on Bedrock is 33% cheaper
+- Using o3 for reasoning → DeepSeek-R1 on Bedrock is 32% cheaper
 - Want to stay on OpenAI models → gpt-oss on Bedrock (same models, AWS infrastructure)
 
 **Consider staying on OpenAI if:**
 
-- Using mid-tier flagships (GPT-5, GPT-4.1, o3, o4-mini) → OpenAI 17-65% cheaper
+- Using mid-tier flagships (GPT-5, GPT-4.1, o3, o4-mini) → OpenAI 29-69% cheaper
 - Low volume (<$500/mo) where absolute savings are small
 - Heavily integrated with OpenAI ecosystem (Assistants API, DALL-E, Whisper, Realtime)
 - Need Realtime API (no Bedrock equivalent)

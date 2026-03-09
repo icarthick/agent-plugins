@@ -92,7 +92,7 @@ Schema for `estimation-infra.json`, produced by `estimate-infra.md`.
     "total_one_time": 21800,
     "complexity_adjustment": "none|reduced_30|increased_50",
     "complexity_factors": [
-      "medium complexity from preferences.json",
+      "medium: 6 services with database migration",
       "standard database migration",
       "container-based compute migration"
     ]

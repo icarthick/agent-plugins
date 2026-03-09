@@ -58,22 +58,22 @@ Gemini 3.1 Pro Preview (Feb 19, 2026) has shifted the landscape. Be honest with 
 
 | Gemini Model           | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price  | Winner              |
 | ---------------------- | --------------------- | ------------------ | -------------- | ------------------- |
-| Gemini 3.1 Pro Preview | $2.00 / $12.00        | Claude Sonnet 4.6  | $3.00 / $15.00 | Gemini 31% cheaper  |
-| Gemini 3.1 Pro Preview | $2.00 / $12.00        | Claude Opus 4.6    | $5.00 / $25.00 | Gemini 119% cheaper |
-| Gemini 3 Pro           | $0.50 / $3.00         | Llama 4 Maverick   | $0.24 / $0.97  | Bedrock 63% cheaper |
+| Gemini 3.1 Pro Preview | $2.00 / $12.00        | Claude Sonnet 4.6  | $3.00 / $15.00 | Gemini 24% cheaper  |
+| Gemini 3.1 Pro Preview | $2.00 / $12.00        | Claude Opus 4.6    | $5.00 / $25.00 | Gemini 54% cheaper  |
+| Gemini 3 Pro           | $0.50 / $3.00         | Llama 4 Maverick   | $0.24 / $0.97  | Bedrock 64% cheaper |
 | Gemini 3 Pro           | $0.50 / $3.00         | Llama 4 Scout      | $0.17 / $0.66  | Bedrock 75% cheaper |
-| Gemini 3 Pro           | $0.50 / $3.00         | Nova Pro           | $0.80 / $3.20  | Gemini 20% cheaper  |
-| Gemini 2.5 Pro         | $1.25 / $10.00        | Claude Sonnet 4.6  | $3.00 / $15.00 | Gemini 68% cheaper  |
+| Gemini 3 Pro           | $0.50 / $3.00         | Nova Pro           | $0.80 / $3.20  | Gemini 17% cheaper  |
+| Gemini 2.5 Pro         | $1.25 / $10.00        | Claude Sonnet 4.6  | $3.00 / $15.00 | Gemini 40% cheaper  |
 | Gemini 2.5 Pro         | $1.25 / $10.00        | Nova Pro           | $0.80 / $3.20  | Bedrock 62% cheaper |
 | Gemini 3.1 Pro Preview | $2.00 / $12.00        | Nova 2 Pro         | $1.38 / $11.00 | Bedrock 14% cheaper |
-| Gemini 2.5 Pro         | $1.25 / $10.00        | Nova 2 Pro         | $1.38 / $11.00 | Similar pricing     |
+| Gemini 2.5 Pro         | $1.25 / $10.00        | Nova 2 Pro         | $1.38 / $11.00 | Gemini 9% cheaper   |
 
 ### Gemini Flash/Lite Tier
 
 | Gemini Model     | Price (in/out per 1M) | Best Bedrock Match | Bedrock Price  | Winner              |
 | ---------------- | --------------------- | ------------------ | -------------- | ------------------- |
 | Gemini 2.5 Flash | $0.30 / $2.50         | Nova Lite          | $0.06 / $0.24  | Bedrock 88% cheaper |
-| Gemini 2.0 Flash | $0.10 / $0.40         | Nova Micro         | $0.035 / $0.14 | Bedrock 64% cheaper |
+| Gemini 2.0 Flash | $0.10 / $0.40         | Nova Micro         | $0.035 / $0.14 | Bedrock 65% cheaper |
 | Gemini Flash     | $0.075 / $0.30        | Nova Micro         | $0.035 / $0.14 | Bedrock 53% cheaper |
 
 ### Legacy/Specialized
@@ -83,6 +83,8 @@ Gemini 3.1 Pro Preview (Feb 19, 2026) has shifted the landscape. Be honest with 
 | text-bison / chat-bison | Legacy                | Llama 4 Scout         | $0.17 / $0.66    | Bedrock (better quality + cheaper) |
 | text-embedding-004      | $0.025 / N/A          | Titan Embeddings V2   | $0.02 / N/A      | Bedrock 20% cheaper                |
 | imagen-*                | Varies                | Titan Image Generator | $0.008-$0.04/img | Varies                             |
+
+_Percentages are blended savings using a 2:1 input-to-output token ratio. Actual savings depend on your input/output ratio._
 
 ---
 
@@ -141,15 +143,17 @@ Gemini Flash → **Nova Micro** (<200ms, text-only, cheapest), **Haiku 4.5** (<4
 
 | Gemini Model                    | Monthly | Best Bedrock Match             | Monthly | Difference |
 | ------------------------------- | ------- | ------------------------------ | ------- | ---------- |
-| Gemini 3.1 Pro Preview ($2/$12) | $1,200  | Claude Sonnet 4.6 ($3/$15)     | $1,575  | +31%       |
-| Gemini 3.1 Pro Preview ($2/$12) | $1,200  | Claude Opus 4.6 ($5/$25)       | $2,625  | +119%      |
+| Gemini 3.1 Pro Preview ($2/$12) | $1,200  | Claude Sonnet 4.6 ($3/$15)     | $1,575  | +24%       |
+| Gemini 3.1 Pro Preview ($2/$12) | $1,200  | Claude Opus 4.6 ($5/$25)       | $2,625  | +54%       |
 | Gemini 3.1 Pro Preview ($2/$12) | $1,200  | Nova 2 Pro ($1.38/$11.00)      | $1,032  | -14%       |
-| Gemini 3 Pro ($0.50/$3.00)      | $300    | Llama 4 Maverick ($0.24/$0.97) | $109    | -63%       |
+| Gemini 3 Pro ($0.50/$3.00)      | $300    | Llama 4 Maverick ($0.24/$0.97) | $109    | -64%       |
 | Gemini 3 Pro ($0.50/$3.00)      | $300    | Llama 4 Scout ($0.17/$0.66)    | $75     | -75%       |
-| Gemini 2.5 Pro ($1.25/$10)      | $938    | Nova 2 Pro ($1.38/$11.00)      | $1,032  | +10%       |
+| Gemini 2.5 Pro ($1.25/$10)      | $938    | Nova 2 Pro ($1.38/$11.00)      | $1,032  | +9%        |
 | Gemini 2.5 Pro ($1.25/$10)      | $938    | Nova Pro ($0.80/$3.20)         | $360    | -62%       |
 | Gemini 2.5 Flash ($0.30/$2.50)  | $233    | Nova Lite ($0.06/$0.24)        | $27     | -88%       |
 | Gemini 2.0 Flash ($0.10/$0.40)  | $45     | Nova Micro ($0.035/$0.14)      | $16     | -64%       |
+
+_Difference column shows blended savings at a 2:1 input/output token ratio. Positive = Bedrock costs more (Gemini cheaper), negative = Bedrock cheaper._
 
 ---
 
