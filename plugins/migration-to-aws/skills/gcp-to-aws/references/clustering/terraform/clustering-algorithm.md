@@ -17,7 +17,7 @@ All resources with fields:
 **IF** `google_compute_network` resource exists:
 
 - Group: `google_compute_network` + ALL network_path secondaries (subnetworks, firewalls, routers)
-- Cluster ID: `network_vpc_{gcp_region}_{sequence}` (e.g., `network_vpc_us-central1_001`)
+- Cluster ID: `networking_vpc_{gcp_region}_001` (e.g., `networking_vpc_us-central1_001`)
 - **Reasoning**: Network is shared infrastructure; groups all config together
 
 **Output**: 1 cluster (or 0 if no networks found)
@@ -70,7 +70,7 @@ All resources with fields:
 
 **Output**: ONE cluster per resource type (not per resource)
 
-**Reasoning**: Identical workloads of the same GCP service type migrate together, share operational characteristics, and should be managed as a unit.
+**Reasoning**: Identical workloads of the same GCP service type migrate together, share operational characteristics, and are managed as a unit.
 
 **Mark all resources of this type as clustered; remove from unassigned pool.**
 
@@ -89,16 +89,15 @@ All resources with fields:
 
 ### Rule 4: Merge on Dependencies
 
-**IF** two clusters have bidirectional or data_dependency edges between their PRIMARY resources:
+**IF** two clusters have **bidirectional** `data_dependency` edges between their PRIMARY resources (A→B AND B→A):
 
-- **AND** they form a single logical deployment unit (determined by: shared infrastructure, sequential deploy, business logic)
 - **THEN** merge clusters
 
 **Action**: Combine into one cluster; update ID to reflect both (e.g., `web-api_us-central1_001`)
 
-**Reasoning**: Some workloads must deploy together (e.g., two Cloud Runs sharing database)
+**Reasoning**: Bidirectional data dependencies indicate a tightly coupled deployment unit that must migrate together.
 
-**Heuristic**: Merge if one PRIMARY depends on another's output (e.g., Function → Database). Do NOT merge independent workloads.
+**Do NOT merge** when edges are unidirectional (A→B only). Unidirectional dependencies are captured in `dependencies[]` instead.
 
 ### Rule 5: Skip API Services
 
@@ -115,7 +114,7 @@ All resources with fields:
 Apply consistent cluster naming:
 
 - **Format**: `{service_category}_{service_type}_{gcp_region}_{sequence}`
-- **service_category**: One of: `compute`, `database`, `storage`, `network`, `messaging`, `analytics`, `security`
+- **service_category**: One of: `compute`, `database`, `storage`, `networking`, `messaging`, `monitoring`, `analytics`, `security`
 - **service_type**: GCP service shortname (e.g., `cloudrun`, `sql`, `bucket`, `vpc`)
 - **gcp_region**: Source region (e.g., `us-central1`)
 - **sequence**: Zero-padded counter (e.g., `001`, `002`)
@@ -125,9 +124,40 @@ Apply consistent cluster naming:
 - `compute_cloudrun_us-central1_001`
 - `database_sql_us-west1_001`
 - `storage_bucket_multi-region_001`
-- `network_vpc_us-central1_001` (rule 1 network cluster)
+- `networking_vpc_us-central1_001` (rule 1 network cluster)
 
 **Reasoning**: Names reflect deployment intent; deterministic for reproducibility.
+
+## Post-Clustering: Populate Cluster Metadata
+
+After all clusters are formed, populate these fields for each cluster:
+
+### `network`
+
+Identify which VPC/network the cluster's resources belong to. Trace `network_path` edges from resources in this cluster to find the `google_compute_network` they reference. Store the network cluster ID (e.g., `networking_vpc_us-central1_001`). Set to `null` if resources have no network association.
+
+### `must_migrate_together`
+
+Default: `true` for all clusters. Set to `false` only if the cluster contains resources that can be independently migrated without breaking dependencies (rare — most clusters are atomic).
+
+### `dependencies`
+
+Derive from Primary→Primary edges that cross cluster boundaries. If cluster A contains a resource with a `data_dependency` edge to a resource in cluster B, then cluster A depends on cluster B. Store as array of cluster IDs.
+
+### `creation_order`
+
+Build a global ordering of clusters by depth level:
+
+```json
+"creation_order": [
+  { "depth": 0, "clusters": ["networking_vpc_us-central1_001"] },
+  { "depth": 1, "clusters": ["security_iam_us-central1_001"] },
+  { "depth": 2, "clusters": ["database_sql_us-central1_001", "storage_gcs_us-central1_001"] },
+  { "depth": 3, "clusters": ["compute_cloudrun_us-central1_001"] }
+]
+```
+
+Cluster depth = minimum depth across all primary resources in the cluster. Clusters at the same depth can be migrated in parallel.
 
 ## Output Cluster Schema
 
@@ -136,25 +166,34 @@ Each cluster includes:
 ```json
 {
   "cluster_id": "compute_cloudrun_us-central1_001",
-  "name": "Cloud Run Application",
-  "type": "compute",
-  "description": "Primary: cloud_run_service.app, Secondary: service_account, iam_policy",
   "gcp_region": "us-central1",
   "primary_resources": ["google_cloud_run_service.app"],
   "secondary_resources": ["google_service_account.app_runner"],
-  "network": "network_vpc_us-central1_001",
+  "network": "networking_vpc_us-central1_001",
   "creation_order_depth": 2,
   "must_migrate_together": true,
-  "dependencies": [],
-  "edges": [{ "from": "...", "to": "...", "relationship_type": "..." }]
+  "dependencies": ["database_sql_us-central1_001"],
+  "edges": [
+    {
+      "from": "google_cloud_run_service.app",
+      "to": "google_sql_database_instance.db",
+      "relationship_type": "data_dependency",
+      "evidence": {
+        "field_path": "template.spec.containers[0].env[].value",
+        "reference": "DATABASE_URL"
+      }
+    }
+  ]
 }
 ```
 
 ## Determinism Guarantee
 
-Given same Terraform input, algorithm produces same cluster structure every run:
+Given the same classified resource inputs, the clustering algorithm produces the same cluster structure every run:
 
 1. Rules applied in fixed order
 2. Sequence counters increment deterministically
 3. Naming reflects source state, not random IDs
-4. Deterministic for Priority 1 and Priority 2 resources. Priority 3 (LLM inference fallback in classification-rules.md and typed-edges-strategy.md) may produce non-deterministic results for unknown resource types
+4. All clustering heuristics are deterministic (no LLM-based decisions within the clustering algorithm itself)
+
+**Note:** Resource classification (see `classification-rules.md`) may use LLM inference as a fallback for resource types not in the hardcoded tables. If LLM-classified resources enter the pipeline, overall reproducibility depends on the LLM producing consistent classifications.

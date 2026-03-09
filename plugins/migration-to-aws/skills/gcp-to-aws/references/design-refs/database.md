@@ -1,6 +1,6 @@
 # Database Services Design Rubric
 
-**Applies to:** Cloud SQL, Firestore, BigQuery, Memorystore (Redis)
+**Applies to:** Cloud SQL, Firestore, BigQuery, Memorystore (Redis), Cloud Spanner
 
 **Quick lookup (no rubric):** Check `fast-path.md` first (Cloud SQL PostgreSQL → RDS Aurora, Cloud SQL MySQL → RDS Aurora, etc.)
 
@@ -18,7 +18,7 @@
 
 - **PostgreSQL, MySQL, SQL Server** → Direct RDS mapping (fast-path)
 - **High availability required** → RDS Multi-AZ or Aurora (preferred)
-- **Dev/test sizing** → RDS Aurora Serverless v2 (scales to 0)
+- **Dev/test sizing** → RDS Aurora Serverless v2 (min 0.5 ACU, ~$43–58/mo depending on I/O mode)
 - **Production, always-on** → RDS Aurora Provisioned (or Serverless v2 if fluctuating)
 
 ### Firestore
@@ -39,6 +39,12 @@
 - **Cluster mode enabled** → ElastiCache Redis with cluster mode
 - **High availability required** → ElastiCache Redis Multi-AZ with auto-failover
 
+### Cloud Spanner
+
+- **Global strong consistency** → Aurora DSQL (distributed SQL with strong consistency across regions)
+- **Single-region relational** → Aurora PostgreSQL (simpler, lower cost if global distribution not needed)
+- **Key-value access patterns dominant** → DynamoDB Global Tables (if workload is mostly key-value lookups)
+
 ## 6-Criteria Rubric
 
 Apply in order:
@@ -46,10 +52,10 @@ Apply in order:
 1. **Eliminators**: Does GCP config require AWS-unsupported features? If yes: switch
 2. **Operational Model**: Managed (Aurora, DynamoDB) vs Provisioned (EC2-based RDS)?
    - Prefer managed unless: Production + cost-optimized + predictable load → Provisioned RDS
-3. **User Preference**: From `clarified.json`, q5 (database requirements)?
-   - `"structured"` → RDS (relational)
-   - `"document"` → DynamoDB (NoSQL)
-   - `"analytics"` → Redshift or Athena
+3. **User Preference**: From `preferences.json`: `design_constraints.database_tier`, `design_constraints.db_io_workload`?
+   - If `database_tier = "standard"` → Standard Aurora Multi-AZ
+   - If `database_tier = "aurora-scale"` → Aurora DSQL considered for global active-active
+   - If `db_io_workload = "high"` → Aurora I/O-Optimized recommended
 4. **Feature Parity**: Does GCP config need features unavailable in AWS?
    - Example: Cloud SQL with binary log replication → Aurora (full support)
    - Example: Firestore with offline-first SDK → DynamoDB (plus app-level sync)
@@ -74,7 +80,7 @@ Apply in order:
 - Signals: NoSQL, real-time, offline-first (inferred from Firestore choice)
 - Criterion 1 (Eliminators): PASS (DynamoDB supports eventual consistency)
 - Criterion 2 (Operational Model): DynamoDB (managed NoSQL)
-- Criterion 3 (User Preference): If q5=`"document"` → DynamoDB confirmed
+- Criterion 3 (User Preference): NoSQL type detected from GCP resource → DynamoDB confirmed
 - → **AWS: DynamoDB (on-demand billing for dev)**
 - Confidence: `inferred`
 
@@ -84,7 +90,7 @@ Apply in order:
 - Signals: Analytics warehouse, large queries
 - Criterion 1 (Eliminators): PASS
 - Criterion 2 (Operational Model): Redshift (managed data warehouse) or Athena (serverless SQL)
-- Criterion 3 (User Preference): If q6=`cost_sensitive` → Athena (pay per query, no idle cost)
+- Criterion 3 (User Preference): If `design_constraints.gcp_monthly_spend` indicates cost sensitivity → Athena (pay per query, no idle cost)
 - → **AWS: Athena (Glue catalog, parquet format in S3)**
 - Confidence: `inferred`
 
@@ -101,7 +107,7 @@ Apply in order:
   },
   "aws_service": "RDS Aurora PostgreSQL",
   "aws_config": {
-    "engine_version": "14.7",
+    "engine_version": "13.12",
     "instance_class": "db.r6g.xlarge",
     "multi_az": true,
     "region": "us-east-1"
@@ -111,7 +117,7 @@ Apply in order:
   "rubric_applied": [
     "Eliminators: PASS",
     "Operational Model: Managed RDS Aurora",
-    "User Preference: Structured (q5)",
+    "User Preference: database_tier=standard, db_io_workload=medium",
     "Feature Parity: Full (binary logs, replication)",
     "Cluster Context: Consistent with app tier",
     "Simplicity: RDS Aurora (managed, multi-AZ)"

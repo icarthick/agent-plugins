@@ -1,16 +1,16 @@
 # Networking Services Design Rubric
 
-**Applies to:** VPC, Firewall, Load Balancing, DNS, Cloud Interconnect
+**Applies to:** VPC, Firewall, Load Balancing, DNS, Cloud Interconnect, Cloud Armor
 
 **Quick lookup (no rubric):** Check `fast-path.md` first (VPC → VPC, Firewall → Security Groups, etc.)
 
 ## Eliminators (Hard Blockers)
 
-| GCP Service          | AWS            | Blocker                                                  |
-| -------------------- | -------------- | -------------------------------------------------------- |
-| Cloud Interconnect   | Direct Connect | Dedicated connection (6+ months setup) → use VPN as temp |
-| Cloud Load Balancing | ALB            | SSL certificate passthrough → NLB (L4, pass-through)     |
-| Cloud Load Balancing | NLB            | IP-based routing → ALB (L7, hostname-based)              |
+| GCP Service          | AWS            | Blocker                                                   |
+| -------------------- | -------------- | --------------------------------------------------------- |
+| Cloud Interconnect   | Direct Connect | Dedicated connection (4-12 weeks setup) → use VPN as temp |
+| Cloud Load Balancing | ALB            | SSL certificate passthrough → NLB (L4, pass-through)      |
+| Cloud Load Balancing | NLB            | Host/path-based routing required → ALB (L7)               |
 
 ## Signals (Decision Criteria)
 
@@ -40,6 +40,13 @@
 - **Dedicated connection** → AWS Direct Connect
 - **Temporary/dev connectivity** → AWS Site-to-Site VPN (quicker, lower cost)
 
+### Cloud Armor
+
+- **DDoS protection + WAF rules** → AWS WAF + AWS Shield Standard (Shield Standard is automatic, no extra cost)
+- **Rate limiting** → AWS WAF rate-based rules
+- **Bot management** → AWS WAF Bot Control
+- **IP allowlist/denylist** → AWS WAF IP set rules
+
 ## 6-Criteria Rubric
 
 Apply in order:
@@ -47,8 +54,8 @@ Apply in order:
 1. **Eliminators**: Does GCP config require AWS-unsupported features? If yes: switch
 2. **Operational Model**: Managed (ALB, Route 53) vs Custom (VPN, custom routing)?
    - Prefer managed
-3. **User Preference**: From `clarified.json`, q2 (primary concern)?
-   - If `"compliance"` → use Direct Connect (explicit data path); else VPN fine
+3. **User Preference**: From `preferences.json`: `design_constraints.compliance`?
+   - If `compliance` includes `"pci"`, `"hipaa"`, or `"fedramp"` → use Direct Connect (explicit data path); else VPN fine
 4. **Feature Parity**: Does GCP config require AWS-unsupported features?
    - Example: GCP policy-based routing → Custom route table rules (AWS does this)
 5. **Cluster Context**: Are other resources in cluster using specific load balancers? Match
@@ -107,7 +114,7 @@ Apply in order:
     },
     "region": "us-east-1"
   },
-  "confidence": "deterministic",
-  "rationale": "GCP global HTTPS LB → AWS ALB (L7, host/path routing)"
+  "confidence": "inferred",
+  "rationale": "Rubric: GCP global HTTPS LB → AWS ALB (L7, host/path routing)"
 }
 ```

@@ -33,7 +33,7 @@ For resources in the Skip Mappings table but present in inventory:
 
 1. Log as "secondary resource, no AWS equivalent needed"
 2. Do not include in aws-design.json
-3. Note in aws-design-report.md warnings section
+3. Note in aws-design.json warnings array
 
 ---
 

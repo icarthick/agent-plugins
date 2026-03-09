@@ -296,18 +296,21 @@ Monthly operating costs, one-time migration costs, and ROI analysis.
       }
     }
   },
-  "one_time_costs": {
-    "dev_hours": "150 hours @ $150/hr = $22,500",
-    "data_transfer": "500 GB @ $0.02/GB = $10",
-    "training": "Team AWS training = $5,000",
-    "total": 27510
+  "migration_cost_considerations": {
+    "categories": [
+      "Development & testing (architecture design, code migration, testing, data migration, deployment)",
+      "Data transfer (GCP egress fees based on migration volume)",
+      "Infrastructure setup (AWS account, IAM, VPC, test environments)",
+      "Training & documentation (team AWS training, operational runbooks)"
+    ],
+    "note": "Actual costs depend on team size, hourly rates, existing AWS experience, and migration complexity."
   },
   "roi": {
     "assumed_gcp_monthly": 4500,
     "aws_monthly_balanced": 3500,
     "monthly_savings": 1000,
-    "payback_months": 27.51,
-    "five_year_savings": 32490
+    "annual_savings": 12000,
+    "note": "Recurring savings only. One-time migration costs are customer-specific and excluded."
   },
   "assumptions": [
     "24/7 workload operation",

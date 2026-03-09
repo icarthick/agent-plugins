@@ -1,8 +1,17 @@
 # AI/ML Services Design Rubric
 
-**Applies to:** Vertex AI, Cloud Vision API, Cloud ML Engine
+**Applies to:** Vertex AI (traditional ML), Cloud Vision API, Cloud ML Engine (deprecated — now part of Vertex AI)
 
-**Note:** v1.0 focuses on infrastructure migration. AI model serving/retraining is deferred to v1.1+.
+## LLM Routing
+
+If the detected AI workload is LLM-based (generative models), load the source-specific design reference instead of this file:
+
+- If `ai-workload-profile.json` → `summary.ai_source` = `"gemini"`: load `ai-gemini-to-bedrock.md`
+- If `ai-workload-profile.json` → `summary.ai_source` = `"openai"`: load `ai-openai-to-bedrock.md`
+- If `ai-workload-profile.json` → `summary.ai_source` = `"both"`: load both files
+- If `ai-workload-profile.json` → `summary.ai_source` = `"other"` or absent, OR if the workload is traditional ML (custom models, Vision API, Speech API): use the SageMaker/Rekognition/Textract rubric below.
+
+---
 
 ## Signals (Decision Criteria)
 
@@ -17,10 +26,10 @@
 - **Image classification, OCR** → AWS Rekognition (images) or Textract (OCR)
 - **Document understanding** → AWS Textract (more powerful for docs)
 
-### Cloud ML Engine
+### Cloud ML Engine (deprecated — legacy Terraform configs only)
 
 - **Model training** → SageMaker (managed training jobs)
-- **AutoML** → SageMaker Autopilot
+- **AutoML** → SageMaker Autopilot / Canvas
 
 ## 6-Criteria Rubric
 
@@ -29,8 +38,8 @@ Apply in order:
 1. **Eliminators**: Does GCP config require AWS-unsupported features? If yes: use alternative
 2. **Operational Model**: Managed (SageMaker) vs Custom (EC2 + training)?
    - Prefer managed
-3. **User Preference**: From `clarified.json`, q2 (primary concern)?
-   - If `"cost"` → check SageMaker Spot + Autopilot
+3. **User Preference**: From `preferences.json`: `design_constraints.cost_sensitivity` + `ai_constraints` (if present)
+   - If cost-sensitive → check SageMaker Spot + Autopilot
 4. **Feature Parity**: Does GCP config need model type unavailable in AWS?
    - Example: TensorFlow 2.x → SageMaker (supported)
 5. **Cluster Context**: Are other compute resources running ML? Prefer SageMaker affinity
@@ -83,10 +92,3 @@ Apply in order:
   "rationale": "Vertex AI custom model → SageMaker Endpoint (PyTorch supported)"
 }
 ```
-
-## Deferred to v1.1+
-
-- Model retraining pipeline setup (training job automation)
-- Hyperparameter tuning (SageMaker Hyperparameter Tuning Job)
-- Multi-instance distributed training
-- Model registry and versioning (SageMaker Model Registry)

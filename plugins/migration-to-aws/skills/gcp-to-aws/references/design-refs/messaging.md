@@ -33,8 +33,9 @@ Apply in order:
 1. **Eliminators**: Does GCP config require AWS-unsupported features? If yes: switch
 2. **Operational Model**: Managed (SNS, SQS, EventBridge) vs Custom queue?
    - Prefer managed
-3. **User Preference**: From `clarified.json`, q2 (primary concern)?
-   - If `"reliability"` → SQS (FIFO for exactly-once); else SNS
+3. **User Preference**: From `preferences.json`: `design_constraints.availability`?
+   - SNS and SQS are multi-AZ by default — no special config needed for HA
+   - If ordering or exactly-once delivery required → SQS FIFO (see Eliminators)
 4. **Feature Parity**: Does GCP config need features unavailable in AWS?
    - Example: Pub/Sub ordering guarantee → SQS FIFO (has ordering)
 5. **Cluster Context**: Are other resources using SNS/SQS? Match if possible
@@ -49,7 +50,7 @@ Apply in order:
 - Criterion 1 (Eliminators): PASS (retention not critical for broadcast)
 - Criterion 2 (Operational Model): SNS (pub/sub)
 - → **AWS: SNS Topic (Standard)**
-- Note: SNS does not support message retention like GCP Pub/Sub. If retention is critical, consider SQS instead.
+- Note: SNS does not support message retention like GCP Pub/Sub. If retention is critical, use SQS instead.
 - Confidence: `inferred`
 
 ### Example 2: Pub/Sub Topic (exactly-once)

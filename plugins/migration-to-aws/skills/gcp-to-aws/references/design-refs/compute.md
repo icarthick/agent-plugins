@@ -6,12 +6,12 @@
 
 ## Eliminators (Hard Blockers)
 
-| GCP Service     | AWS     | Blocker                                                                              |
-| --------------- | ------- | ------------------------------------------------------------------------------------ |
-| Cloud Run       | Lambda  | Execution time >15 min → use Fargate                                                 |
-| Cloud Run       | Fargate | GPU workload or >16 vCPU or >120 GB memory → use EC2                                 |
-| Cloud Functions | Lambda  | Python version not supported (e.g., Python 2.7) → consider custom runtime on Fargate |
-| GKE             | EKS     | Custom CRI incompatible → manual workaround or ECS                                   |
+| GCP Service     | AWS     | Blocker                                                                         |
+| --------------- | ------- | ------------------------------------------------------------------------------- |
+| Cloud Run       | Lambda  | Execution time >15 min → use Fargate                                            |
+| Cloud Run       | Fargate | GPU workload or >16 vCPU or >120 GB memory → use EC2                            |
+| Cloud Functions | Lambda  | Python version not supported (e.g., Python 2.7) → use custom runtime on Fargate |
+| GKE             | EKS     | Custom CRI incompatible → manual workaround or ECS                              |
 
 ## Signals (Decision Criteria)
 
@@ -44,9 +44,10 @@ Apply in order; first match wins:
 1. **Eliminators**: Does GCP config violate AWS constraints? If yes: switch to alternative
 2. **Operational Model**: Managed (Lambda, Fargate) vs Self-Hosted (EC2, EKS)?
    - Prefer managed unless: Always-on + high baseline cost → EC2
-3. **User Preference**: From `clarified.json`, q3 (team experience) or q2 (primary concern)?
-   - If `team_experience = "expert"` + `primary_concern = "control"` → EC2
-   - If `team_experience = "novice"` + `primary_concern = "cost"` → Fargate
+3. **User Preference**: From `preferences.json`: `design_constraints.kubernetes`, `design_constraints.cost_sensitivity`?
+   - If `kubernetes = "eks-managed"` → EKS (preserves K8s investment)
+   - If `kubernetes = "ecs-fargate"` → Fargate (simpler managed containers)
+   - If `cost_sensitivity` present and high → prefer Fargate (lower operational cost)
 4. **Feature Parity**: Does GCP config require AWS-unsupported features?
    - Example: GCP auto-scaling to zero + cold-start-sensitive → Fargate (not Lambda)
 5. **Cluster Context**: Are other resources in this cluster using EKS/EC2/Fargate?
@@ -63,7 +64,7 @@ Apply in order; first match wins:
 - Criterion 1 (Eliminators): PASS (60s < 15min doesn't apply; stateless OK)
 - Criterion 2 (Operational Model): FARGATE preferred
 - → **AWS: Fargate (0.5 CPU, 1 GB memory)**
-- Confidence: `deterministic` (or `inferred` if variant from fast-path)
+- Confidence: `inferred` (rubric-based — Cloud Run is not in fast-path)
 
 ### Example 2a: Cloud Functions (event processor, short-running)
 
@@ -89,7 +90,7 @@ Apply in order; first match wins:
 - Signals: Periodic batch job (inferred from startup script), always-on
 - Criterion 1 (Eliminators): PASS
 - Criterion 2 (Operational Model): EC2 (explicit compute control)
-- Criterion 3 (User Preference): If q2=`cost`, prefer auto-scaling → EC2 + ASG (scale to 0)
+- Criterion 3 (User Preference): If `design_constraints.gcp_monthly_spend` indicates cost sensitivity, prefer auto-scaling → EC2 + ASG (scale to 0)
 - → **AWS: EC2 t3.medium + Auto Scaling Group (min=0 in dev)**
 - Confidence: `inferred`
 
@@ -109,8 +110,8 @@ Apply in order; first match wins:
     "memory_mb": 1024,
     "region": "us-east-1"
   },
-  "confidence": "deterministic",
-  "rationale": "1:1 mapping; Cloud Run (stateless, <15min) → Fargate (always-on)",
+  "confidence": "inferred",
+  "rationale": "Rubric: Cloud Run (stateless, <15min) → Fargate (always-on, managed)",
   "rubric_applied": [
     "Eliminators: PASS",
     "Operational Model: Managed preferred",

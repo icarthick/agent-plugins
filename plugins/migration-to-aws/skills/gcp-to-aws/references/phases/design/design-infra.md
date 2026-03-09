@@ -1,16 +1,14 @@
-# Phase 3: Design AWS Architecture
+# Design Phase: Infrastructure Mapping
+
+> Loaded by `design.md` when `gcp-resource-inventory.json` and `gcp-resource-clusters.json` exist.
+
+**Execute ALL steps in order. Do not skip or optimize.**
 
 ## Step 0: Validate Inputs
 
-1. Read `clarified.json` from `$MIGRATION_DIR`. If missing: **STOP**. Output: "Phase 2 (Clarify) not completed. Run Phase 2 first."
-   - If invalid JSON: **STOP**. Output: "clarified.json is corrupted (invalid JSON). Re-run Phase 2."
-2. Read `gcp-resource-clusters.json` from `$MIGRATION_DIR`. If missing: **STOP**. Output: "Missing gcp-resource-clusters.json. Re-run Phase 1."
-   - If invalid JSON: **STOP**. Output: "gcp-resource-clusters.json is corrupted (invalid JSON). Re-run Phase 1."
-   - If `clusters` array is empty: **STOP**. Output: "No clusters found. Re-run Phase 1."
-3. Read `gcp-resource-inventory.json` from `$MIGRATION_DIR`. If missing: **STOP**. Output: "Missing gcp-resource-inventory.json. Re-run Phase 1."
-   - If invalid JSON: **STOP**. Output: "gcp-resource-inventory.json is corrupted (invalid JSON). Re-run Phase 1."
-   - If `resources` array is empty: **STOP**. Output: "No resources found. Re-run Phase 1."
-   - This file provides per-resource `config` (machine_type, database_version, etc.) needed by design rubric eliminators and feature parity checks.
+Read `preferences.json`. If missing: **STOP**. Output: "Phase 2 (Clarify) not completed. Run Phase 2 first."
+
+Read `gcp-resource-clusters.json`.
 
 ## Step 1: Order Clusters
 
@@ -18,7 +16,7 @@ Sort clusters by `creation_order_depth` (lowest first, representing foundational
 
 ## Step 2: Two-Pass Mapping per Cluster
 
-For each cluster:
+For each cluster, process `primary_resources` first, then `secondary_resources` (as classified during discover phase — see `gcp-resource-clusters.json`).
 
 ### Pass 1: Fast-Path Lookup
 
@@ -44,14 +42,14 @@ For resources not covered by fast-path:
    **Catch-all for unknown types**: If resource type not found in `index.md`:
    - Check resource name pattern (e.g., "scheduler" → orchestration, "log" → monitoring, "metric" → monitoring)
    - If pattern match: use that category
-   - If no pattern match: Add to `warnings[]` with message: "Unknown GCP resource type: [type]. Not in fast-path.md or index.md. Skipped — file an issue to add support." Continue with remaining resources.
+   - If no pattern match: **STOP**. Output: "Unknown GCP resource type: [type]. Not in fast-path.md or index.md. Cannot auto-map. Please file an issue with this resource type."
 
 2. Load rubric from corresponding `design-refs/*.md` file (e.g., `compute.md`, `database.md`)
 
 3. Evaluate 6 criteria (1-sentence each):
    - **Eliminators**: Feature incompatibility (hard blocker)
    - **Operational Model**: Managed vs self-hosted fit
-   - **User Preference**: From `clarified.json` answers
+   - **User Preference**: From `preferences.json` design_constraints
    - **Feature Parity**: GCP feature → AWS feature availability
    - **Cluster Context**: Affinity with other resources in this cluster
    - **Simplicity**: Prefer fewer resources / less config
@@ -77,7 +75,7 @@ For each mapped AWS service, verify:
    - If unavailable: add warning, suggest fallback region
 
 2. **Feature Parity**: Do required features exist in AWS service?
-   - Match GCP features from `clarified.json` answers
+   - Match GCP features from `preferences.json` design_constraints
    - Check AWS feature availability via awsknowledge
    - If feature missing: add warning, suggest alternative service
 
@@ -88,14 +86,13 @@ For each mapped AWS service, verify:
 **If awsknowledge unavailable:**
 
 - Set `validation_status: "skipped"` in output
-- **Display prominent warning to user**: "⚠️ WARNING: Architecture validation skipped (awsknowledge MCP unavailable). Regional availability, feature parity, and service constraints were NOT verified. Manually verify before proceeding."
-- Add same warning to `aws-design-report.md` header
+- Note in summary: "Architecture validation unavailable (non-critical)"
 - Continue with design (validation is informational, not blocking)
 
 **If validation succeeds:**
 
 - Set `validation_status: "completed"` in output
-- List validated services in report
+- List validated services in summary
 
 ## Step 4: Write Design Output
 
@@ -103,10 +100,6 @@ For each mapped AWS service, verify:
 
 ```json
 {
-  "validation_status": {
-    "status": "completed|skipped",
-    "message": "All services validated|Validation unavailable (awsknowledge MCP unreachable)"
-  },
   "clusters": [
     {
       "cluster_id": "compute_instance_us-central1_001",
@@ -127,8 +120,8 @@ For each mapped AWS service, verify:
             "memory": "1024",
             "region": "us-east-1"
           },
-          "confidence": "inferred",
-          "rationale": "Compute mapping; always-on; Fargate for simplicity",
+          "confidence": "deterministic",
+          "rationale": "1:1 compute mapping with Cold Start considerations",
           "rubric_applied": [
             "Eliminators: PASS",
             "Operational Model: Managed Fargate",
@@ -143,42 +136,28 @@ For each mapped AWS service, verify:
   ],
   "warnings": [
     "service X not fully supported in us-east-1; fallback to us-west-2"
-  ],
-  "timestamp": "2026-02-26T14:30:00Z"
+  ]
 }
 ```
 
-**File 2: `aws-design-report.md`**
+## Output Validation Checklist
 
-```
-# AWS Architecture Design Report
+- `clusters` array is non-empty
+- Every cluster has `cluster_id` matching a cluster from `gcp-resource-clusters.json`
+- Every cluster has `gcp_region` and `aws_region`
+- Every resource has `gcp_address`, `gcp_type`, `gcp_config`, `aws_service`, `aws_config`
+- All `confidence` values are either `"deterministic"` or `"inferred"`
+- All `rationale` fields are non-empty
+- Every resource from every evaluated cluster appears in the output
+- No duplicate `gcp_address` values across clusters
+- Output is valid JSON
 
-## Overview
-Mapped X GCP resources to Y AWS services across Z clusters.
+## Present Summary
 
-## Cluster: compute_instance_us-central1_001
-### Compute
-- google_compute_instance.web → Fargate (0.5 CPU, 1 GB memory)
-  Confidence: deterministic
-  Rationale: Direct compute mapping, Cold Start not applicable (always-on)
+After writing `aws-design.json`, present a concise summary to the user:
 
-[repeat per resource]
+1. Total resources mapped and cluster count
+2. Per-cluster table: GCP resource → AWS service (one line each, include confidence)
+3. Any warnings (regional fallbacks, inferred mappings with low confidence)
 
-## Warnings
-- Service X: falling back to region Y due to regional unavailability
-```
-
-## Step 5: Update Phase Status
-
-Update `.phase-status.json`:
-
-```json
-{
-  "phase": "design",
-  "status": "completed",
-  "timestamp": "2026-02-26T14:30:00Z",
-  "version": "1.0.0"
-}
-```
-
-Output to user: "AWS Architecture designed. Proceeding to Phase 4: Estimate Costs."
+Keep it under 20 lines. The user can ask for details or re-read `aws-design.json` at any time.

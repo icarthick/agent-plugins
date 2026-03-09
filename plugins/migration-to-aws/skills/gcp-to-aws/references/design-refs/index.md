@@ -21,12 +21,14 @@
 | Firestore (document)   | `google_firestore_document`    | `database.md`  | DynamoDB              |
 | BigQuery               | `google_bigquery_dataset`      | `database.md`  | Redshift or Athena    |
 | Memorystore (Redis)    | `google_redis_instance`        | `database.md`  | ElastiCache Redis     |
+| Cloud Spanner          | `google_spanner_instance`      | `database.md`  | Aurora DSQL           |
 
 ## Storage Services
 
-| GCP Service         | Resource Type           | Reference File | Fast-Path |
-| ------------------- | ----------------------- | -------------- | --------- |
-| Cloud Storage (GCS) | `google_storage_bucket` | `storage.md`   | S3        |
+| GCP Service         | Resource Type               | Reference File | Fast-Path |
+| ------------------- | --------------------------- | -------------- | --------- |
+| Cloud Storage (GCS) | `google_storage_bucket`     | `storage.md`   | S3        |
+| Filestore           | `google_filestore_instance` | `storage.md`   | EFS       |
 
 ## Networking Services
 
@@ -38,6 +40,7 @@
 | Cloud CDN            | (part of compute_backend_service) | `networking.md` | CloudFront         |
 | Cloud DNS            | `google_dns_managed_zone`         | `networking.md` | Route 53           |
 | Cloud Interconnect   | (custom config)                   | `networking.md` | AWS Direct Connect |
+| Cloud Armor          | `google_compute_security_policy`  | `networking.md` | AWS WAF            |
 
 ## Messaging Services
 
@@ -48,11 +51,13 @@
 
 ## AI/ML Services
 
-| GCP Service           | Resource Type      | Reference File | Fast-Path               |
-| --------------------- | ------------------ | -------------- | ----------------------- |
-| Vertex AI (models)    | (custom endpoints) | `ai.md`        | SageMaker               |
-| Vertex AI (pipelines) | (custom config)    | `ai.md`        | SageMaker Pipelines     |
-| Cloud Vision API      | (managed API)      | `ai.md`        | Textract or Rekognition |
+| GCP Service                | Resource Type       | Reference File            | Fast-Path               |
+| -------------------------- | ------------------- | ------------------------- | ----------------------- |
+| Vertex AI (LLM/Gemini)     | (generative models) | `ai-gemini-to-bedrock.md` | Bedrock                 |
+| OpenAI (in GCP env)        | (openai SDK)        | `ai-openai-to-bedrock.md` | Bedrock                 |
+| Vertex AI (traditional ML) | (custom endpoints)  | `ai.md`                   | SageMaker               |
+| Vertex AI (pipelines)      | (custom config)     | `ai.md`                   | SageMaker Pipelines     |
+| Cloud Vision API           | (managed API)       | `ai.md`                   | Textract or Rekognition |
 
 ## Secondary/Infrastructure Services
 
