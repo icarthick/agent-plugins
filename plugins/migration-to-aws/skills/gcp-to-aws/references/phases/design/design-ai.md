@@ -38,10 +38,8 @@ For each model in `models[]`, select the best-fit Bedrock model using the loaded
 | `ai_priority = "cost"`                | Prefer "Winner" column; flag if source is cheaper |
 | `ai_priority = "quality"`             | Prefer Claude Sonnet/Opus regardless of cost      |
 | `ai_priority = "speed"`               | Prefer Claude Sonnet (fastest integration)        |
-| `ai_model_preference = "open-source"` | Prefer Llama or Mistral                           |
-| `ai_model_preference = "proprietary"` | Prefer Claude                                     |
-| `ai_latency = "real-time"`            | Prefer smaller/faster models (Haiku, Nova Lite)   |
-| `ai_latency = "batch"`                | Any model; flag Batch API for 50% savings         |
+| `ai_latency = "critical"`             | Prefer smaller/faster models (Haiku, Nova Lite)   |
+| `ai_latency = "flexible"`            | Any model; flag Batch API for 50% savings         |
 
 **Stay-or-migrate assessment per model:**
 

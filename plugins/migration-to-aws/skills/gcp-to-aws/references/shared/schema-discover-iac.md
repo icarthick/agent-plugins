@@ -139,7 +139,7 @@ Resources grouped into logical clusters for migration with full dependency graph
         "google_sql_database.main"
       ],
       "network": "networking_vpc_us-central1_001",
-      "creation_order_depth": 2,
+      "creation_order_depth": 1,
       "must_migrate_together": true,
       "dependencies": ["networking_vpc_us-central1_001"],
       "edges": [
@@ -165,7 +165,7 @@ Resources grouped into logical clusters for migration with full dependency graph
         "google_service_account.app"
       ],
       "network": "networking_vpc_us-central1_001",
-      "creation_order_depth": 3,
+      "creation_order_depth": 2,
       "must_migrate_together": true,
       "dependencies": ["database_sql_us-central1_001"],
       "edges": [
@@ -183,15 +183,15 @@ Resources grouped into logical clusters for migration with full dependency graph
   ],
   "creation_order": [
     { "depth": 0, "clusters": ["networking_vpc_us-central1_001"] },
-    { "depth": 2, "clusters": ["database_sql_us-central1_001"] },
-    { "depth": 3, "clusters": ["compute_cloudrun_us-central1_001"] }
+    { "depth": 1, "clusters": ["database_sql_us-central1_001"] },
+    { "depth": 2, "clusters": ["compute_cloudrun_us-central1_001"] }
   ]
 }
 ```
 
 **Key Fields:**
 
-- `cluster_id` — Unique cluster identifier (deterministic format: `{type}_{subtype}_{region}_{sequence}`)
+- `cluster_id` — Unique cluster identifier (deterministic format: `{service_category}_{service_type}_{gcp_region}_{sequence}`)
 - `gcp_region` — GCP region for this cluster
 - `primary_resources` — GCP resources that map independently
 - `secondary_resources` — GCP resources that support primary resources

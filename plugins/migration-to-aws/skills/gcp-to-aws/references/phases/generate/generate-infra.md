@@ -24,7 +24,7 @@ Build an 8-12 week migration timeline based on:
 - **Service complexity** from `aws-design.json` — databases and stateful services take longer
 - **Cutover strategy** from `preferences.json` — maintenance window vs. blue-green affects timeline
 
-### Phase 1: Setup (Weeks 1-2)
+### Stage 1: Setup (Weeks 1-2)
 
 - Finalize AWS account structure and billing alerts
 - Provision foundational infrastructure: VPC, subnets, routing, NAT gateways
@@ -33,7 +33,7 @@ Build an 8-12 week migration timeline based on:
 - Set up CI/CD pipeline for Terraform deployments
 - Configure monitoring baseline (CloudWatch, alarms)
 
-### Phase 2: Proof of Concept (Weeks 3-4)
+### Stage 2: Proof of Concept (Weeks 3-4)
 
 - Deploy the **shallowest-depth cluster** (lowest `creation_order_depth`) to AWS
 - Validate application connectivity and performance
@@ -42,7 +42,7 @@ Build an 8-12 week migration timeline based on:
 - Confirm cost tracking matches `estimation-infra.json` projections
 - **Go/No-Go checkpoint**: If PoC fails acceptance criteria, stop and reassess
 
-### Phase 3: Infrastructure Deployment (Weeks 5-7)
+### Stage 3: Infrastructure Deployment (Weeks 5-7)
 
 - Deploy remaining clusters in `creation_order` sequence (depth-first)
 - For each cluster:
@@ -53,7 +53,7 @@ Build an 8-12 week migration timeline based on:
 - Implement monitoring and logging per cluster
 - Establish backup and restore procedures
 
-### Phase 4: Data Migration (Weeks 8-9)
+### Stage 4: Data Migration (Weeks 8-9)
 
 **Include this phase ONLY if `aws-design.json` contains database or storage resources
 (see resource detection rules in generate-artifacts-scripts.md Step 4).**
@@ -70,7 +70,7 @@ and Validation to Week 10. Reduce `total_weeks` accordingly.**
 - **Secrets**: Migrate secrets from Secret Manager to AWS Secrets Manager
 - Establish dual-write pattern for production data
 
-### Phase 5: Cutover (Weeks 10-11, or Weeks 8-9 if Phase 4 skipped)
+### Stage 5: Cutover (Weeks 10-11, or Weeks 8-9 if Stage 4 skipped)
 
 - Pre-cutover validation:
   - All clusters deployed and healthy on AWS
@@ -83,7 +83,7 @@ and Validation to Week 10. Reduce `total_weeks` accordingly.**
 - Monitor for 24-48 hours post-cutover
 - Keep GCP resources running as hot standby
 
-### Phase 6: Validation and Cleanup (Week 12)
+### Stage 6: Validation and Cleanup (Week 12)
 
 - Monitor AWS performance for 1 full week
 - Compare actual costs against `estimation-infra.json` projections

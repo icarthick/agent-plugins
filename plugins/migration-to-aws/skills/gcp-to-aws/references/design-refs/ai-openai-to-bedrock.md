@@ -116,7 +116,7 @@ _Percentages are blended savings using a 2:1 input-to-output token ratio. Actual
 | -------------------- | --------------------------------------------------------- | ----------------------------------- |
 | Function calling     | Claude tools (excellent, similar format)                  | Minimal changes                     |
 | Streaming            | All major models                                          | Verify gateway format               |
-| Vision (GPT-4V)      | Claude Sonnet/Haiku, Llama 3.2 90B                        | 70-95% cheaper                      |
+| Vision (GPT-4V)      | Claude Sonnet/Haiku, Llama 4 Maverick                     | 70-95% cheaper                      |
 | Embeddings (ada-002) | Titan Embeddings ($0.02/1M, 1536 dims)                    | Must re-embed all docs              |
 | DALL-E               | Titan Image Generator ($0.008-$0.04/img)                  | 50-70% cheaper                      |
 | Whisper (STT)        | Amazon Transcribe ($0.024/min)                            | 4x more expensive but more features |
@@ -166,9 +166,3 @@ Tier by complexity: simple → Nova Micro/Llama 4 Scout (60%), moderate → Llam
 ## OpenAI Pricing Tiers
 
 OpenAI offers 4 tiers: Batch (50% off, 24hr), Flex (30-50% off, higher latency), Standard (baseline), Priority (2x, lowest latency). This guide uses Standard tier for comparison.
-
----
-
-## Validate Before Migrating
-
-Run a Bedrock evaluation job with your own prompts before writing migration code. See `generate-evaluation.md` in the Generate phase.

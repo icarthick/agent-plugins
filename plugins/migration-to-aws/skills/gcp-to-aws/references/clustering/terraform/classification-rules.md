@@ -17,25 +17,31 @@ These resource types are always PRIMARY:
 - `google_compute_instance` — Virtual machine
 - `google_cloudfunctions_function` — Serverless function (Gen 1)
 - `google_cloudfunctions2_function` — Serverless function (Gen 2)
+- `google_app_engine_application` — App Engine application
 
 ### Database (`tier: "database"`)
 
 - `google_sql_database_instance` — Relational database
+- `google_spanner_instance` — Globally-distributed relational database
 - `google_firestore_database` — Document database
+- `google_bigtable_instance` — Wide-column NoSQL database
 - `google_redis_instance` — In-memory cache
 
 ### Storage (`tier: "storage"`)
 
 - `google_storage_bucket` — Object storage
+- `google_filestore_instance` — Managed NFS file storage
 - `google_bigquery_dataset` — Data warehouse
 
 ### Messaging (`tier: "messaging"`)
 
 - `google_pubsub_topic` — Message queue
+- `google_cloud_tasks_queue` — Task queue
 
 ### Networking (`tier: "networking"`)
 
 - `google_compute_network` — Virtual network (VPC — primary because it defines topology)
+- `google_compute_security_policy` — Web application firewall (Cloud Armor)
 - `google_dns_managed_zone` — DNS zone
 
 ### Monitoring (`tier: "monitoring"`)
@@ -64,7 +70,6 @@ Match resource type against secondary classification table. Each match assigns a
 
 ### Network Path (`network_path`)
 
-- `google_compute_network` — Virtual network (VPC). Although SECONDARY, this resource anchors the networking cluster (see clustering-algorithm.md Rule 1)
 - `google_vpc_access_connector` — VPC connector for serverless
 - `google_compute_subnetwork` — Subnet
 - `google_compute_firewall` — Firewall rule
@@ -77,6 +82,7 @@ Match resource type against secondary classification table. Each match assigns a
 
 - `google_sql_database` — SQL schema
 - `google_sql_user` — SQL user
+- `google_spanner_database` — Spanner database schema
 - `google_secret_manager_secret` — Secret vault
 - `google_secret_manager_secret_version` — Secret value
 - `google_dns_record_set` — DNS record

@@ -26,8 +26,8 @@ Attempt to reach awspricing with **up to 2 retries** (3 total attempts):
 
 Each sub-estimate file uses this lookup order per service:
 
-1. **`shared/pricing-cache.md`** — Cached prices (±5-25% accuracy). Set `pricing_source: "cached"`.
-2. **MCP API** — Real-time pricing using recipes in sub-estimate files (±5-10% accuracy). Set `pricing_source: "live"`.
+1. **`shared/pricing-cache.md`** (primary) — Cached prices (±5-25% accuracy). Set `pricing_source: "cached"`. Used first because it requires zero API calls and covers most common services.
+2. **MCP API** (fallback) — Real-time pricing for services NOT in pricing-cache.md (±5-10% accuracy, more precise). Set `pricing_source: "live"`. Only called when the cache lacks the needed service or model.
 
 If cache is > 90 days old and MCP is unavailable:
 
@@ -75,11 +75,11 @@ Produces: `estimation-ai.json`
 ### Mutual Exclusion
 
 - **estimate-infra** and **estimate-billing** never both run (billing-only is the fallback when no IaC exists).
-- **estimate-ai** runs independently alongside either estimate-infra or estimate-billing (if AI artifacts exist).
+- **estimate-ai** runs independently of either estimate-infra or estimate-billing (no shared state). Run it after the infra/billing estimate completes.
 
 ## Phase Completion
 
-After all applicable sub-estimates finish, use the Phase Status Update Protocol (Bash `cat` heredoc) to write `.phase-status.json` with `phases.estimate` set to `"completed"` — **in the same turn** as the output message below.
+After all applicable sub-estimates finish, use the Phase Status Update Protocol (Write tool) to write `.phase-status.json` with `phases.estimate` set to `"completed"` — **in the same turn** as the output message below.
 
 Output to user: "Cost estimation complete. Proceeding to Phase 5: Generate Migration Artifacts."
 

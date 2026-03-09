@@ -93,11 +93,11 @@ Interpret → `ai_model_baseline`. Default: auto-detect, fallback Q2 priority-ba
 
 > A) Text only | B) Vision required | C) Audio/Video inputs
 
-| Answer      | Impact                                                   |
-| ----------- | -------------------------------------------------------- |
-| Text only   | Full model catalog                                       |
-| Vision      | Claude Sonnet family required; Haiku excluded for vision |
-| Audio/Video | Nova Reel/Sonic; Claude excluded for audio/video input   |
+| Answer      | Impact                                                                                   |
+| ----------- | ---------------------------------------------------------------------------------------- |
+| Text only   | Full model catalog                                                                       |
+| Vision      | Claude Sonnet or Haiku (both support multimodal vision); Nova Micro excluded (text-only) |
+| Audio/Video | Nova Reel/Sonic; Claude excluded for audio/video input                                   |
 
 Interpret → `ai_vision`. Default: A → no constraint.
 

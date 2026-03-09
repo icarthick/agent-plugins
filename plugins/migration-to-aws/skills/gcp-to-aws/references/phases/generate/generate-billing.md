@@ -4,8 +4,7 @@
 
 **Execute ALL steps in order. Do not skip or optimize.**
 
-<!-- TODO: Add support for partial IaC discovery (some services have Terraform, some only billing) -->
-<!-- TODO: Add confidence scoring per service based on billing SKU specificity -->
+**Known limitations:** Partial IaC discovery (mixed Terraform + billing-only services) is not yet supported. Confidence scoring per service based on billing SKU specificity is not yet implemented.
 
 ## Overview
 
@@ -55,9 +54,7 @@ If any required file is missing: **STOP**. Output: "Missing required artifact: [
 
 A 15-week timeline with extended discovery and parallel-run phases to account for billing-only uncertainty.
 
-<!-- TODO: Adjust timeline based on service count from aws-design-billing.json -->
-
-### Phase 1: Discovery Refinement (Weeks 1-4)
+### Stage 1: Discovery Refinement (Weeks 1-4)
 
 - **Week 1-2**: Audit current GCP infrastructure manually
   - Document instance sizes, database configs, networking topology
@@ -70,7 +67,7 @@ A 15-week timeline with extended discovery and parallel-run phases to account fo
   - Identify any services that need different AWS targets
   - Consider running IaC discovery if Terraform files become available
 
-### Phase 2: Service Migration (Weeks 5-9)
+### Stage 2: Service Migration (Weeks 5-9)
 
 - **Week 5-6**: Provision AWS infrastructure
   - Set up VPC, subnets, security groups (based on discovery findings)
@@ -85,7 +82,7 @@ A 15-week timeline with extended discovery and parallel-run phases to account fo
   - Performance baseline measurement
   - Data migration dry run
 
-### Phase 3: Parallel Run (Weeks 10-12)
+### Stage 3: Parallel Run (Weeks 10-12)
 
 - Run both GCP and AWS simultaneously
 - Compare performance, reliability, and costs
@@ -93,7 +90,7 @@ A 15-week timeline with extended discovery and parallel-run phases to account fo
 - Build confidence in AWS deployment
 - Monitor for 2+ weeks before cutover decision
 
-### Phase 4: Cutover and Validation (Weeks 13-15)
+### Stage 4: Cutover and Validation (Weeks 13-15)
 
 - **Week 13**: Execute cutover (DNS switch, traffic migration)
 - **Week 14**: Intensive monitoring (48-hour watch period)
@@ -102,8 +99,6 @@ A 15-week timeline with extended discovery and parallel-run phases to account fo
 ## Part 3: Risk Assessment
 
 Risks are higher for billing-only migrations due to configuration uncertainty.
-
-<!-- TODO: Dynamically adjust risk probabilities based on unknowns count from aws-design-billing.json -->
 
 | Risk                                         | Probability | Impact | Mitigation                                                          |
 | -------------------------------------------- | ----------- | ------ | ------------------------------------------------------------------- |
@@ -185,8 +180,6 @@ Action Required:
 ## Part 5: Success Criteria
 
 Relaxed thresholds reflecting billing-only uncertainty.
-
-<!-- TODO: Allow user to override thresholds via preferences.json -->
 
 | Criteria                    | Target                     | Note                                                          |
 | --------------------------- | -------------------------- | ------------------------------------------------------------- |

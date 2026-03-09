@@ -46,10 +46,13 @@ Calculate the monthly Bedrock cost for **every viable model** at the user's toke
 | `"low"`           | 6M                 | 4M                  | 60/40 |
 | `"medium"`        | 60M                | 40M                 | 60/40 |
 | `"high"`          | 600M               | 400M                | 60/40 |
+| `"very_high"`     | 6B                 | 4B                  | 60/40 |
 
 If design or discover phase has more specific token estimates, use those instead.
 
 **Cost formula:** `Monthly = (input_tokens / 1M × input_rate) + (output_tokens / 1M × output_rate)`
+
+**Long-context surcharge:** If `ai_critical_feature = "ultra_long_context"` in `preferences.json`, Claude models charge 2x the standard input rate for tokens beyond 200K context. Apply the surcharge to the portion of input tokens that exceeds 200K per request. If per-request token counts are unknown, assume 50% of input tokens fall in the long-context tier as a conservative estimate.
 
 **Comparison table columns:** Model, Bedrock Monthly, vs Source Provider ($ and %), vs Current GCP, Quality, Capabilities Match (checked against `ai_capabilities_required`).
 
@@ -113,14 +116,14 @@ Reference `aws-design-ai.json` → `honest_assessment`. If `"recommend_stay"`, p
 
 Present applicable optimizations with estimated savings:
 
-| Optimization               | Savings | Applies When                                       |
-| -------------------------- | ------- | -------------------------------------------------- |
-| Model downsizing / tiering | 60-87%  | High volume, premium model selected                |
-| Prompt caching (Claude)    | ~30%    | Repeated system prompts                            |
-| Batch API                  | 50%     | Non-real-time workloads (`ai_latency = "batch"`)   |
-| Provisioned throughput     | Varies  | Token volume > 100M/month, predictable traffic     |
-| Input token reduction      | 10-30%  | Prompt optimization, shorter context               |
-| Multi-model tiered routing | 60-87%  | High/very-high volume, `tiered_strategy` in design |
+| Optimization               | Savings | Applies When                                        |
+| -------------------------- | ------- | --------------------------------------------------- |
+| Model downsizing / tiering | 60-87%  | High volume, premium model selected                 |
+| Prompt caching (Claude)    | ~30%    | Repeated system prompts                             |
+| Batch API                  | 50%     | Non-real-time workloads (`ai_latency = "flexible"`) |
+| Provisioned throughput     | Varies  | Token volume > 100M/month, predictable traffic      |
+| Input token reduction      | 10-30%  | Prompt optimization, shorter context                |
+| Multi-model tiered routing | 60-87%  | High/very-high volume, `tiered_strategy` in design  |
 
 For each applicable optimization, calculate before/after monthly cost and show an `optimized_projection` (best-case monthly with all optimizations).
 

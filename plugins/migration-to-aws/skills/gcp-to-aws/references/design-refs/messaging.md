@@ -34,7 +34,8 @@ Apply in order:
 2. **Operational Model**: Managed (SNS, SQS, EventBridge) vs Custom queue?
    - Prefer managed
 3. **User Preference**: From `preferences.json`: `design_constraints.availability`?
-   - If `availability = "multi-az-ha"` or `"multi-region"` → SQS FIFO (exactly-once for reliability); else SNS
+   - SNS and SQS are multi-AZ by default — no special config needed for HA
+   - If ordering or exactly-once delivery required → SQS FIFO (see Eliminators)
 4. **Feature Parity**: Does GCP config need features unavailable in AWS?
    - Example: Pub/Sub ordering guarantee → SQS FIFO (has ordering)
 5. **Cluster Context**: Are other resources using SNS/SQS? Match if possible

@@ -146,10 +146,17 @@ _Default behavior when disabled:_ Apply conservative defaults — no HA upgrades
 
 If the user opts in, present after all other categories:
 
-- **HA upgrade preference**: Should we recommend upgrading Single-AZ to Multi-AZ where possible?
-  > Default: No — keep current topology.
-- **Right-sizing from billing**: Should we use billing utilization data to right-size instance types?
-  > Default: No — match current capacity.
+### Q24 — Should we recommend upgrading Single-AZ to Multi-AZ where possible?
+
+> A) Yes — upgrade to Multi-AZ for higher availability | B) No — keep current topology
+
+Interpret → `ha_upgrade`: A → `true`, B → `false`. Default: B → `false`.
+
+### Q25 — Should we use billing utilization data to right-size instance types?
+
+> A) Yes — right-size based on utilization | B) No — match current capacity
+
+Interpret → `right_sizing`: A → `true`, B → `false`. Default: B → `false`.
 
 ---
 
@@ -189,8 +196,8 @@ Wait for the user's response. Do NOT proceed to Design without a response or an 
 
 | Scenario                     | Key Answers                                  | Recommendation                                            |
 | ---------------------------- | -------------------------------------------- | --------------------------------------------------------- |
-| Early-stage credits          | Q4 = Pre-seed/Seed                           | AWS Activate Founders or Portfolio credits                |
-| Growth-stage credits         | Q4 = Series B+ and Q3 spend                  | IW Migrate or MAP credits based on ARR                    |
+| Early-stage credits          | Q3 < $5K                                     | AWS Activate Founders or Portfolio credits                |
+| Growth-stage credits         | Q3 ≥ $20K                                    | IW Migrate or MAP credits based on ARR                    |
 | Must stay portable           | Q5 = Yes multi-cloud                         | EKS only, no ECS Fargate                                  |
 | Kubernetes-averse            | Q5 = No + Q8 = Frustrated                    | ECS Fargate strongly recommended                          |
 | WebSocket app                | Q9 = Yes                                     | ALB WebSocket config required                             |
@@ -225,6 +232,7 @@ Apply the interpret rule for every answered question (defined in each category f
 ```json
 {
   "metadata": {
+    "migration_type": "full",
     "timestamp": "<ISO timestamp>",
     "discovery_artifacts": ["gcp-resource-inventory.json", "ai-workload-profile.json"],
     "questions_asked": [
@@ -234,7 +242,6 @@ Apply the interpret rule for every answered question (defined in each category f
       "Q5",
       "Q6",
       "Q7",
-      "Q14",
       "Q16",
       "Q17",
       "Q19",
@@ -265,13 +272,13 @@ Apply the interpret rule for every answered question (defined in each category f
     "ai_priority": { "value": "balanced", "chosen_by": "user" },
     "ai_critical_feature": { "value": "function-calling", "chosen_by": "user" },
     "ai_token_volume": { "value": "low", "chosen_by": "user" },
-    "ai_model_baseline": { "value": "claude-sonnet-4-6", "chosen_by": "derived" },
+    "ai_model_baseline": { "value": "claude-sonnet-4-6", "chosen_by": "user" },
     "ai_vision": { "value": "text-only", "chosen_by": "user" },
     "ai_latency": { "value": "important", "chosen_by": "user" },
     "ai_complexity": { "value": "moderate", "chosen_by": "user" },
     "ai_capabilities_required": {
       "value": ["text_generation", "streaming", "function_calling"],
-      "chosen_by": "derived"
+      "chosen_by": "extracted"
     }
   }
 }
@@ -343,7 +350,7 @@ Before handing off to Design:
 
 ## Step 6: Update Phase Status
 
-In the **same turn** as the output message below, use the Phase Status Update Protocol (Bash `cat` heredoc) to write `.phase-status.json` with `phases.clarify` set to `"completed"`.
+In the **same turn** as the output message below, use the Phase Status Update Protocol (Write tool) to write `.phase-status.json` with `phases.clarify` set to `"completed"`.
 
 Output to user: "Clarification complete. Proceeding to Phase 3: Design AWS Architecture."
 

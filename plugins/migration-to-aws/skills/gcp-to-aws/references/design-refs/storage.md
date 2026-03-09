@@ -1,6 +1,6 @@
 # Storage Services Design Rubric
 
-**Applies to:** Cloud Storage (GCS)
+**Applies to:** Cloud Storage (GCS), Filestore
 
 **Quick lookup (no rubric):** Check `fast-path.md` first (Cloud Storage → S3, deterministic)
 
@@ -64,7 +64,46 @@ Confidence: `deterministic` (always 1:1, no decision tree)
 }
 ```
 
-## No Decision Required
+## Filestore → EFS
+
+**Filestore (`google_filestore_instance`) → EFS (`aws_efs_file_system`)**
+
+Confidence: `deterministic` (both are managed NFS file systems)
+
+**Attribute mapping:**
+
+| Filestore Attribute | EFS Equivalent                    | Notes                                      |
+| ------------------- | --------------------------------- | ------------------------------------------ |
+| `tier` (STANDARD)   | `throughput_mode = "bursting"`    | General purpose, burstable throughput      |
+| `tier` (PREMIUM)    | `throughput_mode = "provisioned"` | High-performance, provisioned throughput   |
+| `capacity_gb`       | No pre-provisioned size           | EFS scales automatically (no capacity set) |
+| `network`           | `mount_target` subnet             | Place mount targets in same VPC subnets    |
+| `file_shares.name`  | Mount target path                 | Preserve share name                        |
+
+**Output Schema:**
+
+```json
+{
+  "gcp_type": "google_filestore_instance",
+  "gcp_address": "shared-data",
+  "gcp_config": {
+    "tier": "STANDARD",
+    "capacity_gb": 1024,
+    "network": "default"
+  },
+  "aws_service": "EFS",
+  "aws_config": {
+    "throughput_mode": "bursting",
+    "performance_mode": "generalPurpose",
+    "encrypted": true,
+    "region": "us-east-1"
+  },
+  "confidence": "deterministic",
+  "rationale": "Filestore → EFS is 1:1 deterministic; both are managed NFS"
+}
+```
+
+## Notes
 
 Cloud Storage has no AWS equivalent variations. All mappings are direct.
 

@@ -17,7 +17,7 @@ All resources with fields:
 **IF** `google_compute_network` resource exists:
 
 - Group: `google_compute_network` + ALL network_path secondaries (subnetworks, firewalls, routers)
-- Cluster ID: `network_{gcp_region}` (e.g., `network_us-central1`)
+- Cluster ID: `networking_vpc_{gcp_region}_001` (e.g., `networking_vpc_us-central1_001`)
 - **Reasoning**: Network is shared infrastructure; groups all config together
 
 **Output**: 1 cluster (or 0 if no networks found)
@@ -89,16 +89,15 @@ All resources with fields:
 
 ### Rule 4: Merge on Dependencies
 
-**IF** two clusters have bidirectional or data_dependency edges between their PRIMARY resources:
+**IF** two clusters have **bidirectional** `data_dependency` edges between their PRIMARY resources (A→B AND B→A):
 
-- **AND** they form a single logical deployment unit (determined by: shared infrastructure, sequential deploy, business logic)
 - **THEN** merge clusters
 
 **Action**: Combine into one cluster; update ID to reflect both (e.g., `web-api_us-central1_001`)
 
-**Reasoning**: Some workloads must deploy together (e.g., two Cloud Runs sharing database)
+**Reasoning**: Bidirectional data dependencies indicate a tightly coupled deployment unit that must migrate together.
 
-**Heuristic**: Merge if one PRIMARY depends on another's output (e.g., Function → Database). Do NOT merge independent workloads.
+**Do NOT merge** when edges are unidirectional (A→B only). Unidirectional dependencies are captured in `dependencies[]` instead.
 
 ### Rule 5: Skip API Services
 
@@ -115,7 +114,7 @@ All resources with fields:
 Apply consistent cluster naming:
 
 - **Format**: `{service_category}_{service_type}_{gcp_region}_{sequence}`
-- **service_category**: One of: `compute`, `database`, `storage`, `network`, `messaging`, `analytics`, `security`
+- **service_category**: One of: `compute`, `database`, `storage`, `networking`, `messaging`, `monitoring`, `analytics`, `security`
 - **service_type**: GCP service shortname (e.g., `cloudrun`, `sql`, `bucket`, `vpc`)
 - **gcp_region**: Source region (e.g., `us-central1`)
 - **sequence**: Zero-padded counter (e.g., `001`, `002`)
@@ -125,7 +124,7 @@ Apply consistent cluster naming:
 - `compute_cloudrun_us-central1_001`
 - `database_sql_us-west1_001`
 - `storage_bucket_multi-region_001`
-- `network_vpc_us-central1_000` (rule 1 network cluster)
+- `networking_vpc_us-central1_001` (rule 1 network cluster)
 
 **Reasoning**: Names reflect deployment intent; deterministic for reproducibility.
 

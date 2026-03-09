@@ -117,44 +117,11 @@ Default: B — `gcp_monthly_spend: "$1K-$5K"`.
 
 ---
 
-## Q4 — What is your company's current funding stage?
+## Q4 — _(Skipped)_
 
-**Rationale:** Funding stage is a primary qualifier for AWS credits programs. AWS Activate targets early-stage startups (pre-seed through Series A), while IW Migrate and MAP credits are available regardless of stage but scale with ARR. Combined with Q3 (GCP spend), this determines the specific credits program and tier.
+Credits program eligibility is inferred from Q3 (GCP spend) alone. No question asked.
 
-_Skip this question. Apply default (no constraint). Credits program eligibility is inferred from Q3 (GCP spend) alone._
-
-> Funding stage helps me recommend the right AWS credits program for your migration.
->
-> A) Pre-Seed
-> B) Bootstrapped
-> C) Seed
-> D) Series A
-> E) Series B
-> F) Series C+
-> G) I don't know / Not applicable
-
-| Answer       | Recommendation Impact                                                                                                                                                  |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Pre-Seed     | **AWS Activate Founders** — up to $1K credits (self-serve); if affiliated with accelerator/incubator/VC in AWS network, eligible for **Activate Portfolio** up to $25K |
-| Bootstrapped | **AWS Activate Founders** — up to $1K (self-serve); IW Migrate also available if ARR qualifies via Q3                                                                  |
-| Seed         | **AWS Activate Portfolio** — up to $25K if affiliated with qualifying organization; otherwise Founders ($1K); IW Migrate also available if ARR qualifies               |
-| Series A     | **AWS Activate Portfolio** — up to $25K; likely qualifies for **IW Migrate at 25% of ARR** (infra) or 35% (AI) based on Q3; dual-stack credits possible                |
-| Series B     | No longer Activate-eligible; **IW Migrate at 25–35% of ARR** based on Q3; if ARR > $500K, **MAP eligibility**                                                          |
-| Series C+    | IW Migrate or MAP credits only; MAP likely if ARR > $500K; Enterprise Support tier recommended                                                                         |
-
-Interpret:
-
-```
-A -> funding_stage: "pre-seed" — Activate Founders ($1K); Activate Portfolio ($25K) if VC-affiliated
-B -> funding_stage: "bootstrapped" — Activate Founders ($1K); IW Migrate if ARR qualifies
-C -> funding_stage: "seed" — Activate Portfolio ($25K) if affiliated; IW Migrate if ARR qualifies
-D -> funding_stage: "series-a" — Activate Portfolio + IW Migrate at 25%/35% of ARR
-E -> funding_stage: "series-b" — IW Migrate or MAP based on ARR
-F -> funding_stage: "series-c-plus" — IW Migrate or MAP; Enterprise Support
-G -> same as default (skip)
-```
-
-Default: Skip — no constraint.
+Default: `funding_stage`: not set.
 
 ---
 

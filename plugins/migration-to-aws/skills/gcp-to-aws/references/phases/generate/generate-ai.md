@@ -15,15 +15,6 @@ Read from `$MIGRATION_DIR/`:
 
 If any required file is missing: **STOP**. Output: "Missing required artifact: [filename]. Complete the prior phase that produces it."
 
-## Part 0: Model Validation (Optional)
-
-Present user with the option to validate recommended Bedrock models before proceeding:
-
-- **A) Yes** — Load `references/phases/generate/generate-evaluation.md` and follow the evaluation guide. Resume at Part 1 after.
-- **B) No** — Continue to Part 1.
-
----
-
 ## Part 1: Fast-Track Timeline
 
 Check `preferences.json` → `ai_constraints.ai_framework` to determine timeline:

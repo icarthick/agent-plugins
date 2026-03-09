@@ -2,20 +2,15 @@
 
 > Loaded by estimate.md when aws-design-billing.json exists and aws-design.json does NOT exist.
 
-<!-- TODO: Improve cost inference from billing SKU details for tighter ranges -->
-<!-- TODO: Add historical trend projection for capacity planning -->
-<!-- TODO: Integration with AWS Cost Calculator for interactive refinement -->
-
 **Execute ALL steps in order. Do not skip or optimize.**
+
+**Known limitations:** Cost inference from billing SKU details (tighter ranges), historical trend projection, and AWS Cost Calculator integration are not yet supported.
 
 ## Pricing Mode
 
-The parent `estimate.md` selects the pricing mode before loading this file. Use whichever mode was selected:
+Without source configuration (CPU, memory, disk, scaling), billing-only estimates use **GCP-cost-ratio projections** (Step 2 below) rather than precise per-resource AWS pricing lookups. The pricing cache and MCP API are not directly used for per-service calculations — instead, GCP actual spend is scaled by service-type multipliers.
 
-- **Live (MCP Server)**: Real-time pricing from AWS API, accuracy ±5-10%
-- **Fallback (Cached)**: Uses `shared/pricing-cache.md`, accuracy ±5-25%
-
-Note: Even with live pricing, billing-only estimates carry wider overall ranges (±30-40%) because we lack source configuration (CPU, memory, disk, scaling).
+Overall accuracy: ±30-40% due to the lack of configuration detail.
 
 ## Overview
 

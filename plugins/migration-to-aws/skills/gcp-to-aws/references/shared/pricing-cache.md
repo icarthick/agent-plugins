@@ -374,6 +374,7 @@ Prices per 1M tokens.
 | GPT-5 Nano   | 0.05       | 0.40        | 128K    | budget    |
 | GPT-4.1      | 2.00       | 8.00        | 1M      | flagship  |
 | GPT-4.1 Mini | 0.40       | 1.60        | 1M      | fast      |
+| GPT-4.1 Nano | 0.10       | 0.40        | 1M      | budget    |
 | GPT-4o       | 2.50       | 10.00       | 128K    | flagship  |
 | o3           | 2.00       | 8.00        | 200K    | reasoning |
 | o4-mini      | 1.10       | 4.40        | 200K    | reasoning |

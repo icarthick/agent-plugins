@@ -67,8 +67,8 @@ Use the Priority 1 list from classification-rules.md as reference:
 google_cloudfunctions2_function, google_compute_instance, google_container_cluster,
 google_app_engine_application, google_sql_database_instance, google_spanner_instance,
 google_firestore_database, google_bigtable_instance, google_bigquery_dataset,
-google_redis_instance, google_storage_bucket, google_pubsub_topic, google_pubsub_subscription,
-google_cloud_tasks_queue, google_monitoring_alert_policy
+google_redis_instance, google_storage_bucket, google_filestore_instance,
+google_pubsub_topic, google_cloud_tasks_queue
 
 Count resources matching these types. This is the **primary resource count**.
 

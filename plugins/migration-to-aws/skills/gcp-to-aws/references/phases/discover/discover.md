@@ -124,9 +124,15 @@ After all loaded sub-discoveries complete, check what artifacts were produced in
 
 ## Step 3: Update Phase Status
 
-In the **same turn** as the output message below, use the Phase Status Update Protocol (Bash `cat` heredoc) to write `.phase-status.json` with `phases.discover` set to `"completed"` and all other phases unchanged from their initial values.
+In the **same turn** as the output message below, use the Phase Status Update Protocol (Write tool) to write `.phase-status.json` with `phases.discover` set to `"completed"` and all other phases unchanged from their initial values.
 
-Output to user: "Discover phase complete. Discovered X total resources across Y clusters. Proceeding to Phase 2: Clarify."
+Output to user — build message from whichever artifacts exist:
+
+- If `gcp-resource-inventory.json` exists: "Discovered X total resources across Y clusters."
+- If `ai-workload-profile.json` exists: "Detected AI workloads (source: [ai_source])."
+- If `billing-profile.json` exists: "Parsed billing data ($Z/month across N services)."
+
+Format: "Discover phase complete. [artifact summaries joined by space] Proceeding to Phase 2: Clarify."
 
 ## Output Files
 

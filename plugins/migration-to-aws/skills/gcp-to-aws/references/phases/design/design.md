@@ -44,11 +44,11 @@ Produces: `aws-design-ai.json`
 ### Mutual Exclusion
 
 - **design-infra** and **design-billing** never both run (billing-only is the fallback when no IaC exists).
-- **design-ai** runs independently alongside either design-infra or design-billing (if AI artifacts exist).
+- **design-ai** runs independently of either design-infra or design-billing (no shared state). Run it after the infra/billing design completes.
 
 ## Phase Completion
 
-After all applicable sub-designs finish, use the Phase Status Update Protocol (Bash `cat` heredoc) to write `.phase-status.json` with `phases.design` set to `"completed"` — **in the same turn** as the output message below.
+After all applicable sub-designs finish, use the Phase Status Update Protocol (Write tool) to write `.phase-status.json` with `phases.design` set to `"completed"` — **in the same turn** as the output message below.
 
 Output to user: "AWS Architecture designed. Proceeding to Phase 4: Estimate Costs."
 

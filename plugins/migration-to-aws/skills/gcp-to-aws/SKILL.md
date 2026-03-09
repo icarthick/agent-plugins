@@ -91,15 +91,14 @@ The `.migration/` directory is automatically protected by a `.gitignore` file cr
 
 ### Phase Status Update Protocol
 
-**Never Read `.phase-status.json` before updating it.** You already know the current state because you are executing phases sequentially. Instead, write the **complete file** using a Bash `cat` heredoc **in the same turn** as your final phase work (e.g., the output message announcing phase completion). This eliminates dedicated Read and Write turns.
+**Do not Read `.phase-status.json` before updating it.** You already know the current state because you are executing phases sequentially. Use the Write tool to write the **complete file** in the same turn as your final phase work (e.g., the output message announcing phase completion).
 
-Example — after completing the Clarify phase:
+Example — after completing the Clarify phase, write `$MIGRATION_DIR/.phase-status.json` with:
 
-```bash
-cat > "$MIGRATION_DIR/.phase-status.json" << EOF
+```json
 {
   "migration_id": "MMDD-HHMM",
-  "last_updated": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+  "last_updated": "2026-02-26T15:35:22Z",
   "phases": {
     "discover": "completed",
     "clarify": "completed",
@@ -109,10 +108,9 @@ cat > "$MIGRATION_DIR/.phase-status.json" << EOF
     "feedback": "pending"
   }
 }
-EOF
 ```
 
-Replace `MMDD-HHMM` with the actual migration ID and set each phase to its correct status at that point.
+Replace `MMDD-HHMM` with the actual migration ID, generate the `last_updated` ISO 8601 UTC timestamp yourself, and set each phase to its correct status at that point.
 
 **Read `.phase-status.json` ONLY during session resume** (Step 0 of discover.md when checking for existing runs) or the feedback prerequisite check.
 
@@ -258,7 +256,7 @@ When invoked, the agent **MUST follow this exact sequence**:
 
 5. **Validate outputs**: Confirm all required output files exist with correct schema before proceeding.
 
-6. **Update phase status**: Use the Phase Status Update Protocol (Bash `cat` heredoc, no Read) in the same turn as the phase's final output message.
+6. **Update phase status**: Use the Phase Status Update Protocol (Write tool, no Read) in the same turn as the phase's final output message.
 
 7. **Feedback checkpoint**: After a phase completes, check if feedback is due (see rules below). This runs **before** advancing to the next phase.
 

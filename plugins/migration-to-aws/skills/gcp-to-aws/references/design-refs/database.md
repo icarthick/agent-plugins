@@ -1,6 +1,6 @@
 # Database Services Design Rubric
 
-**Applies to:** Cloud SQL, Firestore, BigQuery, Memorystore (Redis)
+**Applies to:** Cloud SQL, Firestore, BigQuery, Memorystore (Redis), Cloud Spanner
 
 **Quick lookup (no rubric):** Check `fast-path.md` first (Cloud SQL PostgreSQL → RDS Aurora, Cloud SQL MySQL → RDS Aurora, etc.)
 
@@ -38,6 +38,12 @@
 - **In-memory cache** → ElastiCache Redis (fast-path, 1:1 mapping)
 - **Cluster mode enabled** → ElastiCache Redis with cluster mode
 - **High availability required** → ElastiCache Redis Multi-AZ with auto-failover
+
+### Cloud Spanner
+
+- **Global strong consistency** → Aurora DSQL (distributed SQL with strong consistency across regions)
+- **Single-region relational** → Aurora PostgreSQL (simpler, lower cost if global distribution not needed)
+- **Key-value access patterns dominant** → DynamoDB Global Tables (if workload is mostly key-value lookups)
 
 ## 6-Criteria Rubric
 
@@ -101,7 +107,7 @@ Apply in order:
   },
   "aws_service": "RDS Aurora PostgreSQL",
   "aws_config": {
-    "engine_version": "14.7",
+    "engine_version": "13.12",
     "instance_class": "db.r6g.xlarge",
     "multi_az": true,
     "region": "us-east-1"

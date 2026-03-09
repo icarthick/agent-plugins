@@ -1,6 +1,6 @@
 # Networking Services Design Rubric
 
-**Applies to:** VPC, Firewall, Load Balancing, DNS, Cloud Interconnect
+**Applies to:** VPC, Firewall, Load Balancing, DNS, Cloud Interconnect, Cloud Armor
 
 **Quick lookup (no rubric):** Check `fast-path.md` first (VPC → VPC, Firewall → Security Groups, etc.)
 
@@ -10,7 +10,7 @@
 | -------------------- | -------------- | -------------------------------------------------------- |
 | Cloud Interconnect   | Direct Connect | Dedicated connection (6+ months setup) → use VPN as temp |
 | Cloud Load Balancing | ALB            | SSL certificate passthrough → NLB (L4, pass-through)     |
-| Cloud Load Balancing | NLB            | IP-based routing → ALB (L7, hostname-based)              |
+| Cloud Load Balancing | NLB            | Host/path-based routing required → ALB (L7)              |
 
 ## Signals (Decision Criteria)
 
@@ -39,6 +39,13 @@
 
 - **Dedicated connection** → AWS Direct Connect
 - **Temporary/dev connectivity** → AWS Site-to-Site VPN (quicker, lower cost)
+
+### Cloud Armor
+
+- **DDoS protection + WAF rules** → AWS WAF + AWS Shield Standard (Shield Standard is automatic, no extra cost)
+- **Rate limiting** → AWS WAF rate-based rules
+- **Bot management** → AWS WAF Bot Control
+- **IP allowlist/denylist** → AWS WAF IP set rules
 
 ## 6-Criteria Rubric
 

@@ -22,7 +22,7 @@ Read the following artifacts from `$MIGRATION_DIR/`:
 
 If any REQUIRED file is missing: **STOP**. Output: "Missing required artifact: [filename]. Complete the prior phase that produces it."
 
-## Step 4: Detect Resource Categories
+## Step 1: Detect Resource Categories
 
 Scan `aws-design.json` clusters[].resources[] to determine which resource categories exist.
 Set boolean flags for downstream script generation:
@@ -53,7 +53,7 @@ $MIGRATION_DIR/
 │   └── 05-validate-migration.sh              # Always (adapts checks)
 ```
 
-## Step 5: Generate Migration Scripts
+## Step 2: Generate Migration Scripts
 
 ### Script Rules
 
@@ -121,7 +121,7 @@ echo "TODO: Compare row counts between source and target"
 echo "TODO: Run checksum validation on critical tables"
 ```
 
-**BigQuery to S3** — include only if `has_storage`:
+**BigQuery to S3** — include only if `has_databases`:
 
 ```bash
 # BigQuery → S3 data export
@@ -240,7 +240,7 @@ aws secretsmanager list-secrets --query 'SecretList[].Name' --output table
 ### 05-validate-migration.sh
 
 Post-migration validation script. **Always generated**, but adapt checks based on which resource
-categories were detected in Step 4. Only include validation sections for resources that exist.
+categories were detected in Step 1. Only include validation sections for resources that exist.
 
 ```bash
 #!/usr/bin/env bash
@@ -283,7 +283,7 @@ echo "TODO: Run application-level health checks"
 echo "TODO: Compare performance metrics against GCP baseline"
 ```
 
-## Step 6: Self-Check
+## Step 3: Self-Check
 
 After generating all scripts, verify the following quality rules:
 
@@ -299,10 +299,10 @@ After generating all scripts, verify the following quality rules:
 
 Report the list of generated script files to the parent orchestrator. **Do NOT update `.phase-status.json`** — the parent `generate.md` handles phase completion.
 
-Only list scripts that were actually generated (based on Step 4 resource detection flags):
+Only list scripts that were actually generated (based on Step 1 resource detection flags):
 
 ```
-Resource categories detected: [list active flags from Step 4]
+Resource categories detected: [list active flags from Step 1]
 
 Generated migration scripts:
 - scripts/01-validate-prerequisites.sh

@@ -172,13 +172,7 @@ Not available on other Bedrock models. This is a significant Claude advantage fo
 | Function calling       | Claude tools (excellent), Mistral (good)                    | Minimal changes                |
 | Structured output/JSON | Claude (excellent), Nova Pro (good)                         | Most models via prompt         |
 | Streaming              | All major models                                            | Same SSE pattern               |
-| Vision                 | Claude Sonnet/Haiku, Llama 3.2 90B                          | Multimodal parity              |
+| Vision                 | Claude Sonnet/Haiku, Llama 4 Maverick                       | Multimodal parity              |
 | Context caching        | Claude prompt caching                                       | 90% savings on cached portions |
 | Audio/video input      | Nova Sonic (speech), Transcribe/Rekognition (preprocessing) | Different architecture         |
 | Embeddings             | Amazon Titan Embeddings ($0.02/1M, 1536 dims)               | Must re-embed all docs         |
-
----
-
-## Validate Before Migrating
-
-Run a Bedrock evaluation job with your own prompts before writing migration code. See `generate-evaluation.md` in the Generate phase.

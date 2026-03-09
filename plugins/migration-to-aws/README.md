@@ -6,7 +6,7 @@ Migrate workloads from Google Cloud Platform to AWS with a 6-phase guided proces
 
 This plugin guides you through migrating GCP infrastructure to AWS by:
 
-1. **Discover** - Scan Terraform files for GCP resources
+1. **Discover** - Scan Terraform files, application code, and/or billing exports for GCP resources
 2. **Clarify** - Answer adaptive questions about your migration requirements
 3. **Design** - Map GCP services to equivalent AWS services
 4. **Estimate** - Calculate monthly costs and ROI
@@ -32,7 +32,7 @@ Invoke the skill with migration-related phrases:
 
 ## Scope (v1.0)
 
-- **Supports**: Terraform-based GCP infrastructure
+- **Supports**: Terraform IaC, application code (AI workload detection), and GCP billing exports
 - **Generates**: AWS architecture design, cost estimates, Terraform configurations, migration scripts, AI migration code, and documentation
 
 ## MCP Servers

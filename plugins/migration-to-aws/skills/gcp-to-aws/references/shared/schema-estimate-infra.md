@@ -113,7 +113,7 @@ Schema for `estimation-infra.json`, produced by `estimate-infra.md`.
       "payback_period_months": 2.6,
       "note": "Includes reduction in operational overhead from managed services"
     },
-    "five_year_total_savings": 475000,
+    "five_year_total_savings": 484540,
     "non_cost_benefits": [
       "Operational efficiency (fewer engineers needed for managed services)",
       "Better global reach (more AWS regions)",
