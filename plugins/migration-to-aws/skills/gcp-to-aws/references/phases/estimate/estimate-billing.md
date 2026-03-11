@@ -151,7 +151,7 @@ Write `estimation-billing.json`.
   "timestamp": "[ISO 8601]",
   "metadata": {
     "estimate_source": "billing_only",
-    "pricing_source": "cached|live|fallback",
+    "pricing_source": "cached|live|cached_fallback|unavailable",
     "confidence_note": "Estimates have wider ranges due to billing-only source"
   },
   "accuracy_confidence": "±30-40%",
@@ -261,12 +261,13 @@ Write `estimation-billing.json`.
 
 After writing `estimation-billing.json`, present a concise summary to the user:
 
-1. GCP baseline from billing data (total monthly spend)
-2. AWS projected cost ranges: low / mid / high per service
-3. Total projection: best case / expected / worst case vs GCP
-4. One-time cost categories the customer should budget for
-5. Key unknowns that would narrow the estimates
-6. Recommendation: run IaC discovery for tighter estimates (±10-15% vs ±30-40%)
+1. **Pricing source and accuracy**: State that estimates are billing-only projections with ±30-40% accuracy due to lack of infrastructure configuration. Example: "Billing-only estimates, accuracy ±30-40%. Provide Terraform files to narrow to ±10-15%."
+2. GCP baseline from billing data (total monthly spend)
+3. AWS projected cost ranges: low / mid / high per service
+4. Total projection: best case / expected / worst case vs GCP
+5. One-time cost categories the customer should budget for
+6. Key unknowns that would narrow the estimates
+7. Recommendation: run IaC discovery for tighter estimates (±10-15% vs ±30-40%)
 
 Keep it under 20 lines. The user can ask for details or re-read `estimation-billing.json` at any time.
 

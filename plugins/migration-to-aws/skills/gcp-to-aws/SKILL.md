@@ -1,6 +1,6 @@
 ---
 name: gcp-to-aws
-description: "Migrate workloads from Google Cloud Platform to AWS. Triggers on: migrate from GCP, GCP to AWS, move off Google Cloud, migrate Terraform to AWS, migrate Cloud SQL to RDS, migrate GKE to EKS, migrate Cloud Run to Fargate, Google Cloud migration. Runs a 6-phase process: discover GCP resources from Terraform files, app code, or billing exports, clarify migration requirements, design AWS architecture, estimate costs, plan execution, and collect optional feedback. Do not use for: Azure or on-premises migrations to AWS, AWS-to-GCP reverse migration, general AWS architecture advice without migration intent, GCP-to-GCP refactoring, or multi-cloud deployments that do not involve migrating off GCP."
+description: "Migrate workloads from Google Cloud Platform to AWS. Triggers on: migrate from GCP, GCP to AWS, move off Google Cloud, migrate Terraform to AWS, migrate Cloud SQL to RDS, migrate GKE to EKS, migrate Cloud Run to Fargate, Google Cloud migration. Runs a 6-phase process: discover GCP resources from Terraform files, app code, or billing exports, clarify migration requirements, design AWS architecture, estimate costs, generate migration artifacts, and collect optional feedback. Do not use for: Azure or on-premises migrations to AWS, AWS-to-GCP reverse migration, general AWS architecture advice without migration intent, GCP-to-GCP refactoring, or multi-cloud deployments that do not involve migrating off GCP."
 ---
 
 # GCP-to-AWS Migration Skill
@@ -36,14 +36,15 @@ If none of the above are found, stop and ask user to provide at least one source
 
 This is the execution controller. After completing each phase, consult this table to determine the next action.
 
-| Current State   | Condition | Next Action                                   |
-| --------------- | --------- | --------------------------------------------- |
-| `start`         | always    | Load `references/phases/discover/discover.md` |
-| `discover_done` | always    | Load `references/phases/clarify/clarify.md`   |
-| `clarify_done`  | always    | Load `references/phases/design/design.md`     |
-| `design_done`   | always    | Load `references/phases/estimate/estimate.md` |
-| `estimate_done` | always    | Load `references/phases/generate/generate.md` |
-| `generate_done` | always    | Migration planning complete                   |
+| Current State   | Condition                        | Next Action                                                                            |
+| --------------- | -------------------------------- | -------------------------------------------------------------------------------------- |
+| `start`         | always                           | Load `references/phases/discover/discover.md`                                          |
+| `discover_done` | always                           | Load `references/phases/clarify/clarify.md`                                            |
+| `clarify_done`  | always                           | Load `references/phases/design/design.md`                                              |
+| `design_done`   | always                           | Load `references/phases/estimate/estimate.md`                                          |
+| `estimate_done` | always                           | Load `references/phases/generate/generate.md`                                          |
+| `generate_done` | `phases.feedback == "pending"`   | Set `phases.feedback` to `"completed"` (user had two chances), then migration complete |
+| `generate_done` | `phases.feedback == "completed"` | Migration planning complete                                                            |
 
 **How to determine current state:** Read `$MIGRATION_DIR/.phase-status.json` → check `phases` object → find the last phase with value `"completed"`.
 
@@ -208,13 +209,13 @@ gcp-to-aws/
 │       └── pricing-cache.md                    # Cached AWS + source provider pricing (±5-25%, primary source)
 ```
 
-| Condition                                                     | Action                                                                                                                                           |
-| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| No GCP sources found (no `.tf`, no app code, no billing data) | Stop. Output: "No GCP sources detected. Provide at least one source type (Terraform files, application code, or billing exports) and try again." |
-| `.phase-status.json` missing phase gate                       | Stop. Output: "Cannot enter Phase X: Phase Y-1 not completed. Start from Phase Y or resume Phase Y-1."                                           |
-| awspricing unavailable after 3 attempts                       | Display user warning about ±5-25% accuracy. Use `pricing-cache.md`. Add `pricing_source: "cached"` to estimation.json.                           |
-| User skips questions or says "use all defaults"               | Apply documented defaults from each category file. Phase 2 completes either way.                                                                 |
-| `aws-design.json` missing required clusters                   | Stop Phase 4. Output: "Re-run Phase 3 to generate missing cluster designs."                                                                      |
+| Condition                                                     | Action                                                                                                                                                  |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| No GCP sources found (no `.tf`, no app code, no billing data) | Stop. Output: "No GCP sources detected. Provide at least one source type (Terraform files, application code, or billing exports) and try again."        |
+| `.phase-status.json` missing phase gate                       | Stop. Output: "Cannot enter Phase X: Phase Y-1 not completed. Start from Phase Y or resume Phase Y-1."                                                  |
+| awspricing unavailable after 3 attempts                       | Display user warning about ±5-25% accuracy. Use `pricing-cache.md`. Add `pricing_source: "cached_fallback"` to the applicable `estimation-*.json` file. |
+| User skips questions or says "use all defaults"               | Apply documented defaults from each category file. Phase 2 completes either way.                                                                        |
+| `aws-design.json` missing required clusters                   | Stop Phase 4. Output: "Re-run Phase 3 to generate missing cluster designs."                                                                             |
 
 ## Defaults
 

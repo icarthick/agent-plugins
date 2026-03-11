@@ -12,8 +12,8 @@ Schema for `estimation-infra.json`, produced by `estimate-infra.md`.
   "design_source": "infrastructure",
   "timestamp": "2026-02-24T14:00:00Z",
   "pricing_source": {
-    "status": "cached|live|fallback",
-    "message": "Using cached prices from 2026-03-04 (±5-10% accuracy)|Using live AWS pricing API|Using cached rates from 2026-02-24 (±15-25% accuracy)",
+    "status": "cached|live|cached_fallback|unavailable",
+    "message": "Using cached prices from 2026-03-04 (±5-10% accuracy)|Using live AWS pricing API|MCP unavailable, using cached rates (±5-25% accuracy)|Pricing unavailable for [service]",
     "fallback_staleness": {
       "last_updated": "2026-02-24",
       "days_old": 3,
@@ -30,7 +30,7 @@ Schema for `estimation-infra.json`, produced by `estimate-infra.md`.
   "accuracy_confidence": "±5-10%|±15-25%",
 
   "current_costs": {
-    "source": "billing_data|inventory_estimate|preferences|default",
+    "source": "billing_data|inventory_estimate|preferences|user_provided|unavailable",
     "gcp_monthly": 300,
     "gcp_annual": 3600,
     "baseline_note": "From billing-profile.json actual spend data",
@@ -190,9 +190,9 @@ Schema for `estimation-infra.json`, produced by `estimate-infra.md`.
 ## Output Validation Checklist
 
 - `design_source` is `"infrastructure"`
-- `pricing_source.status` is `"cached"`, `"live"`, or `"fallback"`
+- `pricing_source.status` is `"cached"`, `"live"`, `"cached_fallback"`, or `"unavailable"`
 - `accuracy_confidence` matches the pricing mode (±5-10% for cached/live, ±15-25% for fallback)
-- `current_costs.source` is `"billing_data"` if `billing-profile.json` was used, `"inventory_estimate"`, `"preferences"`, or `"default"` otherwise
+- `current_costs.source` is `"billing_data"` if `billing-profile.json` was used, `"inventory_estimate"`, `"preferences"`, `"user_provided"` (asked during estimate), or `"unavailable"` (user declined) otherwise
 - `current_costs.gcp_monthly` matches billing-profile.json total (if used) or is a reasonable estimate
 - `projected_costs` has all three tiers (premium, balanced, optimized)
 - `projected_costs.breakdown` covers compute, database, storage, networking, and supporting services

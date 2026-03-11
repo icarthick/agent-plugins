@@ -12,6 +12,8 @@ The parent `estimate.md` determines pricing source before loading this file.
 
 1. **`shared/pricing-cache.md` (primary)** — Read once. Look up each service by table. If found, use the price directly. No MCP call needed. Set `pricing_source: "cached"`.
 2. **MCP with recipes (secondary)** — If a service is NOT in pricing-cache.md and MCP is available, use the Pricing Recipes table below. Set `pricing_source: "live"`.
+3. **Cache after MCP failure** — If MCP was attempted but failed, and the service IS in the cache, use the cached price. Set `pricing_source: "cached_fallback"`.
+4. **Unavailable** — If a service is NOT in the cache AND MCP failed, set `pricing_source: "unavailable"`. Add to `services_with_missing_fallback` and warn the user.
 
 For typical migrations (Fargate, Aurora/RDS, Aurora Serverless v2, S3, ALB, NAT Gateway, Lambda, Secrets Manager, CloudWatch, ElastiCache, DynamoDB), ALL prices are in `pricing-cache.md`. Zero MCP calls needed.
 
@@ -68,7 +70,7 @@ Determine the current GCP monthly infrastructure costs. Use the best available s
 1. **`billing-profile.json` (preferred)** — Use actual billing data as the GCP baseline. Highest confidence (±5%).
 2. **`gcp-resource-inventory.json` (fallback)** — Estimate costs from discovered resource configurations. Wider range (±20-30%).
 3. **`preferences.json` → `gcp_monthly_spend`** — User-provided monthly spend from clarification.
-4. **Conservative default** — If none of the above: use `AWS monthly balanced × 1.25`.
+4. **Ask the user** — If none of the above are available, ask: "I need your current GCP monthly spend to produce a meaningful cost comparison. What is your approximate GCP monthly infrastructure cost?" Use the user's answer. If the user declines or is unsure, present AWS costs without a GCP comparison and note: "GCP baseline unavailable — AWS costs shown without comparison."
 
 Present the GCP baseline as a total and per-service breakdown, noting which source was used.
 
@@ -197,12 +199,13 @@ Read `shared/schema-estimate-infra.md` for the `estimation-infra.json` schema an
 
 After writing `estimation-infra.json`, present a concise summary to the user:
 
-1. GCP baseline vs AWS projected (balanced tier) — one-line comparison
-2. Three-tier table: Premium / Balanced / Optimized with monthly totals
-3. Per-service cost breakdown (balanced tier, 1 line per service)
-4. One-time cost categories the customer should budget for
-5. Monthly and annual savings (or increase) vs GCP per tier
-6. Top 2-3 optimization opportunities with savings amounts
+1. **Pricing source and accuracy**: State whether prices came from cache or live API, and the accuracy range (±5-10% for infrastructure from cache/live, ±15-25% if cache is stale). Example: "Estimates based on cached AWS pricing (2026-03-07), accuracy ±5-10%."
+2. GCP baseline vs AWS projected (balanced tier) — one-line comparison
+3. Three-tier table: Premium / Balanced / Optimized with monthly totals
+4. Per-service cost breakdown (balanced tier, 1 line per service)
+5. One-time cost categories the customer should budget for
+6. Monthly and annual savings (or increase) vs GCP per tier
+7. Top 2-3 optimization opportunities with savings amounts
 
 Keep it under 25 lines. The user can ask for details or re-read `estimation-infra.json` at any time.
 

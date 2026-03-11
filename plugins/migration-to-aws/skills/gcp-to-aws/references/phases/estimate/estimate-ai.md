@@ -11,7 +11,9 @@ The parent `estimate.md` selects the pricing mode before loading this file.
 **Price lookup order:**
 
 1. **`shared/pricing-cache.md` (primary)** — Look up Bedrock model pricing and source provider pricing by table. Set `pricing_source: "cached"`.
-2. **MCP (secondary)** — If a model is NOT in pricing-cache.md and MCP is available, query `get_pricing("AmazonBedrock", "us-east-1")` with model filter. Set `pricing_source: "live"`.
+2. **MCP (secondary)** — If a model is NOT in pricing-cache.md and MCP is available, query `get_pricing("AmazonBedrock", ...)` with model filter and the user's target region. Set `pricing_source: "live"`.
+3. **Cache after MCP failure** — If MCP was attempted but failed, and the model IS in the cache, use the cached price. Set `pricing_source: "cached_fallback"`.
+4. **Unavailable** — If a model is NOT in the cache AND MCP failed, set `pricing_source: "unavailable"` and warn the user.
 
 For typical migrations (Claude, Llama, Nova, Mistral, DeepSeek, Gemma, OpenAI gpt-oss, Gemini source pricing), ALL prices are in `pricing-cache.md`. Zero MCP calls needed.
 
@@ -166,12 +168,13 @@ All cost values are numbers, not strings. Output must be valid JSON.
 
 After writing `estimation-ai.json`, present under 25 lines:
 
-1. Current GCP AI spend vs projected Bedrock cost (recommended model)
-2. Model comparison table: model name, monthly cost, vs source provider %, capabilities match
-3. Recommended model with cost breakdown
-4. If migration increases cost: flag honestly with non-cost justification
-5. Top 2-3 optimization opportunities with potential savings
-6. Optimized projection
+1. **Pricing source and accuracy**: State whether prices came from cache or live API, and the accuracy range (±15-25% for AI models from cache, ±5-10% from live API). Example: "AI model estimates based on cached pricing (2026-03-07), accuracy ±15-25%."
+2. Current GCP AI spend vs projected Bedrock cost (recommended model)
+3. Model comparison table: model name, monthly cost, vs source provider %, capabilities match
+4. Recommended model with cost breakdown
+5. If migration increases cost: flag honestly with non-cost justification
+6. Top 2-3 optimization opportunities with potential savings
+7. Optimized projection
 
 ## Generate Phase Integration
 

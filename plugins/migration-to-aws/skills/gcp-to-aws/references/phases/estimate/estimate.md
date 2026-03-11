@@ -27,7 +27,18 @@ Attempt to reach awspricing with **up to 2 retries** (3 total attempts):
 Each sub-estimate file uses this lookup order per service:
 
 1. **`shared/pricing-cache.md`** (primary) — Cached prices (±5-25% accuracy). Set `pricing_source: "cached"`. Used first because it requires zero API calls and covers most common services.
-2. **MCP API** (fallback) — Real-time pricing for services NOT in pricing-cache.md (±5-10% accuracy, more precise). Set `pricing_source: "live"`. Only called when the cache lacks the needed service or model.
+2. **MCP API** (secondary) — Real-time pricing for services NOT in pricing-cache.md (±5-10% accuracy, more precise). Set `pricing_source: "live"`. Only called when the cache lacks the needed service or model. **Region note:** The `.mcp.json` sets `AWS_REGION=us-east-1` as the MCP server default, but each `get_pricing()` call accepts a `region` parameter that overrides it. Always pass the user's target region (from `preferences.json`) in MCP queries.
+3. **Cache after MCP failure** — If MCP was attempted but failed (timeout, error), and the service IS in the cache, use the cached price. Set `pricing_source: "cached_fallback"`. This distinguishes intentional cache use from MCP failure recovery.
+4. **Unavailable** — If a service is NOT in the cache AND MCP is unavailable, set `pricing_source: "unavailable"` for that service. Add the service to `services_with_missing_fallback` and display a warning to the user: "Pricing unavailable for [service] — not in cache and MCP unreachable. Exclude from totals or provide a manual estimate."
+
+**`pricing_source` values summary:**
+
+| Value               | Meaning                                                   |
+| ------------------- | --------------------------------------------------------- |
+| `"cached"`          | Found in pricing-cache.md (normal path)                   |
+| `"live"`            | Retrieved from MCP API in real-time                       |
+| `"cached_fallback"` | MCP was attempted but failed; fell back to cache          |
+| `"unavailable"`     | Not in cache AND MCP failed; service excluded from totals |
 
 If cache is > 90 days old and MCP is unavailable:
 
