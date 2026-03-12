@@ -70,43 +70,39 @@ Write `$MIGRATION_DIR/billing-profile.json` with the following structure:
 ```json
 {
   "metadata": {
-    "report_date": "[ISO 8601 date]",
-    "billing_files_analyzed": ["path/to/billing.csv"],
-    "currency": "USD"
+    "report_date": "2026-02-24",
+    "project_directory": "/path/to/project",
+    "billing_source": "gcp-billing-export.csv",
+    "billing_period": "2026-01"
   },
   "summary": {
-    "total_monthly_spend": 0.00,
-    "service_count": 0,
-    "top_services_by_spend": []
+    "total_monthly_spend": 2450.00,
+    "service_count": 8,
+    "currency": "USD"
   },
   "services": [
     {
-      "service": "Cloud Run",
+      "gcp_service": "Cloud Run",
       "gcp_service_type": "google_cloud_run_service",
       "monthly_cost": 450.00,
+      "percentage_of_total": 0.18,
       "top_skus": [
         {
-          "sku": "Cloud Run - CPU Allocation Time",
-          "monthly_cost": 320.00,
-          "usage_amount": 1500,
-          "usage_unit": "vCPU-seconds"
+          "sku_description": "Cloud Run - CPU Allocation Time",
+          "monthly_cost": 300.00
+        },
+        {
+          "sku_description": "Cloud Run - Memory Allocation Time",
+          "monthly_cost": 150.00
         }
       ],
-      "usage_pattern": "consistent"
+      "ai_signals": []
     }
   ],
-  "ai_signals": [
-    {
-      "pattern": "3.1",
-      "service_description": "Vertex AI",
-      "monthly_cost": 200.00,
-      "confidence": 0.98
-    }
-  ],
-  "ai_detection": {
-    "has_ai_workload": false,
+  "ai_signals": {
+    "detected": false,
     "confidence": 0,
-    "ai_monthly_spend": 0.00
+    "services": []
   }
 }
 ```

@@ -56,7 +56,7 @@ Build an 8-12 week migration timeline based on:
 ### Stage 4: Data Migration (Weeks 8-9)
 
 **Include this phase ONLY if `aws-design.json` contains database or storage resources
-(see resource detection rules in generate-artifacts-scripts.md Step 4).**
+(see resource detection rules in generate-artifacts-scripts.md Step 1).**
 **If no data migration is needed, compress the timeline: move Cutover to Weeks 8-9
 and Validation to Week 10. Reduce `total_weeks` accordingly.**
 
